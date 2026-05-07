@@ -1,4 +1,4 @@
-# Tienda XP Premium (local_xpstore)
+# XP Store (local_xpstore)
 
 Un plugin de gamificación para Moodle que transforma la experiencia de aprendizaje permitiendo a los estudiantes canjear sus puntos de experiencia (obtenidos a través de Level Up XP) por recompensas, mejoras de calificación o contenido especial dentro de cada curso.
 
