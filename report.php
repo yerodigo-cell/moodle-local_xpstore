@@ -1,7 +1,12 @@
 <?php
 /**
- * report.php - Reporte Agrupado Premium
+ * XP Store (local_xpstore)
+ *
+ * @package     local_xpstore
+ * @copyright   2026 Yeison Díaz
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
