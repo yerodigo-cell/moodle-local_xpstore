@@ -76,4 +76,4 @@ Un acceso directo limpio y minimalista para que el estudiante revise sus canjes 
 
 ## 📝 Notas de Versión
 
-- **v2.0 (Premium Edition):** Migración a catálogos aislados por curso, implementación de FontAwesome 6, variables CSS dinámicas, rediseño de UI (sin bordes de categoría, títulos centrados) y soporte total responsivo para dispositivos móviles.
+- **v2.0:** Migración a catálogos aislados por curso, implementación de FontAwesome 6, variables CSS dinámicas, rediseño de UI (sin bordes de categoría, títulos centrados) y soporte total responsivo para dispositivos móviles.
