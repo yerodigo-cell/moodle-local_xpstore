@@ -1,5 +1,13 @@
 <?php
 /**
+ * XP Store (local_xpstore)
+ *
+ * @package     local_xpstore
+ * @copyright   2026 Yeison Díaz
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/**
  * index.php - Versión Premium
  */
 require_once(__DIR__ . '/../../config.php');
@@ -95,7 +103,7 @@ $cp_store = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: 
 $cb_store = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
 $ci_store = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800'; 
 // NUEVA VARIABLE: Color de iconos de categorías
-$cc_store = get_config('local_xpstore', 'color_cat_icon_course_' . $courseid) ?: '#e83e8c';
+$cc_store = get_config('local_xpstore', 'color_cat_icon_course_' . $courseid) ?: $cp_store;
 
 // Recuperamos los iconos configurados para las categorías
 $cat_icons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid), true) ?: [];
