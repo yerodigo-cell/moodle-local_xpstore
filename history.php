@@ -1,5 +1,13 @@
 <?php
 /**
+ * XP Store (local_xpstore)
+ *
+ * @package     local_xpstore
+ * @copyright   2026 Yeison Díaz
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+/**
  * history.php - Historial del Estudiante
  */
 require_once(__DIR__ . '/../../config.php');
