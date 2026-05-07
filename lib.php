@@ -1,6 +1,10 @@
 <?php
 /**
- * lib.php - Versión Multilingüe Definitiva
+ * XP Store (local_xpstore)
+ *
+ * @package     local_xpstore
+ * @copyright   2026 Yeison Díaz
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
