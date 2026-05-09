@@ -9,6 +9,7 @@ Un plugin de gamificación para Moodle que transforma la experiencia de aprendiz
 * **Diseño Moderno y Responsivo:** Interfaz limpia con amplios espacios de respiración, tipografía Montserrat nativa y soporte para iconos FontAwesome 6 (estilo *Solid*).
 * **Personalización Visual (UI):** Ajuste de color primario, secundario (gradientes interactivos), color de iconos de producto y color de iconos de categoría, gestionables desde la interfaz del curso.
 * **Reportes:** Panel completo para profesores con el historial detallado de canjes por estudiante, avatares y enlaces directos a las actividades o al libro de calificaciones.
+* **Generación Automática de Widgets:** Creación instantánea de códigos Iframe desde el panel de configuración, listos para copiar y pegar sin necesidad de programar.
 * **Ecosistema de Widgets Embebidos:** Vistas especializadas listas para integrarse en lecciones o etiquetas mediante Iframes (Tarjetas individuales, Categorías completas y Botón de historial flotante).
 
 ---
@@ -34,18 +35,21 @@ Desde este panel se puede:
 1. Definir la paleta de colores de la interfaz.
 2. Asignar visualmente los iconos de FontAwesome a las categorías creadas.
 3. Construir la cadena de configuración del catálogo de productos (definiendo costos, límites y categorías).
+4. **Generar automáticamente los códigos Iframe** de los widgets para integrarlos en el curso al instante.
 
 ---
 
 ## 🧩 Uso de Widgets (Iframes)
 
-Puedes incrustar partes de la tienda directamente dentro de recursos interactivos, páginas o etiquetas de Moodle usando el formato Iframe y las siguientes URLs (reemplazando los valores en mayúsculas por los de tu curso):
+💡 **Tip:** ¡No tienes que armar estos enlaces a mano! El panel de configuración del curso cuenta con una herramienta que genera automáticamente el código Iframe exacto para cada widget, listo para copiar y pegar en tus lecciones.
+
+Si deseas construirlos manualmente, puedes incrustar partes de la tienda directamente dentro de recursos interactivos, páginas o etiquetas de Moodle usando el formato Iframe y las siguientes URLs (reemplazando los valores en mayúsculas por los de tu curso):
 
 ### 1. Widget de Tienda Principal
 
 Muestra todas las categorías y tarjetas de recompensas disponibles.
 
-`<iframe src="https://moodle52.missionenglish.net/local/xpstore/widget_category.php?id=2" width="100%" height="700" frameborder="0"></iframe>`
+`<iframe src="https://tusitio.com/local/xpstore/index.php?id=ID_CURSO" width="100%" height="700" frameborder="0"></iframe>`
 
 ### 2. Widget de Categoría Completa
 
@@ -69,4 +73,4 @@ Un acceso directo limpio y minimalista para que el estudiante revise sus canjes 
 
 ## 📝 Notas de Versión
 
-- **v2.0:** Migración a catálogos aislados por curso, implementación de FontAwesome 6, variables CSS dinámicas, rediseño de UI (sin bordes de categoría, títulos centrados) y soporte total responsivo para dispositivos móviles.
+- **v2.0:** Migración a catálogos aislados por curso, implementación de FontAwesome 6, variables CSS dinámicas, rediseño de UI (sin bordes de categoría, títulos centrados, nuevos colores) y soporte total responsivo para dispositivos móviles.
