@@ -36,7 +36,7 @@ Administrators or editing teachers can access the exclusive configuration panel 
 From this panel you can:
 
 1. Define the UI color palette.
-2. Visually assign FontAwesome icons to created categories.
+2. Visually assign icons to created categories.
 3. Build the product catalog configuration string (defining costs, limits, and categories).
 4. **Automatically generate Iframe codes** for widgets to instantly integrate them into the course.
 
