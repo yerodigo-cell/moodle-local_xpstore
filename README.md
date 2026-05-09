@@ -1,76 +1,56 @@
 # XP Store (local_xpstore)
 
-Un plugin de gamificación para Moodle que transforma la experiencia de aprendizaje permitiendo a los estudiantes canjear sus puntos de experiencia (obtenidos a través de `Level Up XP`) por recompensas, mejoras de calificación o contenido especial dentro de cada curso.
+A gamification plugin for Moodle that transforms the learning experience by allowing students to redeem their experience points (earned through `Level Up XP`) for rewards, grade boosts, or special content within each course.
 
-## ✨ Características Principales
+## ✨ Key Features
 
-* **Catálogos Independientes por Curso:** Cada curso tiene su propia configuración, catálogo de productos y paleta de colores de forma aislada.
-* **Límites de Compra:** Control total sobre cuántas veces un estudiante puede adquirir un ítem o beneficio específico.
-* **Diseño Moderno y Responsivo:** Interfaz limpia con amplios espacios de respiración, tipografía Montserrat nativa y soporte para iconos FontAwesome 6 (estilo *Solid*).
-* **Personalización Visual (UI):** Ajuste de color primario, secundario (gradientes interactivos), color de iconos de producto y color de iconos de categoría, gestionables desde la interfaz del curso.
-* **Reportes:** Panel completo para profesores con el historial detallado de canjes por estudiante, avatares y enlaces directos a las actividades o al libro de calificaciones.
-* **Generación Automática de Widgets:** Creación instantánea de códigos Iframe desde el panel de configuración, listos para copiar y pegar sin necesidad de programar.
-* **Ecosistema de Widgets Embebidos:** Vistas especializadas listas para integrarse en lecciones o etiquetas mediante Iframes (Tarjetas individuales, Categorías completas y Botón de historial flotante).
-
----
-
-## 🚀 Instalación
-
-1. Descarga el código fuente del plugin.
-2. Extrae o copia la carpeta `xpstore` dentro del directorio `local` de tu instalación de Moodle (la ruta final debe ser `moodle/local/xpstore`).
-3. Inicia sesión en Moodle con una cuenta de Administrador.
-4. Ve a **Administración del sitio > Notificaciones** (o simplemente carga la página principal) para que Moodle detecte los nuevos archivos.
-5. Haz clic en **Actualizar base de datos de Moodle ahora**.
+* **Independent Catalogs per Course:** Each course has its own isolated configuration, product catalog, and color palette.
+* **Purchase Limits:** Total control over how many times a student can acquire a specific item or benefit.
+* **Modern and Responsive Design:** Clean interface with generous breathing room, native Montserrat typography, and support for FontAwesome 6 icons (*Solid* style).
+* **Visual Customization (UI):** Manage primary color, secondary color (interactive gradients), product icon colors, and category icon colors directly from the course interface.
+* **Reports:** Comprehensive dashboard for teachers featuring a detailed redemption history per student, avatars, and direct links to activities or the gradebook.
+* **Automatic Widget Generation:** Instant creation of Iframe codes from the configuration panel, ready to be copied and pasted without any coding.
+* **Embedded Widgets Ecosystem:** Specialized views ready to be integrated into lessons or labels via Iframes (Individual cards, full Categories, and a floating History button).
 
 ---
 
-## ⚙️ Configuración de la Tienda
+## ⚙️ Store Configuration
 
-Una vez instalado, debe activarse el bloque `Level Up XP`. De esta manera los administradores o profesores con permisos de edición pueden configurar la tienda accediendo al panel de administración exclusivo del curso:
+Once installed, the `Level Up XP` block must be active. Administrators or editing teachers can configure the store by accessing the course's exclusive administration panel:
 
-**Ruta de acceso:** `tusitio.com/local/xpstore/config.php?id=ID_DEL_CURSO`
+**Path:** `yoursite.com/local/xpstore/config.php?id=COURSE_ID`
 
-Desde este panel se puede:
+From this panel you can:
 
-1. Definir la paleta de colores de la interfaz.
-2. Asignar visualmente los iconos de FontAwesome a las categorías creadas.
-3. Construir la cadena de configuración del catálogo de productos (definiendo costos, límites y categorías).
-4. **Generar automáticamente los códigos Iframe** de los widgets para integrarlos en el curso al instante.
-
----
-
-## 🧩 Uso de Widgets (Iframes)
-
-💡 **Tip:** ¡No tienes que armar estos enlaces a mano! El panel de configuración del curso cuenta con una herramienta que genera automáticamente el código Iframe exacto para cada widget, listo para copiar y pegar en tus lecciones.
-
-Si deseas construirlos manualmente, puedes incrustar partes de la tienda directamente dentro de recursos interactivos, páginas o etiquetas de Moodle usando el formato Iframe y las siguientes URLs (reemplazando los valores en mayúsculas por los de tu curso):
-
-### 1. Widget de Tienda Principal
-
-Muestra todas las categorías y tarjetas de recompensas disponibles.
-
-`<iframe src="https://tusitio.com/local/xpstore/index.php?id=ID_CURSO" width="100%" height="700" frameborder="0"></iframe>`
-
-### 2. Widget de Categoría Completa
-
-Muestra todas las tarjetas correspondientes a una categoría específica, con diseño fluido y centrado.
-
-`<iframe src="https://tusitio.com/local/xpstore/widget_category.php?id=ID_CURSO&cat=NombreCategoria" width="100%" height="650" frameborder="0"></iframe>`
-
-### 3. Widget de Tarjeta Individual
-
-Muestra un único producto o recompensa disponible para compra directa.
-
-`<iframe src="https://tusitio.com/local/xpstore/widget.php?id=ID_CURSO&tipo=LETRA&cmid=ID_MODULO" width="100%" height="350" frameborder="0"></iframe>`
-
-### 4. Botón de Historial Flotante
-
-Un acceso directo limpio y minimalista para que el estudiante revise sus canjes previos.
-
-`<iframe src="https://tusitio.com/local/xpstore/widget_history.php?id=ID_CURSO" width="100%" height="100" frameborder="0"></iframe>`
+1. Define the UI color palette.
+2. Visually assign FontAwesome icons to created categories.
+3. Build the product catalog configuration string (defining costs, limits, and categories).
+4. **Automatically generate Iframe codes** for widgets to instantly integrate them into the course.
 
 ---
 
-## 📝 Notas de Versión
+## 🧩 Widget Usage (Iframes)
 
-- **v2.0:** Migración a catálogos aislados por curso, implementación de FontAwesome 6, variables CSS dinámicas, rediseño de UI (sin bordes de categoría, títulos centrados, nuevos colores) y soporte total responsivo para dispositivos móviles.
+💡 **Tip:** The course configuration panel includes a tool that automatically generates the exact Iframe code for each widget, ready to be copied and pasted into your lessons.
+
+### 1. Main Store Widget
+
+Displays all available categories and reward cards.
+
+### 2. Full Category Widget
+
+Displays all cards corresponding to a specific category, with a fluid and centered design.
+
+### 3. Individual Card Widget
+
+Displays a single product or reward available for direct purchase.
+
+### 4. Floating History Button
+
+A clean and minimalist shortcut for students to review their previous redemptions.
+
+---
+
+## 📝 Release Notes
+
+- **v1.0.0:** Initial public release.
