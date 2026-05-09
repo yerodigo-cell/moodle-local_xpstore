@@ -42,7 +42,7 @@ From this panel you can:
 
 ---
 
-## 🧩 Widget Usage (Iframes)
+## 🧩 Widget Usage (iframes)
 
 💡 **Tip:** The course configuration panel includes a tool that automatically generates the exact Iframe code for each widget, ready to be copied and pasted into your lessons.
 
