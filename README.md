@@ -46,21 +46,13 @@ From this panel you can:
 
 💡 **Tip:** The course configuration panel includes a tool that automatically generates the exact Iframe code for each widget, ready to be copied and pasted into your lessons.
 
-### 1. Main Store Widget
+1. **Main Store Widget:** Displays all available categories and reward cards.
 
-Displays all available categories and reward cards.
+2. **Full Category Widget:** Displays all cards corresponding to a specific category, with a fluid and centered design.
 
-### 2. Full Category Widget
+3. **Individual Card Widget:** Displays a single product or reward available for direct purchase.
 
-Displays all cards corresponding to a specific category, with a fluid and centered design.
-
-### 3. Individual Card Widget
-
-Displays a single product or reward available for direct purchase.
-
-### 4. Floating History Button
-
-A clean and minimalist shortcut for students to review their previous redemptions.
+4. **Floating History Button:** A clean and minimalist shortcut for students to review their previous redemptions.
 
 ---
 
