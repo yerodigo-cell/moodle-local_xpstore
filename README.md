@@ -58,4 +58,4 @@ From this panel you can:
 
 ## 📝 Release Notes
 
-- **v1.0.0:** Initial public release.
+- **v1.0.1:** Initial public release.
