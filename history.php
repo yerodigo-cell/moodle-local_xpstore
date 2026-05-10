@@ -31,12 +31,12 @@ require_once(__DIR__ . '/lib.php');
 global $USER, $PAGE, $OUTPUT, $DB;
 
 $courseid = required_param('id', PARAM_INT);
-$course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
 require_login($course);
 
-$url = new moodle_url('/local/xpstore/history.php', array('id' => $courseid));
+$url = new moodle_url('/local/xpstore/history.php', ['id' => $courseid]);
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('incourse');
@@ -44,15 +44,15 @@ $PAGE->set_title(get_string('history', 'local_xpstore'));
 
 echo $OUTPUT->header();
 
-// Cargamos la información de los módulos para extraer las URLs reales
+// Cargamos la información de los módulos para extraer las URLs reales.
 $modinfo = get_fast_modinfo($courseid);
 
-// --- LÓGICA DE SEGURIDAD PARA EL BOTÓN DE REGRESAR ---
+// Lógica de seguridad para el botón de regresar.
 $showinmenu = get_config('local_xpstore', 'show_menu_course_' . $courseid);
-$is_teacher = has_capability('moodle/course:update', $context);
+$isteacher = has_capability('moodle/course:update', $context);
 
-// El botón se muestra si la tienda está visible para todos, O si el que mira es un profesor
-$show_back_button = ($showinmenu !== '0' || $is_teacher);
+// El botón se muestra si la tienda está visible para todos, o si el que mira es un profesor.
+$showbackbutton = ($showinmenu !== '0' || $isteacher);
 ?>
 
 <style>
@@ -225,8 +225,8 @@ $show_back_button = ($showinmenu !== '0' || $is_teacher);
             </h2>
         </div>
         
-        <?php if ($show_back_button): ?>
-            <a href="<?php echo new moodle_url('/local/xpstore/index.php', array('id' => $courseid)); ?>" 
+        <?php if ($showbackbutton): ?>
+            <a href="<?php echo new moodle_url('/local/xpstore/index.php', ['id' => $courseid]); ?>" 
                class="btn-tienda">
                 <i class="fa fa-arrow-left"></i> <?php echo get_string('tiendaxp', 'local_xpstore'); ?>
             </a>
@@ -246,33 +246,33 @@ $show_back_button = ($showinmenu !== '0' || $is_teacher);
             </thead>
             <tbody>
                 <?php
-                // Consultamos únicamente los gastos del usuario actual en este curso
+                // Consultamos únicamente los gastos del usuario actual en este curso.
                 $sql = "SELECT g.*, cm.module, cm.instance 
                         FROM {local_xpstore_gastos} g 
                         JOIN {course_modules} cm ON g.itemid = cm.id 
                         WHERE g.userid = ? AND cm.course = ? 
                         ORDER BY g.timecreated DESC";
                 
-                $logs = $DB->get_records_sql($sql, array($USER->id, $courseid));
+                $logs = $DB->get_records_sql($sql, [$USER->id, $courseid]);
 
                 if ($logs) {
                     foreach ($logs as $log) {
-                        $modname = $DB->get_field('modules', 'name', array('id' => $log->module));
-                        $activity_name = $DB->get_field($modname, 'name', array('id' => $log->instance));
+                        $modname = $DB->get_field('modules', 'name', ['id' => $log->module]);
+                        $activityname = $DB->get_field($modname, 'name', ['id' => $log->instance]);
                         
-                        $tipo_str = strtolower($log->itemtype);
+                        $tipostr = strtolower($log->itemtype);
                         
-                        $label_tipo = get_string_manager()->string_exists('type_'.$tipo_str, 'local_xpstore') 
-                            ? get_string('type_'.$tipo_str, 'local_xpstore') 
+                        $labeltipo = get_string_manager()->string_exists('type_' . $tipostr, 'local_xpstore') 
+                            ? get_string('type_' . $tipostr, 'local_xpstore') 
                             : 'Legacy';
                 ?>
                     <tr>
                         <td class="td-first font-weight-bold" style="color: #444; white-space: nowrap;">
-                            <?php echo htmlspecialchars($activity_name); ?>
+                            <?php echo htmlspecialchars($activityname); ?>
                         </td>
                         <td>
-                            <span class="badge-tipo bg-<?php echo $tipo_str; ?>">
-                                <?php echo $label_tipo; ?>
+                            <span class="badge-tipo bg-<?php echo $tipostr; ?>">
+                                <?php echo $labeltipo; ?>
                             </span>
                         </td>
                         <td class="text-center font-weight-bold text-primary" style="white-space: nowrap;">
@@ -284,19 +284,19 @@ $show_back_button = ($showinmenu !== '0' || $is_teacher);
                         <td class="td-last text-right">
                             <?php 
                             if ($log->itemtype === 'G') {
-                                // Enlace al calificador para Puntos Extra
-                                $grade_url = new moodle_url('/grade/report/user/index.php', array('id' => $courseid));
-                                echo '<a href="' . $grade_url . '" class="btn-action-history btn-grade">' .
+                                // Enlace al calificador para puntos extra.
+                                $gradeurl = new moodle_url('/grade/report/user/index.php', ['id' => $courseid]);
+                                echo '<a href="' . $gradeurl . '" class="btn-action-history btn-grade">' .
                                      '<i class="fa fa-bar-chart"></i> ' . 
                                      get_string('gotogradebook', 'local_xpstore') . 
                                      '</a>';
                             } else {
-                                // Enlace directo a la actividad para Quiz, Tareas y VIP
-                                $cm_url = isset($modinfo->cms[$log->itemid]) 
+                                // Enlace directo a la actividad para quiz, tareas y VIP.
+                                $cmurl = isset($modinfo->cms[$log->itemid]) 
                                     ? $modinfo->cms[$log->itemid]->url 
-                                    : new moodle_url('/course/view.php', array('id' => $courseid));
+                                    : new moodle_url('/course/view.php', ['id' => $courseid]);
                                 
-                                echo '<a href="' . $cm_url . '" class="btn-action-history btn-activity">' .
+                                echo '<a href="' . $cmurl . '" class="btn-action-history btn-activity">' .
                                      '<i class="fa fa-external-link"></i> ' . 
                                      get_string('gotoactivity', 'local_xpstore') . 
                                      '</a>';
@@ -308,7 +308,7 @@ $show_back_button = ($showinmenu !== '0' || $is_teacher);
                     }
                 } else {
                     echo "<tr><td colspan='5' class='text-center py-5 text-muted' style='border-radius: 12px;'>" . 
-                         get_string('nopurchases', 'local_xpstore', 'No tienes canjes aún.') . 
+                         get_string('nopurchases', 'local_xpstore') . 
                          "</td></tr>";
                 }
                 ?>

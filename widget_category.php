@@ -23,7 +23,7 @@
  */
 
 /**
- * widget_category.php - Sucursal Embebida
+ * widget_category.php - Sucursal Embebida.
  */
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
@@ -31,14 +31,14 @@ require_once(__DIR__ . '/lib.php');
 global $USER, $PAGE, $OUTPUT, $DB;
 
 $courseid = required_param('id', PARAM_INT);
-$cat_req = optional_param('cat', '', PARAM_TEXT);
+$catreq = optional_param('cat', '', PARAM_TEXT);
 
-$course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 require_login($course);
 
-$url_params = array('id' => $courseid, 'cat' => $cat_req);
-$url = new moodle_url('/local/xpstore/widget_category.php', $url_params);
+$urlparams = ['id' => $courseid, 'cat' => $catreq];
+$url = new moodle_url('/local/xpstore/widget_category.php', $urlparams);
 
 $PAGE->set_url($url);
 $PAGE->set_context($context);
@@ -56,37 +56,37 @@ if ($action === 'comprar' && confirm_sesskey()) {
     $tipo = required_param('tipo', PARAM_ALPHA);
     $costo = required_param('costo', PARAM_INT);
 
-    $productos_raw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
-    $items = array_filter(explode(',', $productos_raw));
-    $limite_compra = 0;
+    $productosraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
+    $items = array_filter(explode(',', $productosraw));
+    $limitecompra = 0;
     
     foreach ($items as $it) {
-        $p_tipo = substr($it, 0, 1);
-        $p_parts = explode(':', substr($it, 1));
-        if ($p_tipo === $tipo && (int)$p_parts[0] === $cmid) {
-            $limite_compra = (int)($p_parts[5] ?? 0);
+        $ptipo = substr($it, 0, 1);
+        $pparts = explode(':', substr($it, 1));
+        if ($ptipo === $tipo && (int)$pparts[0] === $cmid) {
+            $limitecompra = (int)($pparts[5] ?? 0);
             break;
         }
     }
 
-    $limite_alcanzado = false;
-    if ($limite_compra > 0) {
-        $compras_params = array('userid' => $USER->id, 'itemid' => $cmid, 'itemtype' => $tipo);
-        $compras_previas = $DB->count_records('local_xpstore_gastos', $compras_params);
-        if ($compras_previas >= $limite_compra) { 
-            $limite_alcanzado = true; 
+    $limitealcanzado = false;
+    if ($limitecompra > 0) {
+        $comprasparams = ['userid' => $USER->id, 'itemid' => $cmid, 'itemtype' => $tipo];
+        $comprasprevias = $DB->count_records('local_xpstore_gastos', $comprasparams);
+        if ($comprasprevias >= $limitecompra) { 
+            $limitealcanzado = true; 
         }
     }
 
-    if ($limite_alcanzado) {
-        redirect(new moodle_url($url, array('status' => 'limit')));
+    if ($limitealcanzado) {
+        redirect(new moodle_url($url, ['status' => 'limit']));
     } else {
         if (local_xpstore_comprar($USER->id, $tipo, $cmid, $costo, $courseid)) {
             local_xpstore_entregar_producto($USER->id, $cmid, $tipo, $courseid);
-            $success_params = array('status' => 'success', 'cmid' => $cmid, 'tipo_compra' => $tipo);
-            redirect(new moodle_url($url, $success_params));
+            $successparams = ['status' => 'success', 'cmid' => $cmid, 'tipo_compra' => $tipo];
+            redirect(new moodle_url($url, $successparams));
         } else {
-            redirect(new moodle_url($url, array('status' => 'error')));
+            redirect(new moodle_url($url, ['status' => 'error']));
         }
     }
 }
@@ -94,36 +94,35 @@ if ($action === 'comprar' && confirm_sesskey()) {
 echo $OUTPUT->header();
 
 $status = optional_param('status', '', PARAM_ALPHA);
-$bought_cmid = optional_param('cmid', 0, PARAM_INT);
-$tipo_compra = optional_param('tipo_compra', '', PARAM_ALPHA);
+$boughtcmid = optional_param('cmid', 0, PARAM_INT);
+$tipocompra = optional_param('tipo_compra', '', PARAM_ALPHA);
 
 if ($status === 'success') {
     echo '<div class="alert alert-success text-center mb-3" ' .
          'style="border-radius: 10px; padding: 10px;">' . 
          get_string('exito', 'local_xpstore') . '</div>';
-} elseif ($status === 'error') {
+} else if ($status === 'error') {
     echo '<div class="alert alert-danger text-center mb-3" ' .
          'style="border-radius: 10px; padding: 10px;">' . 
          get_string('insuficiente', 'local_xpstore') . '</div>';
-} elseif ($status === 'limit') {
+} else if ($status === 'limit') {
     echo '<div class="alert alert-warning text-center mb-3" ' .
          'style="border-radius: 10px; padding: 10px; font-weight: bold;">' . 
          get_string('limitreached', 'local_xpstore') . '</div>';
 }
 
 $saldo = local_xpstore_get_saldo($USER->id, $courseid);
-$productos_raw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
-$todos_los_productos = array_filter(array_map('trim', explode(',', $productos_raw)));
+$productosraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
+$todoslosproductos = array_filter(array_map('trim', explode(',', $productosraw)));
 $modinfo = get_fast_modinfo($courseid);
-$historyurl = new moodle_url('/local/xpstore/history.php', array('id' => $courseid));
+$historyurl = new moodle_url('/local/xpstore/history.php', ['id' => $courseid]);
 
-$cp_store = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
-$cb_store = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
-$ci_store = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800'; 
-$cc_store = get_config('local_xpstore', 'color_cat_icon_course_' . $courseid) ?: $cp_store;
+$cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
+$cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
+$cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800'; 
+$ccstore = get_config('local_xpstore', 'color_cat_icon_course_' . $courseid) ?: $cpstore;
 
-// Recuperamos iconos de categorías
-$cat_icons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid), true) ?: [];
+$caticons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid), true) ?: [];
 ?>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -131,14 +130,13 @@ $cat_icons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $cour
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
     
     :root { 
-        --cp: <?php echo $cp_store; ?>; 
-        --cb: <?php echo $cb_store; ?>; 
-        --ci: <?php echo $ci_store; ?>; 
-        --cc: <?php echo $cc_store; ?>; 
+        --cp: <?php echo $cpstore; ?>; 
+        --cb: <?php echo $cbstore; ?>; 
+        --ci: <?php echo $cistore; ?>; 
+        --cc: <?php echo $ccstore; ?>; 
         --gradient: linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%); 
     }
     
-    /* FORZAR ICONOS GRUESOS (SOLID) */
     .fa, .fas, .fa-solid { 
         font-weight: 900 !important; 
     }
@@ -290,75 +288,75 @@ $cat_icons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $cour
     </div>
 
     <?php
-    $categorias_tienda = array();
-    foreach ($todos_los_productos as $item) {
-        $tipo_char = substr($item, 0, 1);
+    $categoriastienda = [];
+    foreach ($todoslosproductos as $item) {
+        $tipochar = substr($item, 0, 1);
         $rest = substr($item, 1);
         $parts = explode(':', $rest);
         
         if (count($parts) >= 2) {
             $cid = $parts[0] ?? ''; 
             $costo = $parts[1] ?? ''; 
-            $n_custom = $parts[2] ?? '';
+            $ncustom = $parts[2] ?? '';
             $boost = $parts[3] ?? '0'; 
-            $nombre_cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
+            $nombrecat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
             $limite = (int)($parts[5] ?? 0);
             
-            if ($cat_req === '' || strtolower($nombre_cat) === strtolower($cat_req)) {
-                $cm = $DB->get_record('course_modules', array('id' => $cid, 'course' => $courseid));
+            if ($catreq === '' || strtolower($nombrecat) === strtolower($catreq)) {
+                $cm = $DB->get_record('course_modules', ['id' => $cid, 'course' => $courseid]);
                 if ($cm) { 
-                    $categorias_tienda[$nombre_cat][] = array(
-                        'tipo' => $tipo_char, 
+                    $categoriastienda[$nombrecat][] = [
+                        'tipo' => $tipochar, 
                         'cid' => $cid, 
                         'costo' => $costo, 
-                        'n_custom' => $n_custom, 
+                        'n_custom' => $ncustom, 
                         'boost' => $boost, 
                         'limite' => $limite, 
                         'cm' => $cm
-                    ); 
+                    ]; 
                 }
             }
         }
     }
 
-    if (empty($categorias_tienda)) {
+    if (empty($categoriastienda)) {
         echo '<div class="alert alert-info text-center" ' .
              'style="border-radius: 10px; padding: 15px; font-size: 0.9rem;">' .
              get_string('widgeterror', 'local_xpstore') . '</div>';
     } else {
-        foreach ($categorias_tienda as $nombre_seccion => $productos) {
+        foreach ($categoriastienda as $nombreseccion => $productos) {
             
-            $cat_icon = isset($cat_icons[$nombre_seccion]) ? $cat_icons[$nombre_seccion] : 'trophy';
+            $caticon = isset($caticons[$nombreseccion]) ? $caticons[$nombreseccion] : 'trophy';
             
             echo '<h4 class="mt-4 mb-4 font-weight-bold" ' .
                  'style="color: #333; font-size: 1.6rem; text-align: center; letter-spacing: -0.5px;">';
-            echo '<i class="fa fa-' . htmlspecialchars($cat_icon) . ' mr-2" ' .
-                 'style="color: var(--cc);"></i> ' . htmlspecialchars($nombre_seccion);
+            echo '<i class="fa fa-' . htmlspecialchars($caticon) . ' mr-2" ' .
+                 'style="color: var(--cc);"></i> ' . htmlspecialchars($nombreseccion);
             echo '</h4><div class="product-grid" style="margin-bottom: 50px;">';
             
             foreach ($productos as $p) {
                 $tipo = $p['tipo']; 
                 $cid = $p['cid']; 
                 $costo = $p['costo']; 
-                $n_custom = $p['n_custom']; 
+                $ncustom = $p['n_custom']; 
                 $boost = $p['boost']; 
                 $limite = $p['limite']; 
                 $cm = $p['cm'];
                 
-                $modname = $DB->get_field('modules', 'name', array('id' => $cm->module));
-                $n_real = $DB->get_field($modname, 'name', array('id' => $cm->instance));
-                $icon_map = [
+                $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+                $nreal = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
+                $iconmap = [
                     'Q' => 'bolt', 
                     'A' => 'file-text', 
                     'F' => 'comments', 
                     'G' => 'star', 
                     'S' => 'unlock-alt'
                 ];
-                $icon = $icon_map[$tipo] ?? 'gift';
+                $icon = $iconmap[$tipo] ?? 'gift';
                 
-                $compras_params = array('userid' => $USER->id, 'itemid' => $cid, 'itemtype' => $tipo);
-                $compras_actuales = $DB->count_records('local_xpstore_gastos', $compras_params);
-                $limite_alcanzado = ($limite > 0 && $compras_actuales >= $limite);
+                $comprasparams = ['userid' => $USER->id, 'itemid' => $cid, 'itemtype' => $tipo];
+                $comprasactuales = $DB->count_records('local_xpstore_gastos', $comprasparams);
+                $limitealcanzado = ($limite > 0 && $comprasactuales >= $limite);
                 ?>
                 <div class="p-card">
                     <div>
@@ -379,10 +377,10 @@ $cat_icons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $cour
                         <?php endif; ?>
                         
                         <div class="font-weight-bold" style="font-size: 0.95rem; line-height: 1.2; margin-bottom: 4px;">
-                            <?php echo htmlspecialchars($n_custom ?: $n_real); ?>
+                            <?php echo htmlspecialchars($ncustom ?: $nreal); ?>
                         </div>
                         <div class="text-muted small mb-2" style="font-size: 0.75rem;">
-                            <?php echo htmlspecialchars($n_real); ?>
+                            <?php echo htmlspecialchars($nreal); ?>
                         </div>
                     </div>
                     
@@ -394,21 +392,21 @@ $cat_icons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $cour
                         <?php if ($limite > 0): ?>
                             <div class="w-limit">
                                 <?php echo get_string('redemptions_count', 'local_xpstore'); ?> 
-                                <?php echo $compras_actuales; ?> / <?php echo $limite; ?>
+                                <?php echo $comprasactuales; ?> / <?php echo $limite; ?>
                             </div>
                         <?php else: ?>
                             <div style="margin-bottom: 8px;"></div>
                         <?php endif; ?>
                         
                         <?php 
-                        if ($status === 'success' && $bought_cmid == $cid && $tipo_compra == $tipo && $tipo != 'G'): 
-                            $cm_url = isset($modinfo->cms[$cid]) ? $modinfo->cms[$cid]->url : new moodle_url('/course/view.php', array('id' => $courseid)); 
+                        if ($status === 'success' && $boughtcmid == $cid && $tipocompra == $tipo && $tipo != 'G'): 
+                            $cmurl = isset($modinfo->cms[$cid]) ? $modinfo->cms[$cid]->url : new moodle_url('/course/view.php', ['id' => $courseid]); 
                         ?>
-                            <a href="<?php echo $cm_url; ?>" target="_top" class="btn-go-activity">
+                            <a href="<?php echo $cmurl; ?>" target="_top" class="btn-go-activity">
                                 <i class="fa fa-external-link mr-1"></i> <?php echo get_string('gotoactivity', 'local_xpstore'); ?>
                             </a>
-                        <?php elseif ($status === 'success' && $bought_cmid == $cid && $tipo_compra == $tipo && $tipo == 'G'): ?>
-                            <a href="<?php echo new moodle_url('/grade/report/user/index.php', array('id' => $courseid)); ?>" target="_top" class="btn-go-activity">
+                        <?php elseif ($status === 'success' && $boughtcmid == $cid && $tipocompra == $tipo && $tipo == 'G'): ?>
+                            <a href="<?php echo new moodle_url('/grade/report/user/index.php', ['id' => $courseid]); ?>" target="_top" class="btn-go-activity">
                                 <i class="fa fa-bar-chart mr-1"></i> <?php echo get_string('gotogradebook', 'local_xpstore'); ?>
                             </a>
                         <?php else: ?>
@@ -419,13 +417,19 @@ $cat_icons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $cour
                                 <input type="hidden" name="tipo" value="<?php echo $tipo; ?>">
                                 <input type="hidden" name="costo" value="<?php echo $costo; ?>">
                                 
-                                <?php if ($limite_alcanzado): ?>
-                                    <button type="button" class="btn-buy" disabled style="background: #e0e0e0; color: #888;">
+                                <?php if ($limitealcanzado): ?>
+                                    <button type="button" class="btn-buy" disabled 
+                                            style="background: #e0e0e0; color: #888;">
                                         <?php echo get_string('soldout', 'local_xpstore'); ?>
                                     </button>
                                 <?php else: ?>
-                                    <button type="submit" class="btn-buy" <?php echo ($saldo < $costo) ? 'disabled' : ''; ?>>
-                                        <?php echo ($saldo < $costo) ? get_string('insuficiente', 'local_xpstore') : get_string('canjear', 'local_xpstore'); ?>
+                                    <button type="submit" class="btn-buy" 
+                                            <?php echo ($saldo < $costo) ? 'disabled' : ''; ?>>
+                                        <?php 
+                                        echo ($saldo < $costo) 
+                                            ? get_string('insuficiente', 'local_xpstore') 
+                                            : get_string('canjear', 'local_xpstore'); 
+                                        ?>
                                     </button>
                                 <?php endif; ?>
                             </form>

@@ -22,49 +22,53 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+/**
+ * Report.php
+ */
+ 
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
 $courseid = required_param('id', PARAM_INT);
-$course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
 require_login($course);
 require_capability('moodle/course:update', $context);
 
-$url = new moodle_url('/local/xpstore/report.php', array('id' => $courseid));
+$url = new moodle_url('/local/xpstore/report.php', ['id' => $courseid]);
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string('audit', 'local_xpstore'));
 
-// --- Lógica para Reiniciar el Ciclo ---
+// Lógica para Reiniciar el Ciclo.
 $action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'reset' && confirm_sesskey()) {
-    $reset_sql = "DELETE g FROM {local_xpstore_gastos} g 
-                  JOIN {course_modules} cm ON g.itemid = cm.id 
-                  WHERE cm.course = ?";
-    $DB->execute($reset_sql, array($courseid));
+    $resetsql = "DELETE g FROM {local_xpstore_gastos} g 
+                 JOIN {course_modules} cm ON g.itemid = cm.id 
+                 WHERE cm.course = ?";
+    $DB->execute($resetsql, [$courseid]);
     redirect($url, get_string('productdeleted', 'local_xpstore'));
 }
 
-// Pre-cargar categorías de la tienda para asignarlas a los registros
-$config_raw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
-$items_raw = array_filter(explode(',', $config_raw));
-$map_categorias = array();
+// Pre-cargar categorías de la tienda para asignarlas a los registros.
+$configraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
+$itemsraw = array_filter(explode(',', $configraw));
+$mapcategorias = [];
 
-foreach ($items_raw as $item) {
-    $tipo_char = strtoupper(substr($item, 0, 1));
+foreach ($itemsraw as $item) {
+    $tipochar = strtoupper(substr($item, 0, 1));
     $rest = substr($item, 1);
     $parts = explode(':', $rest);
     if (count($parts) >= 2) {
         $cid = $parts[0] ?? '';
         $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
-        $map_categorias[$tipo_char][$cid] = $cat;
+        $mapcategorias[$tipochar][$cid] = $cat;
     }
 }
 
-// Cargar información de los módulos del curso para los links
+// Cargar información de los módulos del curso para los links.
 $modinfo = get_fast_modinfo($courseid);
 
 echo $OUTPUT->header();
@@ -288,7 +292,7 @@ echo $OUTPUT->header();
             <p><?php echo get_string('reportsubtitle', 'local_xpstore'); ?></p>
         </div>
         <div>
-            <a href="<?php echo new moodle_url('/local/xpstore/index.php', array('id' => $courseid)); ?>" 
+            <a href="<?php echo new moodle_url('/local/xpstore/index.php', ['id' => $courseid]); ?>" 
                class="btn-tienda">
                 <i class="fa fa-arrow-left"></i> <?php echo get_string('tiendaxp', 'local_xpstore'); ?>
             </a>
@@ -308,48 +312,48 @@ echo $OUTPUT->header();
             WHERE cm.course = ? 
             ORDER BY u.firstname ASC, g.timecreated DESC";
     
-    $logs = $DB->get_records_sql($sql, array($courseid));
-    $agrupados = array();
+    $logs = $DB->get_records_sql($sql, [$courseid]);
+    $agrupados = [];
 
     if ($logs) {
         foreach ($logs as $log) {
             $agrupados[$log->userid][] = $log;
         }
 
-        foreach ($agrupados as $userid => $user_logs) {
-            $first_log = $user_logs[0];
+        foreach ($agrupados as $userid => $userlogs) {
+            $firstlog = $userlogs[0];
             
-            // --- FIX DE AVATARES ROBUSTO ---
-            $real_user = core_user::get_user($userid);
-            $user_pic_html = $OUTPUT->user_picture($real_user, array('size' => 50, 'link' => false));
+            // FIX DE AVATARES ROBUSTO.
+            $realuser = core_user::get_user($userid);
+            $userpichtml = $OUTPUT->user_picture($realuser, ['size' => 50, 'link' => false]);
             
-            // Formato limpio Nombre Apellido
-            $user_fullname = $real_user->firstname . ' ' . $real_user->lastname;
-            $total_canjes = count($user_logs);
+            // Formato limpio Nombre Apellido.
+            $userfullname = $realuser->firstname . ' ' . $realuser->lastname;
+            $totalcanjes = count($userlogs);
             
-            // Link al perfil del estudiante
-            $profile_url = new moodle_url('/user/view.php', array('id' => $userid, 'course' => $courseid));
+            // Link al perfil del estudiante.
+            $profileurl = new moodle_url('/user/view.php', ['id' => $userid, 'course' => $courseid]);
     ?>
         <div class="user-card">
             <div class="card-header-user" onclick="toggleLogs(<?php echo $userid; ?>)">
                 <div class="u-avatar-container">
-                    <?php echo $user_pic_html; ?>
+                    <?php echo $userpichtml; ?>
                 </div>
                 <div class="u-info">
                     <div class="u-name">
-                        <a href="<?php echo $profile_url; ?>" 
+                        <a href="<?php echo $profileurl; ?>" 
                            onclick="event.stopPropagation();" 
                            style="color: inherit; text-decoration: none;" 
                            onmouseover="this.style.textDecoration='underline'" 
                            onmouseout="this.style.textDecoration='none'" 
                            target="_blank">
-                            <?php echo $user_fullname; ?>
+                            <?php echo $userfullname; ?>
                         </a>
                     </div>
-                    <div class="u-email"><?php echo $real_user->email; ?></div>
+                    <div class="u-email"><?php echo $realuser->email; ?></div>
                 </div>
                 <div class="badge-total">
-                    <?php echo $total_canjes . ' ' . get_string('redemptions', 'local_xpstore'); ?>
+                    <?php echo $totalcanjes . ' ' . get_string('redemptions', 'local_xpstore'); ?>
                 </div>
                 <i class="fa fa-chevron-down text-muted" id="icon-<?php echo $userid; ?>"></i>
             </div>
@@ -367,64 +371,64 @@ echo $OUTPUT->header();
                     </thead>
                     <tbody>
                         <?php 
-                        foreach ($user_logs as $log) {
-                            $cm = $DB->get_record('course_modules', array('id' => $log->itemid));
+                        foreach ($userlogs as $log) {
+                            $cm = $DB->get_record('course_modules', ['id' => $log->itemid]);
                             
                             if ($cm) {
-                                $modname = $DB->get_field('modules', 'name', array('id' => $cm->module));
-                                $activity_name = $DB->get_field($modname, 'name', array('id' => $cm->instance));
+                                $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+                                $activityname = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
                             } else {
-                                $activity_name = 'Actividad / Recurso eliminado';
+                                $activityname = 'Actividad / Recurso eliminado';
                             }
                             
-                            $tipo_str = strtolower($log->itemtype);
-                            $tipo_char_upper = strtoupper($tipo_str);
+                            $tipostr = strtolower($log->itemtype);
+                            $tipocharupper = strtoupper($tipostr);
                             
-                            $label_tipo = get_string_manager()->string_exists('type_'.$tipo_str, 'local_xpstore') 
-                                ? get_string('type_'.$tipo_str, 'local_xpstore') 
+                            $labeltipo = get_string_manager()->string_exists('type_' . $tipostr, 'local_xpstore') 
+                                ? get_string('type_' . $tipostr, 'local_xpstore') 
                                 : 'Legacy';
 
-                            // 1. Obtener la categoría cruzando con la configuración
-                            $categoria_texto = isset($map_categorias[$tipo_char_upper][$log->itemid]) 
-                                ? $map_categorias[$tipo_char_upper][$log->itemid] 
+                            // 1. Obtener la categoría cruzando con la configuración.
+                            $categoriatexto = isset($mapcategorias[$tipocharupper][$log->itemid]) 
+                                ? $mapcategorias[$tipocharupper][$log->itemid] 
                                 : '-';
 
-                            // 2. Generar el enlace inteligente a la actividad
-                            $cm_url = '';
-                            if ($tipo_str === 'g') {
-                                // Redirige al reporte de calificaciones ESPECÍFICO de este estudiante
-                                $cm_url = new moodle_url(
+                            // 2. Generar el enlace inteligente a la actividad.
+                            $cmurl = '';
+                            if ($tipostr === 'g') {
+                                // Redirige al reporte de calificaciones ESPECÍFICO de este estudiante.
+                                $cmurl = new moodle_url(
                                     '/grade/report/user/index.php', 
-                                    array('id' => $courseid, 'userid' => $log->userid)
+                                    ['id' => $courseid, 'userid' => $log->userid]
                                 );
                             } else if (isset($modinfo->cms[$log->itemid])) {
-                                $cm_url = $modinfo->cms[$log->itemid]->url;
+                                $cmurl = $modinfo->cms[$log->itemid]->url;
                             }
 
-                            // 3. Formatear el HTML de la actividad
-                            $activity_html = htmlspecialchars($activity_name);
-                            if (!empty($cm_url) && $activity_name !== 'Actividad / Recurso eliminado') {
-                                $activity_html = '<a href="' . $cm_url . '" target="_blank" ' .
+                            // 3. Formatear el HTML de la actividad.
+                            $activityhtml = htmlspecialchars($activityname);
+                            if (!empty($cmurl) && $activityname !== 'Actividad / Recurso eliminado') {
+                                $activityhtml = '<a href="' . $cmurl . '" target="_blank" ' .
                                                  'style="color: #0056D2; text-decoration: none; transition: 0.2s;" ' .
                                                  'onmouseover="this.style.color=\'#00C9A7\'" ' .
                                                  'onmouseout="this.style.color=\'#0056D2\'">' .
                                                  '<i class="fa fa-external-link mr-1" style="font-size: 0.8rem;"></i>' . 
-                                                 $activity_html . 
+                                                 $activityhtml . 
                                                  '</a>';
                             }
                         ?>
                         <tr>
                             <td class="font-weight-bold" style="font-size: 0.9rem; color: #444;">
-                                <?php echo $activity_html; ?>
+                                <?php echo $activityhtml; ?>
                             </td>
                             <td>
                                 <span style="background: #f0f0f0; color: #555; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; white-space: nowrap;">
-                                    <?php echo htmlspecialchars($categoria_texto); ?>
+                                    <?php echo htmlspecialchars($categoriatexto); ?>
                                 </span>
                             </td>
                             <td>
-                                <span class="badge-tipo bg-<?php echo $tipo_str; ?>">
-                                    <?php echo $label_tipo; ?>
+                                <span class="badge-tipo bg-<?php echo $tipostr; ?>">
+                                    <?php echo $labeltipo; ?>
                                 </span>
                             </td>
                             <td class="text-center font-weight-bold text-primary">

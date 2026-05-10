@@ -23,7 +23,7 @@
  */
 
 /**
- * widget.php - Recompensa Individual
+ * widget.php - Recompensa Individual.
  */
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
@@ -31,42 +31,46 @@ require_once(__DIR__ . '/lib.php');
 global $USER, $PAGE, $OUTPUT, $DB;
 
 $courseid = required_param('id', PARAM_INT);
-$cmid_req = required_param('cmid', PARAM_INT);
-$tipo_req = required_param('tipo', PARAM_ALPHA);
+$cmidreq = required_param('cmid', PARAM_INT);
+$tiporeq = required_param('tipo', PARAM_ALPHA);
 
-$course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 require_login($course);
 
-$url_params = array('id' => $courseid, 'cmid' => $cmid_req, 'tipo' => $tipo_req);
-$url = new moodle_url('/local/xpstore/widget.php', $url_params);
+$urlparams = [
+    'id' => $courseid, 
+    'cmid' => $cmidreq, 
+    'tipo' => $tiporeq,
+];
+$url = new moodle_url('/local/xpstore/widget.php', $urlparams);
 
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('embedded'); 
 
-$productos_raw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
-$items = array_filter(explode(',', $productos_raw));
+$productosraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
+$items = array_filter(explode(',', $productosraw));
 $producto = null;
 
 foreach ($items as $item) {
-    $tipo_char = substr($item, 0, 1);
+    $tipochar = substr($item, 0, 1);
     $rest = substr($item, 1);
     $parts = explode(':', $rest);
     
-    if (count($parts) >= 2 && (int)$parts[0] === $cmid_req && $tipo_char === $tipo_req) {
-        $cm = $DB->get_record('course_modules', array('id' => (int)$parts[0], 'course' => $courseid));
+    if (count($parts) >= 2 && (int)$parts[0] === $cmidreq && $tipochar === $tiporeq) {
+        $cm = $DB->get_record('course_modules', ['id' => (int)$parts[0], 'course' => $courseid]);
         if ($cm) {
-            $modname = $DB->get_field('modules', 'name', array('id' => $cm->module));
-            $producto = array(
-                'tipo' => $tipo_char, 
+            $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+            $producto = [
+                'tipo' => $tipochar, 
                 'cid' => (int)$parts[0], 
                 'costo' => (int)($parts[1] ?? 0),
                 'n_custom' => $parts[2] ?? '', 
                 'boost' => $parts[3] ?? '0',
                 'limite' => (int)($parts[5] ?? 0),
-                'n_real' => $DB->get_field($modname, 'name', array('id' => $cm->instance))
-            );
+                'n_real' => $DB->get_field($modname, 'name', ['id' => $cm->instance]),
+            ];
         }
         break;
     }
@@ -79,24 +83,24 @@ if (!$producto) {
     die(); 
 }
 
-$compras_params = array(
+$comprasparams = [
     'userid' => $USER->id, 
     'itemid' => $producto['cid'], 
-    'itemtype' => $producto['tipo']
-);
-$compras_actuales = $DB->count_records('local_xpstore_gastos', $compras_params);
-$limite_alcanzado = ($producto['limite'] > 0 && $compras_actuales >= $producto['limite']);
+    'itemtype' => $producto['tipo'],
+];
+$comprasactuales = $DB->count_records('local_xpstore_gastos', $comprasparams);
+$limitealcanzado = ($producto['limite'] > 0 && $comprasactuales >= $producto['limite']);
 
 $action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'comprar' && confirm_sesskey()) {
-    if ($limite_alcanzado) {
+    if ($limitealcanzado) {
         redirect(new moodle_url($url));
     } else {
-        if (local_xpstore_comprar($USER->id, $tipo_req, $cmid_req, $producto['costo'], $courseid)) {
-            local_xpstore_entregar_producto($USER->id, $cmid_req, $tipo_req, $courseid);
-            redirect(new moodle_url($url, array('status' => 'success')));
+        if (local_xpstore_comprar($USER->id, $tiporeq, $cmidreq, $producto['costo'], $courseid)) {
+            local_xpstore_entregar_producto($USER->id, $cmidreq, $tiporeq, $courseid);
+            redirect(new moodle_url($url, ['status' => 'success']));
         } else {
-            redirect(new moodle_url($url, array('status' => 'error')));
+            redirect(new moodle_url($url, ['status' => 'error']));
         }
     }
 }
@@ -106,18 +110,18 @@ $saldo = local_xpstore_get_saldo($USER->id, $courseid);
 
 echo $OUTPUT->header();
 
-$icon_map = [
+$iconmap = [
     'Q' => 'bolt', 
     'A' => 'file-text', 
     'F' => 'comments', 
     'G' => 'star', 
-    'S' => 'unlock-alt'
+    'S' => 'unlock-alt',
 ];
-$icon = $icon_map[$producto['tipo']] ?? 'gift';
+$icon = $iconmap[$producto['tipo']] ?? 'gift';
 
-$cp_store = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
-$cb_store = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
-$ci_store = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800'; 
+$cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
+$cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
+$cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800'; 
 ?>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -125,9 +129,9 @@ $ci_store = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#f
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
     
     :root { 
-        --cp: <?php echo $cp_store; ?>; 
-        --cb: <?php echo $cb_store; ?>; 
-        --ci: <?php echo $ci_store; ?>; 
+        --cp: <?php echo $cpstore; ?>; 
+        --cb: <?php echo $cbstore; ?>; 
+        --ci: <?php echo $cistore; ?>; 
         --gradient: linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%); 
     }
     
@@ -329,14 +333,14 @@ $ci_store = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#f
         <?php 
         if ($status === 'success'): 
             $dest = ($producto['tipo'] == 'G') ? '/grade/report/user/index.php' : '/course/view.php';
-            $dest_url = new moodle_url($dest, array('id' => $courseid));
+            $desturl = new moodle_url($dest, ['id' => $courseid]);
             
             if ($producto['tipo'] != 'G') { 
                 $modinfo = get_fast_modinfo($courseid); 
-                $dest_url = $modinfo->cms[$producto['cid']]->url ?? $dest_url; 
+                $desturl = $modinfo->cms[$producto['cid']]->url ?? $desturl; 
             }
         ?>
-            <a href="<?php echo $dest_url; ?>" target="_top" class="btn-success-w">
+            <a href="<?php echo $desturl; ?>" target="_top" class="btn-success-w">
                 <?php 
                 echo ($producto['tipo'] == 'G') 
                     ? get_string('gotogradebook', 'local_xpstore') 
@@ -352,7 +356,7 @@ $ci_store = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#f
             <?php if ($producto['limite'] > 0): ?>
                 <div class="w-limit">
                     <?php echo get_string('redemptions_count', 'local_xpstore'); ?> 
-                    <?php echo $compras_actuales; ?> / <?php echo $producto['limite']; ?>
+                    <?php echo $comprasactuales; ?> / <?php echo $producto['limite']; ?>
                 </div>
             <?php else: ?>
                 <div style="margin-bottom: 8px;"></div>
@@ -362,7 +366,7 @@ $ci_store = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#f
                 <input type="hidden" name="sesskey" value="<?php echo sesskey(); ?>">
                 <input type="hidden" name="action" value="comprar">
                 
-                <?php if ($limite_alcanzado): ?>
+                <?php if ($limitealcanzado): ?>
                     <button type="button" class="btn-buy" disabled 
                             style="background: #e0e0e0; color: #888;">
                         <?php echo get_string('soldout', 'local_xpstore'); ?>

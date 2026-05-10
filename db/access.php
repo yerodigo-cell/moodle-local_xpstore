@@ -24,13 +24,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
-    'local/xpstore:manage' => array(
+$capabilities = [
+    'local/xpstore:manage' => [
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array(
+        'archetypes' => [
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW,
-        ),
-    ),
-);
+        ],
+    ],
+];
