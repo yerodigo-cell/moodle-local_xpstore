@@ -1,0 +1,367 @@
+{{!
+    @template local_xpstore/config_page
+    
+    XP Store configuration page.
+}}
+<div class="local_xpstore-container local_xpstore-config-wrapper config-wrapper">
+    <div class="header-container">
+        <div class="header-title">
+            <h2>
+                <i class="fa fa-cog mr-2 text-muted"></i> 
+                {{str_configtitle}}
+            </h2>
+        </div>
+        <div class="local_xpstore-config-actions">
+            <div class="local_xpstore-config-actions-inner">
+                <form method="POST" action="{{url}}" class="local_xpstore-config-actions-form">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <input type="hidden" name="action" value="togglemenu">
+                    {{#menu_is_visible}}
+                        <button type="submit" class="btn btn-sm btn-success btn-toggle-menu" title="{{str_hide_menu_tooltip}}">
+                            <i class="fa fa-eye"></i> {{str_menuvisible}}
+                        </button>
+                    {{/menu_is_visible}}
+                    {{^menu_is_visible}}
+                        <button type="submit" class="btn btn-sm btn-secondary btn-toggle-menu" title="{{str_show_menu_tooltip}}">
+                            <i class="fa fa-eye-slash"></i> {{str_menuhidden}}
+                        </button>
+                    {{/menu_is_visible}}
+                </form>
+                {{{help_menuvisibility}}}
+            </div>
+            <a href="{{storeurl}}" class="btn-tienda m-0">
+                <i class="fa fa-arrow-left"></i> {{str_tiendaxp}}
+            </a>
+        </div>
+    </div>
+
+    <div class="form-box {{#isediting}}editing{{/isediting}}">
+        <h5 class="mb-3 font-weight-bold d-flex align-items-center">
+            {{#isediting}}
+                <i class="fa fa-pencil mr-2 text-warning"></i> {{str_edit}}
+            {{/isediting}}
+            {{^isediting}}
+                {{str_addproduct}}
+            {{/isediting}}
+        </h5>
+        
+        <form method="POST" action="{{url}}" class="row align-items-end">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <input type="hidden" name="action" value="{{#isediting}}edit_save{{/isediting}}{{^isediting}}add{{/isediting}}">
+            {{#isediting}}
+                <input type="hidden" name="old_item" value="{{olditemval}}">
+            {{/isediting}}
+            
+            <div class="col-6 col-md-4 col-lg-2 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-flex">
+                    {{str_type}}
+                    {{{help_type}}}
+                </label>
+                <select name="tipo" id="type_select" class="form-control form-control-sm" required>
+                    <option value="" disabled {{^etipo}}selected{{/etipo}}>{{str_choosetype}}</option>
+                    {{#type_options}}
+                        <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                    {{/type_options}}
+                </select>
+            </div>
+
+            <div class="col-12 col-md-8 col-lg-3 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">
+                    {{str_activity}}
+                </label>
+                <select name="cmid" id="activity_select" class="form-control form-control-sm" required>
+                    <option value="" disabled {{^ecmid}}selected{{/ecmid}}>{{str_chooseactivity}}</option>
+                    {{#activity_options}}
+                        <option value="{{id}}" data-modname="{{modname}}" {{#selected}}selected{{/selected}}>{{{name}}}</option>
+                    {{/activity_options}}
+                </select>
+            </div>
+
+            <div class="col-6 col-md-3 col-lg-1 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_cost}}</label>
+                <input type="number" name="costo" class="form-control form-control-sm" required value="{{ecosto}}">
+            </div>
+
+            <div class="col-6 col-md-3 col-lg-1 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_limit}}</label>
+                <input type="number" name="limite" min="0" class="form-control form-control-sm" placeholder="{{str_limitzero}}" value="{{elimite}}">
+            </div>
+
+            <div class="col-12 col-md-3 col-lg-2 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-category">{{str_category}}</label>
+                <input type="text" name="categoria" class="form-control form-control-sm" value="{{ecat}}">
+            </div>
+
+            <div class="col-12 col-md-4 col-lg-2 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-flex">
+                    {{str_label}}
+                    {{{help_label}}}
+                </label>
+                <input type="text" name="nombre" class="form-control form-control-sm" value="{{enombre}}">
+            </div>
+
+            <div id="bonus_container" class="col-6 col-md-2 col-lg-1 mb-3" style="display: none;">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_gradepoints}}</label>
+                <input type="number" step="0.1" name="valor_nota" class="form-control form-control-sm" value="{{evalor}}">
+            </div>
+
+            <div class="col-12 d-flex justify-content-end mt-2">
+                {{#isediting}}
+                    <a href="{{url}}" class="btn btn-secondary px-4 py-2 mr-2 btn-config-cancel">{{str_cancel}}</a>
+                    <button type="submit" class="btn-ucm-edit px-4 py-2">{{str_update}}</button>
+                {{/isediting}}
+                {{^isediting}}
+                    <button type="submit" class="btn-ucm-add px-4 py-2">{{str_add}}</button>
+                {{/isediting}}
+            </div>
+        </form>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-end mb-2 mt-4 catalog-header-mobile">
+        <h5 class="m-0 font-weight-bold text-muted catalog-header-title">
+            {{str_currentcatalog}}
+        </h5>
+        {{#has_items}}
+            <a href="{{deleteallurl}}" class="btn btn-sm btn-outline-danger btn-delete-all" onclick="return confirm('{{str_confirmdeleteall}}')">
+                <i class="fa fa-trash"></i> {{str_deleteall}}
+            </a>
+        {{/has_items}}
+    </div>
+
+    <div class="table-responsive-wrapper mb-4">
+        <table class="table-products">
+            <thead>
+                <tr class="table-products-row">
+                    <th class="small px-3">{{str_coltype}}</th>
+                    <th class="small">{{str_colcategory}}</th>
+                    <th class="small">{{str_colactivity}}</th>
+                    <th class="small text-center">{{str_colcost}}</th>
+                    <th class="small text-center">{{str_limit}}</th>
+                    <th class="small">{{str_collabel}}</th>
+                    <th class="small text-right px-3">{{str_colaction}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{^has_items}}
+                    <tr><td colspan='7' class='text-center text-muted py-4'>{{str_norewardscreated}}</td></tr>
+                {{/has_items}}
+                {{#catalog_items}}
+                    <tr>
+                        <td class="px-3">
+                            <span class="badge-tipo bg-{{tipolower}}">{{labeltipo}}</span>
+                        </td>
+                        <td>
+                            <span class="badge-category">
+                                {{cat}}
+                            </span>
+                        </td>
+                        <td class="small">{{realname}}</td>
+                        <td class="text-center font-weight-bold text-primary">{{cost}} XP</td>
+                        <td class="text-center font-weight-bold td-limit">
+                            {{#has_item_limit}}
+                                {{limiteactual}}
+                            {{/has_item_limit}}
+                            {{^has_item_limit}}
+                                <span class="td-limit-inf">∞</span>
+                            {{/has_item_limit}}
+                        </td>
+                        <td>
+                            <strong>{{displayname}}</strong> 
+                            {{#is_grade_boost}} (+{{val}}) {{/is_grade_boost}}
+                        </td>
+                        <td class="text-right px-3" style="min-width: 110px;">
+                            <button type="button" class="btn btn-sm btn-info text-white mr-1" title="{{str_copysinglecard}}" data-action="copy-widget" data-code="{{iframecode}}">
+                                <i class="fa fa-code"></i>
+                            </button>
+                            <a href="{{editurl}}" class="btn btn-sm btn-outline-secondary mr-1 btn-outline-edit" title="{{str_edit}}">
+                                {{str_edit}}
+                            </a>
+                            <a href="{{deleteurl}}" class="btn btn-sm text-danger" title="{{str_delete}}" onclick="return confirm('{{str_confirmdelete}}')">
+                                <i class="fa fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {{/catalog_items}}
+            </tbody>
+        </table>
+    </div>
+
+    {{#has_categories}}
+        <div class="form-box form-box-category">
+            <h5 class="mb-3 font-weight-bold">
+                <i class="fa fa-star mr-2 icon-category-title"></i> 
+                {{str_categoryicons}}
+            </h5>
+            
+            <form method="POST" action="{{url}}" class="row align-items-end">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="action" value="savecaticons">
+                
+                {{#category_icon_options}}
+                    <div class="col-12 col-md-3 mb-3">
+                        <label class="small font-weight-bold mb-1 form-label-block">
+                            {{catname}}
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text input-group-text-white">
+                                    <i class="fa fa-{{currenticon}} icon-preview" id="preview_{{cathash}}" style="color: {{ccactual}};"></i>
+                                </span>
+                            </div>
+                            <select name="caticon_{{cathash}}" class="form-control" onchange="document.getElementById('preview_{{cathash}}').className = 'fa fa-' + this.value">
+                                {{#icons}}
+                                    <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                                {{/icons}}
+                            </select>
+                        </div>
+                    </div>
+                {{/category_icon_options}}
+                
+                <div class="col-12 d-flex justify-content-end mt-2">
+                    <button type="submit" class="btn px-4 py-2 font-weight-bold btn-save-icons">
+                        <i class="fa fa-save"></i> {{str_saveicons}}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="widget-generator">
+            <h5 class="mb-3 font-weight-bold">
+                <i class="fa fa-share-alt mr-2 icon-widget-title"></i> {{str_widget_panel_title}}
+            </h5>
+            <p class="small text-muted mb-3">
+                {{str_widget_panel_desc}}
+            </p>
+            <div>
+                <button class="btn-copy-w btn-copy-w-store" data-action="copy-widget" data-code="{{iframestore}}">
+                    <i class="fa fa-code"></i> {{str_full_store}}
+                </button>
+                
+                <button class="btn-copy-w btn-copy-w-history" data-action="copy-widget" data-code="{{iframehistory}}">
+                    <i class="fa fa-history"></i> {{str_history_button}}
+                </button>
+                
+                {{#category_iframe_options}}
+                    <button class="btn-copy-w" data-action="copy-widget" data-code="{{iframecat}}">
+                        <i class="fa fa-{{currenticon}}"></i> {{str_category_short}} {{catname}}
+                    </button>
+                {{/category_iframe_options}}
+            </div>
+        </div>
+    {{/has_categories}}
+
+    <div class="form-box mt-4 form-box-colors">
+        <h5 class="mb-3 font-weight-bold">
+            <i class="fa fa-paint-brush mr-2" style="color: {{cpactual}};"></i> 
+            {{str_colorconfig}}
+        </h5>
+        
+        <form method="POST" action="{{url}}" class="row align-items-end">
+            <input type="hidden" name="sesskey" value="{{sesskey}}">
+            <input type="hidden" name="action" value="savecolors">
+
+            <div class="col-6 col-md-3 col-lg-2 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_primarycolor}}</label>
+                <input type="color" name="color_primary" class="form-control color-picker-input" value="{{cpactual}}">
+            </div>
+
+            <div class="col-6 col-md-3 col-lg-2 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_secondarycolor}}</label>
+                <input type="color" name="color_secondary" class="form-control color-picker-input" value="{{cbactual}}">
+            </div>
+
+            <div class="col-6 col-md-3 col-lg-2 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_iconcolor}}</label>
+                <input type="color" name="color_icon" class="form-control color-picker-input" value="{{ciactual}}">
+            </div>
+            
+            <div class="col-6 col-md-3 col-lg-2 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_color_cat_icon}}</label>
+                <input type="color" name="color_cat_icon" class="form-control color-picker-input" value="{{ccactual}}">
+            </div>
+
+            <div class="col-12 col-md-12 col-lg-4 mb-3 d-flex gap-2 justify-content-end">
+                <a href="{{resetcolorsurl}}" class="btn btn-outline-secondary px-3 py-2 font-weight-bold w-50 btn-reset-colors" onclick="return confirm('{{str_confirmresetcolors}}')">
+                    <i class="fa fa-undo"></i> {{str_resetcolors}}
+                </a>
+                <button type="submit" class="btn px-3 py-2 font-weight-bold w-50 btn-save-colors" style="background: {{cpactual}};">
+                    {{str_savecolors}}
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var typeSelect = document.getElementById('type_select');
+    var activitySelect = document.getElementById('activity_select');
+    if (!typeSelect || !activitySelect) return;
+
+    var allOptions = Array.from(activitySelect.querySelectorAll('option:not([disabled])'));
+    
+    // Fallback original options for older browsers that don't support hiding options well
+    var backupOptions = allOptions.map(function(opt) {
+        return {
+            value: opt.value,
+            text: opt.text,
+            modname: opt.getAttribute('data-modname'),
+            selected: opt.selected
+        };
+    });
+
+    function filterActivities() {
+        var selectedType = typeSelect.value;
+        var currentSelectedValue = activitySelect.value;
+        
+        // Clear all options except the first disabled one
+        while (activitySelect.options.length > 1) {
+            activitySelect.remove(1);
+        }
+
+        backupOptions.forEach(function(optData) {
+            var show = false;
+            if (selectedType === 'Q') {
+                show = (optData.modname === 'quiz');
+            } else if (selectedType === 'A') {
+                show = (optData.modname === 'assign');
+            } else if (selectedType === 'G') {
+                var gradables = ['quiz', 'assign', 'forum', 'workshop', 'scorm', 'lesson', 'h5pactivity'];
+                show = gradables.indexOf(optData.modname) !== -1;
+            } else {
+                show = true;
+            }
+
+            if (show) {
+                var newOption = document.createElement('option');
+                newOption.value = optData.value;
+                newOption.text = optData.text;
+                newOption.setAttribute('data-modname', optData.modname);
+                if (optData.value === currentSelectedValue) {
+                    newOption.selected = true;
+                }
+                activitySelect.appendChild(newOption);
+            }
+        });
+        
+        // Handle Bonus field visibility
+        var bonusContainer = document.getElementById('bonus_container');
+        if (bonusContainer) {
+            if (selectedType === 'G') {
+                bonusContainer.style.display = '';
+            } else {
+                bonusContainer.style.display = 'none';
+            }
+        }
+        
+        // Reset selection if it disappeared
+        if (activitySelect.selectedIndex === -1) {
+            activitySelect.selectedIndex = 0;
+        }
+    }
+
+    typeSelect.addEventListener('change', filterActivities);
+    filterActivities();
+});
+</script>

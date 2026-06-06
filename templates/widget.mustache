@@ -1,0 +1,91 @@
+{{!
+    @template local_xpstore/widget
+    
+    Embedded individual product widget for the store.
+}}
+<div class="local_xpstore-container local_xpstore-embedded-container" style="--cp: {{cpstore}}; --cb: {{cbstore}}; --ci: {{cistore}}; --gradient: linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%); display: flex; justify-content: center; align-items: flex-start;">
+
+    <div class="widget-card" style="width: 100%; max-width: 250px; margin: 0 auto;">
+        <div class="mini-wallet">
+            {{str_balance}}:&nbsp;{{saldo}} XP
+        </div>
+        
+        <div class="card-body">
+            {{#status_success}}
+                <div class="w-icon" style="color: #28a745; animation: none;">
+                    <i class="fa fa-check-circle"></i>
+                </div>
+                <div class="w-title">
+                    {{str_widgetunlocked}}
+                </div>
+                <div class="w-subtitle">
+                    {{str_widgetunlockeddesc}}
+                </div>
+            {{/status_success}}
+            
+            {{^status_success}}
+                <div class="w-icon">
+                    <i class="fa fa-{{icon}}"></i>
+                </div>
+                
+                {{#is_bonus}}
+                    <div class="w-badge">
+                        +{{boost}} {{str_points}}
+                    </div>
+                {{/is_bonus}}
+                {{#is_special}}
+                    <div class="w-badge" style="background: var(--cb); color: white;">
+                        {{str_specialcontent}}
+                    </div>
+                {{/is_special}}
+                
+                <div class="w-title">
+                    {{displayname}}
+                </div>
+                <div class="w-subtitle">
+                    {{n_real}}
+                </div>
+            {{/status_success}}
+        </div>
+        
+        <div class="card-footer">
+            {{#status_success}}
+                <a href="{{desturl}}" target="_top" class="btn-success-w">
+                    {{str_goto_dest}}
+                </a>
+            {{/status_success}}
+            
+            {{^status_success}}
+                <div class="w-cost">
+                    {{costo}} XP
+                </div>
+                
+                {{#has_limit}}
+                    <div class="w-limit">
+                        {{str_redemptions_count}} {{comprasactuales}} / {{limite}}
+                    </div>
+                {{/has_limit}}
+                {{^has_limit}}
+                    <div style="margin-bottom: 8px;"></div>
+                {{/has_limit}}
+                
+                <form method="POST" action="{{actionurl}}">
+                    <input type="hidden" name="sesskey" value="{{sesskey}}">
+                    <input type="hidden" name="action" value="comprar">
+                    
+                    {{#limitealcanzado}}
+                        <button type="button" class="btn-buy" disabled style="background: #e0e0e0; color: #888;">
+                            {{str_soldout}}
+                        </button>
+                    {{/limitealcanzado}}
+                    
+                    {{^limitealcanzado}}
+                        <button type="submit" class="btn-buy" {{#disabled}}disabled{{/disabled}}>
+                            {{btntext}}
+                        </button>
+                    {{/limitealcanzado}}
+                </form>
+            {{/status_success}}
+        </div>
+    </div>
+</div>

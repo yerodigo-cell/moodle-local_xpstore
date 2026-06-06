@@ -1,0 +1,69 @@
+<div class="local_xpstore-container history-wrapper">
+    <div class="header-container">
+        <div class="header-title">
+            <h2>
+                <i class="fa fa-history mr-2" style="color: #0056D2;"></i> 
+                {{str_history}}
+            </h2>
+        </div>
+        
+        {{#showbackbutton}}
+            <a href="{{storeurl}}" class="btn-tienda">
+                <i class="fa fa-arrow-left"></i> {{str_tiendaxp}}
+            </a>
+        {{/showbackbutton}}
+    </div>
+
+    <div class="table-responsive-wrapper">
+        <table class="table-history">
+            <thead>
+                <tr>
+                    <th>{{str_activity}}</th>
+                    <th>{{str_type}}</th>
+                    <th class="text-center">{{str_cost}}</th>
+                    <th>{{str_date}}</th>
+                    <th class="text-right">{{str_action}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{#has_logs}}
+                    {{#logs}}
+                    <tr>
+                        <td class="td-first font-weight-bold" style="color: #444; white-space: nowrap;">
+                            {{activityname}}
+                        </td>
+                        <td>
+                            <span class="badge-tipo bg-{{tipostr}}">
+                                {{labeltipo}}
+                            </span>
+                        </td>
+                        <td class="text-center font-weight-bold text-primary" style="white-space: nowrap;">
+                            {{amount}} XP
+                        </td>
+                        <td class="small text-muted" style="white-space: nowrap;">
+                            {{date}}
+                        </td>
+                        <td class="td-last text-right">
+                            {{#is_grade}}
+                                <a href="{{gradeurl}}" class="btn-action-history btn-grade">
+                                    <i class="fa fa-bar-chart"></i> {{str_gotogradebook}}
+                                </a>
+                            {{/is_grade}}
+                            {{^is_grade}}
+                                <a href="{{cmurl}}" class="btn-action-history btn-activity">
+                                    <i class="fa fa-external-link"></i> {{str_gotoactivity}}
+                                </a>
+                            {{/is_grade}}
+                        </td>
+                    </tr>
+                    {{/logs}}
+                {{/has_logs}}
+                {{^has_logs}}
+                    <tr><td colspan="5" class="text-center py-5 text-muted" style="border-radius: 12px;">
+                         {{str_nopurchases}}
+                    </td></tr>
+                {{/has_logs}}
+            </tbody>
+        </table>
+    </div>
+</div>
