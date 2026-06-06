@@ -40,15 +40,15 @@ require_login($course);
 
 
 $urlparams = [
-    'id' => $courseid, 
-    'cmid' => $cmidreq, 
+    'id' => $courseid,
+    'cmid' => $cmidreq,
     'tipo' => $tiporeq,
 ];
 $url = new moodle_url('/local/xpstore/widget.php', $urlparams);
 
 $PAGE->set_url($url);
 $PAGE->set_context($context);
-$PAGE->set_pagelayout('embedded'); 
+$PAGE->set_pagelayout('embedded');
 
 $productosraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
 $items = array_filter(explode(',', $productosraw));
@@ -58,16 +58,16 @@ foreach ($items as $item) {
     $tipochar = substr($item, 0, 1);
     $rest = substr($item, 1);
     $parts = explode(':', $rest);
-    
+
     if (count($parts) >= 2 && (int)$parts[0] === $cmidreq && $tipochar === $tiporeq) {
         $cm = $DB->get_record('course_modules', ['id' => (int)$parts[0], 'course' => $courseid]);
         if ($cm) {
             $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
             $producto = [
-                'tipo' => $tipochar, 
-                'cid' => (int)$parts[0], 
+                'tipo' => $tipochar,
+                'cid' => (int)$parts[0],
                 'costo' => (int)($parts[1] ?? 0),
-                'n_custom' => $parts[2] ?? '', 
+                'n_custom' => $parts[2] ?? '',
                 'boost' => $parts[3] ?? '0',
                 'limite' => (int)($parts[5] ?? 0),
                 'n_real' => $DB->get_field($modname, 'name', ['id' => $cm->instance]),
@@ -77,16 +77,16 @@ foreach ($items as $item) {
     }
 }
 
-if (!$producto) { 
-    echo $OUTPUT->header(); 
-    echo "<div style='padding:20px; text-align:center;'>".get_string('widgeterror', 'local_xpstore')."</div>"; 
-    echo $OUTPUT->footer(); 
-    die(); 
+if (!$producto) {
+    echo $OUTPUT->header();
+    echo "<div style='padding:20px; text-align:center;'>".get_string('widgeterror', 'local_xpstore')."</div>";
+    echo $OUTPUT->footer();
+    die();
 }
 
 $comprasparams = [
-    'userid' => $USER->id, 
-    'itemid' => $producto['cid'], 
+    'userid' => $USER->id,
+    'itemid' => $producto['cid'],
     'itemtype' => $producto['tipo'],
 ];
 $comprasactuales = $DB->count_records('local_xpstore_gastos', $comprasparams);
@@ -112,30 +112,30 @@ $saldo = local_xpstore_get_balance($USER->id, $courseid);
 echo $OUTPUT->header();
 
 $iconmap = [
-    'Q' => 'bolt', 
-    'A' => 'file-text', 
-    'F' => 'comments', 
-    'G' => 'star', 
+    'Q' => 'bolt',
+    'A' => 'file-text',
+    'F' => 'comments',
+    'G' => 'star',
     'S' => 'unlock-alt',
 ];
 $icon = $iconmap[$producto['tipo']] ?? 'gift';
 
 $cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
 $cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
-$cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800'; 
+$cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800';
 
-$is_bonus = ($producto['tipo'] == 'G' && $producto['boost'] != '0');
-$is_special = ($producto['tipo'] == 'S');
-$status_success = ($status === 'success');
+$isBonus = ($producto['tipo'] == 'G' && $producto['boost'] != '0');
+$isSpecial = ($producto['tipo'] == 'S');
+$statusSuccess = ($status === 'success');
 
 $desturl = null;
-if ($status_success) {
+if ($statusSuccess) {
     $dest = ($producto['tipo'] == 'G') ? '/grade/report/user/index.php' : '/course/view.php';
     $destmoodleurl = new moodle_url($dest, ['id' => $courseid]);
-    
-    if ($producto['tipo'] != 'G') { 
-        $modinfo = get_fast_modinfo($courseid); 
-        $destmoodleurl = $modinfo->cms[$producto['cid']]->url ?? $destmoodleurl; 
+
+    if ($producto['tipo'] != 'G') {
+        $modinfo = get_fast_modinfo($courseid);
+        $destmoodleurl = $modinfo->cms[$producto['cid']]->url ?? $destmoodleurl;
     }
     $desturl = $destmoodleurl->out(false);
 }
@@ -148,11 +148,11 @@ $templatedata = [
     'cbstore' => $cbstore,
     'cistore' => $cistore,
     'saldo' => $saldo,
-    'status_success' => $status_success,
+    'status_success' => $statusSuccess,
     'icon' => $icon,
-    'is_bonus' => $is_bonus,
+    'is_bonus' => $isBonus,
     'boost' => $producto['boost'],
-    'is_special' => $is_special,
+    'is_special' => $isSpecial,
     'displayname' => $producto['n_custom'] ?: $producto['n_real'],
     'n_real' => $producto['n_real'],
     'desturl' => $desturl,

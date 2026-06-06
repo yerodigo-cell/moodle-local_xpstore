@@ -1,11 +1,11 @@
-define(['core/notification'], function(notification) {
+define([], function() {
     return {
         init: function(copyAlertStr, copyErrorStr) {
             document.addEventListener('click', function(e) {
                 var btn = e.target.closest('[data-action="copy-widget"]');
                 if (btn) {
                     var code = btn.getAttribute('data-code');
-                    
+
                     // Fallback for non-HTTPS (like localhost)
                     var fallbackCopyTextToClipboard = function(text) {
                         var textArea = document.createElement("textarea");
@@ -38,7 +38,7 @@ define(['core/notification'], function(notification) {
                         function() {
                             alert(copyAlertStr);
                         },
-                        function(err) {
+                        function() {
                             fallbackCopyTextToClipboard(code);
                         }
                     );
