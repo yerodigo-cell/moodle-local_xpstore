@@ -1,19 +1,25 @@
 {{!
     @template local_xpstore/store_catalog
-    
-    Full store catalog page.
 
     Example context (json):
     {
+        "url": "https://moodle.org",
+        "actionurl": "https://moodle.org",
         "cpstore": "#0056D2",
         "cbstore": "#00C9A7",
         "cistore": "#ff9800",
         "ccstore": "#ffffff",
-        "actionurl": "https://moodle.org",
+        "cpactual": "#0056D2",
+        "cbactual": "#00C9A7",
+        "ciactual": "#ff9800",
+        "ccactual": "#ffffff",
         "showbackbutton": true,
         "isteacher": false,
         "saldo": 100,
-        "storecategories": [], "tipos": [{"value": "1", "label": "dummy"}], "activities": [{"id": 1, "name": "dummy"}]
+        "str_configtitle": "Configuration",
+        "storecategories": [],
+        "tipos": [{"value": "1", "label": "dummy", "selected": true}],
+        "activities": [{"id": 1, "name": "dummy", "selected": true}]
     }
 }}
 <div class="local_xpstore-container local_xpstore-full-container tienda-wrapper" style="--cp: {{cpstore}}; --cb: {{cbstore}}; --ci: {{cistore}}; --cc: {{ccstore}}; --gradient: linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%);">

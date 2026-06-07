@@ -1,34 +1,25 @@
 {{!
     @template local_xpstore/widget_history
 
-    XP Store history widget.
-
-    Context variables required for this template:
-    * historyurl - The URL to the history page
-    * cpstore - Primary color
-    * cbstore - Secondary color
-    * str_history - Localized string for 'history'
-
     Example context (json):
     {
-        "historyurl": "http://localhost/moodle/local/xpstore/history.php?id=2",
-        "cpstore": "#0056D2",
-        "cbstore": "#00C9A7",
-        "str_history": "Purchase History"
-    }
-}}
-
-    Example context (json):
-    {
+        "url": "https://moodle.org",
+        "actionurl": "https://moodle.org",
         "cpstore": "#0056D2",
         "cbstore": "#00C9A7",
         "cistore": "#ff9800",
         "ccstore": "#ffffff",
-        "actionurl": "https://moodle.org",
+        "cpactual": "#0056D2",
+        "cbactual": "#00C9A7",
+        "ciactual": "#ff9800",
+        "ccactual": "#ffffff",
         "showbackbutton": true,
         "isteacher": false,
         "saldo": 100,
-        "storecategories": [], "tipos": [{"value": "1", "label": "dummy"}], "activities": [{"id": 1, "name": "dummy"}]
+        "str_configtitle": "Configuration",
+        "storecategories": [],
+        "tipos": [{"value": "1", "label": "dummy", "selected": true}],
+        "activities": [{"id": 1, "name": "dummy", "selected": true}]
     }
 }}
 <div class="local_xpstore-container local_xpstore-embedded-container history-widget" style="--cp: {{cpstore}}; --cb: {{cbstore}}; --gradient: linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%);">

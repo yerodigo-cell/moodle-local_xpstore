@@ -19,12 +19,12 @@ define(['core/notification'], function(notification) {
                         try {
                             var successful = document.execCommand('copy');
                             if (successful) {
-                                notification.addNotification({ message: copyAlertStr, type: 'success' });
+                                notification.addNotification({message: copyAlertStr, type: 'success'});
                             } else {
-                                notification.addNotification({ message: copyErrorStr, type: 'error' });
+                                notification.addNotification({message: copyErrorStr, type: 'error'});
                             }
                         } catch (err) {
-                            notification.addNotification({ message: copyErrorStr, type: 'error' });
+                            notification.addNotification({message: copyErrorStr, type: 'error'});
                         }
                         document.body.removeChild(textArea);
                     };
@@ -36,7 +36,7 @@ define(['core/notification'], function(notification) {
 
                     navigator.clipboard.writeText(code).then(
                         function() {
-                            notification.addNotification({ message: copyAlertStr, type: 'success' });
+                            notification.addNotification({message: copyAlertStr, type: 'success'});
                             return true;
                         }
                     ).catch(function() {

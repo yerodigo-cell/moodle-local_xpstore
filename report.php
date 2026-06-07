@@ -89,7 +89,7 @@ $templatedata = [
     'str_nopurchases' => get_string('nopurchases', 'local_xpstore'),
     'str_redemptions' => get_string('redemptions', 'local_xpstore'),
     'has_users' => false,
-    'users' => []
+    'users' => [],
 ];
 
 $sql = "SELECT g.*, u.firstname, u.lastname, u.picture, u.imagealt, u.email
@@ -122,7 +122,7 @@ if ($logs) {
             'useremail' => $realuser->email,
             'totalcanjes' => $totalcanjes,
             'profileurl' => $profileurl,
-            'logs' => []
+            'logs' => [],
         ];
 
         foreach ($userlogs as $log) {
@@ -148,7 +148,8 @@ if ($logs) {
 
             $cmurl = '';
             if ($tipostr === 'g') {
-                $cmurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid, 'userid' => $log->userid]))->out(false);
+                $cmurl = (new moodle_url('/grade/report/user/index.php', 
+                    ['id' => $courseid, 'userid' => $log->userid]))->out(false);
             } else if (isset($modinfo->cms[$log->itemid])) {
                 $cmurl = $modinfo->cms[$log->itemid]->url->out(false);
             }
