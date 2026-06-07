@@ -38,7 +38,7 @@ function local_xpstore_extend_navigation_course(navigation_node $parentnode, $co
     // 1. Detect if Level Up! is in the course.
     $hasxp = $DB->record_exists('block_instances', [
         'blockname' => 'xp',
-        'parentcontextid' => $context->id
+        'parentcontextid' => $context->id,
     ]);
 
     // If Level Up! block is not active in this course, do not show the menu to anyone.
@@ -186,7 +186,7 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
                     'quiz' => $quiz->id,
                     'userid' => $userid,
                     'attempts' => ($quiz->attempts ?: 1) + 1,
-                    'timeclose' => $deadline
+                    'timeclose' => $deadline,
                 ];
                 $DB->insert_record('quiz_overrides', $new);
             }
@@ -203,7 +203,7 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
                     'assignid' => $assign->id,
                     'userid' => $userid,
                     'duedate' => $deadline,
-                    'cutoffdate' => $deadline
+                    'cutoffdate' => $deadline,
                 ];
                 $DB->insert_record('assign_overrides', $new);
             }
@@ -220,7 +220,7 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
                     'userid' => $userid,
                     'extensionduedate' => $deadline,
                     'locked' => 0,
-                    'mailed' => 0
+                    'mailed' => 0,
                 ];
                 $DB->insert_record('assign_user_flags', $newflag);
             }
@@ -230,7 +230,7 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
                 'itemtype' => 'mod',
                 'itemmodule' => $itemmodule,
                 'iteminstance' => $cm->instance,
-                'courseid' => $cm->course
+                'courseid' => $cm->course,
             ]);
 
             if ($gradeitem) {
@@ -249,7 +249,7 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
                         'finalgrade' => $gradevalue,
                         'overridden' => time(),
                         'timecreated' => time(),
-                        'timemodified' => time()
+                        'timemodified' => time(),
                     ];
                     $DB->insert_record('grade_grades', $newgrade);
                 }
@@ -263,7 +263,7 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
                     'courseid' => $cm->course,
                     'name' => $rewardname,
                     'timecreated' => time(),
-                    'timemodified' => time()
+                    'timemodified' => time(),
                 ];
                 $groupid = $DB->insert_record('groups', $newgroup);
             } else {
@@ -274,7 +274,7 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
                 $newmember = (object)[
                     'groupid' => $groupid,
                     'userid' => $userid,
-                    'timeadded' => time()
+                    'timeadded' => time(),
                 ];
                 $DB->insert_record('groups_members', $newmember);
             }

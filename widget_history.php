@@ -55,7 +55,7 @@ $templatedata = [
     'historyurl' => $historyurl->out(false),
     'cpstore' => $cpstore,
     'cbstore' => $cbstore,
-    'str_history' => get_string('history', 'local_xpstore')
+    'str_history' => get_string('history', 'local_xpstore'),
 ];
 
 echo $OUTPUT->render_from_template('local_xpstore/widget_history', $templatedata);

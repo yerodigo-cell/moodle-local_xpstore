@@ -212,17 +212,17 @@ if ($action === 'load_edit') {
 }
 
 $typeoptions = [];
-$available_types = [
+$availabletypes = [
     'Q' => get_string('type_q', 'local_xpstore'),
     'A' => get_string('type_a', 'local_xpstore'),
     'G' => get_string('type_g', 'local_xpstore'),
-    'S' => get_string('type_s', 'local_xpstore')
+    'S' => get_string('type_s', 'local_xpstore'),
 ];
-foreach ($available_types as $val => $label) {
+foreach ($availabletypes as $val => $label) {
     $typeoptions[] = [
         'value' => $val,
         'label' => $label,
-        'selected' => ($etipo === $val)
+        'selected' => ($etipo === $val),
     ];
 }
 
@@ -234,7 +234,7 @@ foreach ($modinfo->get_cms() as $cm) {
             'id' => $cm->id,
             'modname' => $cm->modname,
             'name' => "[" . strtoupper($cm->modname) . "] " . $cm->get_formatted_name(),
-            'selected' => ($cm->id == $ecmid)
+            'selected' => ($cm->id == $ecmid),
         ];
     }
 }
@@ -273,17 +273,17 @@ if (!empty($configraw)) {
             'shopping-cart' => get_string('icon_cart', 'local_xpstore'),
             'bolt' => get_string('icon_bolt', 'local_xpstore'),
             'shield' => get_string('icon_shield', 'local_xpstore'),
-            'gamepad' => get_string('icon_gamepad', 'local_xpstore')
+            'gamepad' => get_string('icon_gamepad', 'local_xpstore'),
         ];
 
         foreach ($categoriasunicas as $catname) {
             $currenticon = isset($savedicons[$catname]) ? $savedicons[$catname] : 'trophy';
-            $icon_list = [];
+            $iconlist = [];
             foreach ($availableicons as $icoval => $icolabel) {
-                $icon_list[] = [
+                $iconlist[] = [
                     'value' => $icoval,
                     'label' => $icolabel,
-                    'selected' => ($currenticon === $icoval)
+                    'selected' => ($currenticon === $icoval),
                 ];
             }
 
@@ -291,7 +291,7 @@ if (!empty($configraw)) {
                 'catname' => $catname,
                 'cathash' => md5($catname),
                 'currenticon' => $currenticon,
-                'icons' => $icon_list
+                'icons' => $iconlist,
             ];
 
             global $CFG;
@@ -301,7 +301,7 @@ if (!empty($configraw)) {
             $categoryiframeoptions[] = [
                 'catname' => $catname,
                 'iframecat' => $iframecat,
-                'currenticon' => $currenticon
+                'currenticon' => $currenticon,
             ];
         }
     }
