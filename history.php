@@ -68,7 +68,7 @@ $templatedata = [
     'logs' => [],
     'str_nopurchases' => get_string('nopurchases', 'local_xpstore'),
     'str_gotogradebook' => get_string('gotogradebook', 'local_xpstore'),
-    'str_gotoactivity' => get_string('gotoactivity', 'local_xpstore')
+    'str_gotoactivity' => get_string('gotoactivity', 'local_xpstore'),
 ];
 
 $sql = "SELECT g.*, cm.module, cm.instance
@@ -91,11 +91,11 @@ if ($logs) {
             ? get_string('type_' . $tipostr, 'local_xpstore')
             : 'Legacy';
 
-        $is_grade = ($log->itemtype === 'G');
+        $isgrade = ($log->itemtype === 'G');
         $gradeurl = '';
         $cmurl = '';
 
-        if ($is_grade) {
+        if ($isgrade) {
             $gradeurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
         } else {
             $cmurl = isset($modinfo->cms[$log->itemid])
@@ -109,9 +109,9 @@ if ($logs) {
             'labeltipo' => $labeltipo,
             'amount' => $log->amount,
             'date' => userdate($log->timecreated, get_string('strftimedatetime', 'langconfig')),
-            'is_grade' => $is_grade,
+            'is_grade' => $isgrade,
             'gradeurl' => $gradeurl,
-            'cmurl' => $cmurl
+            'cmurl' => $cmurl,
         ];
     }
 }

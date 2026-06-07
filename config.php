@@ -211,7 +211,7 @@ if ($action === 'load_edit') {
     }
 }
 
-$type_options = [];
+$typeoptions = [];
 $available_types = [
     'Q' => get_string('type_q', 'local_xpstore'),
     'A' => get_string('type_a', 'local_xpstore'),
@@ -219,18 +219,18 @@ $available_types = [
     'S' => get_string('type_s', 'local_xpstore')
 ];
 foreach ($available_types as $val => $label) {
-    $type_options[] = [
+    $typeoptions[] = [
         'value' => $val,
         'label' => $label,
         'selected' => ($etipo === $val)
     ];
 }
 
-$activity_options = [];
+$activityoptions = [];
 $modinfo = get_fast_modinfo($courseid);
 foreach ($modinfo->get_cms() as $cm) {
     if ($cm->has_view() && !in_array($cm->modname, ['label', 'resource', 'contentview'])) {
-        $activity_options[] = [
+        $activityoptions[] = [
             'id' => $cm->id,
             'modname' => $cm->modname,
             'name' => "[" . strtoupper($cm->modname) . "] " . $cm->get_formatted_name(),
@@ -241,14 +241,14 @@ foreach ($modinfo->get_cms() as $cm) {
 
 $configraw = get_config('local_xpstore', $catalogkey) ?: '';
 $categoriasunicas = [];
-$has_categories = false;
-$category_icon_options = [];
-$category_iframe_options = [];
-$catalog_items = [];
-$has_items = false;
+$hascategories = false;
+$categoryiconoptions = [];
+$categoryiframeoptions = [];
+$catalogitems = [];
+$hasitems = false;
 
 if (!empty($configraw)) {
-    $has_items = true;
+    $hasitems = true;
     $itemsraw = array_filter(explode(',', $configraw));
 
     foreach ($itemsraw as $it) {
@@ -260,7 +260,7 @@ if (!empty($configraw)) {
     }
 
     if (!empty($categoriasunicas)) {
-        $has_categories = true;
+        $hascategories = true;
         $savedicons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid), true) ?: [];
         $availableicons = [
             'trophy' => get_string('icon_trophy', 'local_xpstore'),
@@ -287,7 +287,7 @@ if (!empty($configraw)) {
                 ];
             }
 
-            $category_icon_options[] = [
+            $categoryiconoptions[] = [
                 'catname' => $catname,
                 'cathash' => md5($catname),
                 'currenticon' => $currenticon,
@@ -298,7 +298,7 @@ if (!empty($configraw)) {
             $urlcat = $CFG->wwwroot . "/local/xpstore/widget_category.php?id={$courseid}&cat=".rawurlencode($catname);
             $iframecat = '<iframe src="' . $urlcat . '" width="100%" height="650" style="border: none; border-radius: 15px;" allowfullscreen></iframe>';
 
-            $category_iframe_options[] = [
+            $categoryiframeoptions[] = [
                 'catname' => $catname,
                 'iframecat' => $iframecat,
                 'currenticon' => $currenticon
@@ -334,7 +334,7 @@ if (!empty($configraw)) {
             $widgeturl = $CFG->wwwroot . "/local/xpstore/widget.php?id={$courseid}&tipo={$tipo}&cmid={$cid}";
             $iframecode = '<iframe src="' . $widgeturl . '" style="width: 280px !important; max-width: 100%; height: 350px !important; border: none; overflow: hidden; border-radius: 15px; display: inline-block; margin: 10px;" scrolling="no"></iframe>';
 
-            $catalog_items[] = [
+            $catalogitems[] = [
                 'tipolower' => strtolower($tipo),
                 'labeltipo' => $labeltipo,
                 'cat' => $cat,
@@ -347,7 +347,7 @@ if (!empty($configraw)) {
                 'val' => $val,
                 'iframecode' => $iframecode,
                 'editurl' => (new moodle_url($url, ['action' => 'load_edit', 'item' => $item]))->out(false),
-                'deleteurl' => (new moodle_url($url, ['action' => 'delete', 'sesskey' => sesskey(), 'item' => $item]))->out(false)
+                'deleteurl' => (new moodle_url($url, ['action' => 'delete', 'sesskey' => sesskey(), 'item' => $item]))->out(false),
             ];
         }
     }
@@ -355,17 +355,19 @@ if (!empty($configraw)) {
 
 global $CFG;
 $urlstore = $CFG->wwwroot . "/local/xpstore/widget_category.php?id={$courseid}";
-$iframestore = '<iframe src="' . $urlstore . '" width="100%" height="700" style="border: none; border-radius: 15px;" allowfullscreen></iframe>';
+$iframestore = '<iframe src="' . $urlstore . '" width="100%" height="700" ' .
+    'style="border: none; border-radius: 15px;" allowfullscreen></iframe>';
 
 $urlhistoryw = $CFG->wwwroot . "/local/xpstore/widget_history.php?id={$courseid}";
-$iframehistory = '<iframe src="' . $urlhistoryw . '" width="100%" height="150" style="border: none; overflow: hidden;" scrolling="no"></iframe>';
+$iframehistory = '<iframe src="' . $urlhistoryw . '" width="100%" height="150" ' .
+    'style="border: none; overflow: hidden;" scrolling="no"></iframe>';
 
 $templatedata = [
     'str_configtitle' => get_string('configtitle', 'local_xpstore'),
     'url' => $url->out(false),
     'sesskey' => sesskey(),
     'menu_is_visible' => ($menuvisible === '1'),
-    'str_hide_menu_tooltip' => get_string('hide_menu_tooltip', 'local_xpstore'), // Needs translation if not exists, but we can fallback or just use text.
+    'str_hide_menu_tooltip' => get_string('hide_menu_tooltip', 'local_xpstore'), // Needs translation if missing.
     'str_show_menu_tooltip' => get_string('show_menu_tooltip', 'local_xpstore'),
     'str_menuvisible' => get_string('menuvisible', 'local_xpstore'),
     'str_menuhidden' => get_string('menuhidden', 'local_xpstore'),
@@ -382,12 +384,12 @@ $templatedata = [
     'help_type' => $OUTPUT->help_icon('type', 'local_xpstore'),
     'help_label' => $OUTPUT->help_icon('label', 'local_xpstore'),
     'str_choosetype' => get_string('choosetype', 'local_xpstore'),
-    'type_options' => $type_options,
+    'type_options' => $typeoptions,
     'etipo' => $etipo,
 
     'str_activity' => get_string('activity', 'local_xpstore'),
     'str_chooseactivity' => get_string('chooseactivity', 'local_xpstore'),
-    'activity_options' => $activity_options,
+    'activity_options' => $activityoptions,
     'ecmid' => $ecmid,
 
     'str_cost' => get_string('cost', 'local_xpstore'),
@@ -426,9 +428,9 @@ $templatedata = [
     'str_resetcolors' => get_string('resetcolors', 'local_xpstore'),
     'str_savecolors' => get_string('savecolors', 'local_xpstore'),
 
-    'has_categories' => $has_categories,
+    'has_categories' => $hascategories,
     'str_categoryicons' => get_string('categoryicons', 'local_xpstore'),
-    'category_icon_options' => $category_icon_options,
+    'category_icon_options' => $categoryiconoptions,
     'str_saveicons' => get_string('saveicons', 'local_xpstore'),
 
     'str_widget_panel_title' => get_string('widget_panel_title', 'local_xpstore'),
@@ -440,11 +442,11 @@ $templatedata = [
     'iframehistory' => $iframehistory,
     'str_history_button' => get_string('history_button', 'local_xpstore'),
 
-    'category_iframe_options' => $category_iframe_options,
+    'category_iframe_options' => $categoryiframeoptions,
     'str_category_short' => get_string('category_short', 'local_xpstore'),
 
     'str_currentcatalog' => get_string('currentcatalog', 'local_xpstore'),
-    'has_items' => $has_items,
+    'has_items' => $hasitems,
     'deleteallurl' => (new moodle_url($url, ['action' => 'deleteall', 'sesskey' => sesskey()]))->out(false),
     'str_confirmdeleteall' => get_string('confirmdeleteall', 'local_xpstore'),
     'str_deleteall' => get_string('deleteall', 'local_xpstore'),
@@ -457,15 +459,15 @@ $templatedata = [
     'str_colaction' => get_string('colaction', 'local_xpstore'),
     'str_norewardscreated' => get_string('norewardscreated', 'local_xpstore'),
 
-    'catalog_items' => $catalog_items,
+    'catalog_items' => $catalogitems,
     'str_copysinglecard' => get_string('copysinglecard', 'local_xpstore'),
     'str_delete' => get_string('delete', 'local_xpstore'),
-    'str_confirmdelete' => get_string('confirmdelete', 'local_xpstore')
+    'str_confirmdelete' => get_string('confirmdelete', 'local_xpstore'),
 ];
 
 $PAGE->requires->js_call_amd('local_xpstore/copywidget', 'init', [
     get_string('copyalert', 'local_xpstore'),
-    'Error' // Simple string for error, or could use another string
+    'Error', // Simple string for error, or could use another string.
 ]);
 
 echo $OUTPUT->header();

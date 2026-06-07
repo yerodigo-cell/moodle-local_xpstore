@@ -30,7 +30,7 @@ body.pagelayout-embedded {
     overflow-y: auto; /* Only show scrollbar if content actually overflows */
 }
 
-/* Allow scrolling on category if needed, but usually we just hide the main body scroll 
+/* Allow scrolling on category if needed, but usually we just hide the main body scroll
    and let the container scroll if we want, or just hide it */
 
 /* History Widget */

@@ -133,7 +133,7 @@ foreach ($todoslosproductos as $item) {
                     'A' => 'file-text',
                     'F' => 'comments',
                     'G' => 'star',
-                    'S' => 'unlock-alt'
+                    'S' => 'unlock-alt',
                 ];
                 $icon = $iconmap[$tipochar] ?? 'gift';
 
@@ -141,13 +141,15 @@ foreach ($todoslosproductos as $item) {
                 $comprasactuales = $DB->count_records('local_xpstore_gastos', $comprasparams);
                 $limitealcanzado = ($limite > 0 && $comprasactuales >= $limite);
 
-                $is_bonus = ($tipochar == 'G' && !empty($boost) && $boost != '0');
-                $is_special = ($tipochar == 'S');
+                $isbonus = ($tipochar == 'G' && !empty($boost) && $boost != '0');
+                $isspecial = ($tipochar == 'S');
 
-                $bought_this = ($status === 'success' && $boughtcmid == $cid && $tipocompra == $tipochar);
-                $gotogradebook = ($bought_this && $tipochar == 'G');
+                $boughtthis = ($status === 'success' && $boughtcmid == $cid && $tipocompra == $tipochar);
+                $gotogradebook = ($boughtthis && $tipochar == 'G');
 
-                $cmurl = isset($modinfo->cms[$cid]) ? $modinfo->cms[$cid]->url->out(false) : (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
+                $cmurl = isset($modinfo->cms[$cid]) ?
+                    $modinfo->cms[$cid]->url->out(false) :
+                    (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
                 $gradebookurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
 
                 $disabled = ($saldo < $costo);
@@ -161,13 +163,13 @@ foreach ($todoslosproductos as $item) {
                     'nreal' => $nreal,
                     'icon' => $icon,
                     'boost' => $boost,
-                    'is_bonus' => $is_bonus,
-                    'is_special' => $is_special,
+                    'is_bonus' => $isbonus,
+                    'is_special' => $isspecial,
                     'limite' => $limite,
                     'has_limit' => ($limite > 0),
                     'comprasactuales' => $comprasactuales,
                     'limitealcanzado' => $limitealcanzado,
-                    'bought_this' => $bought_this,
+                    'bought_this' => $boughtthis,
                     'gotogradebook' => $gotogradebook,
                     'cmurl' => $cmurl,
                     'gradebookurl' => $gradebookurl,
@@ -180,20 +182,20 @@ foreach ($todoslosproductos as $item) {
                     'str_gotogradebook' => get_string('gotogradebook', 'local_xpstore'),
                     'str_soldout' => get_string('soldout', 'local_xpstore'),
                     'actionurl' => $url->out(false),
-                    'sesskey' => sesskey()
+                    'sesskey' => sesskey(),
                 ];
             }
         }
     }
 }
 
-$formatted_categories = [];
+$formattedcategories = [];
 foreach ($storecategories as $nombreseccion => $productos) {
     $caticon = isset($caticons[$nombreseccion]) ? $caticons[$nombreseccion] : 'trophy';
-    $formatted_categories[] = [
+    $formattedcategories[] = [
         'nombreseccion' => $nombreseccion,
         'caticon' => $caticon,
-        'productos' => $productos
+        'productos' => $productos,
     ];
 }
 
@@ -212,9 +214,9 @@ $templatedata = [
     'saldo' => $saldo,
     'historyurl' => $historyurl->out(false),
     'str_history' => get_string('history', 'local_xpstore'),
-    'isempty' => empty($formatted_categories),
+    'isempty' => empty($formattedcategories),
     'str_widgeterror' => get_string('widgeterror', 'local_xpstore'),
-    'categoriastienda' => $formatted_categories
+    'categoriastienda' => $formattedcategories,
 ];
 
 echo $OUTPUT->header();
