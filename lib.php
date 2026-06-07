@@ -253,7 +253,6 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
                     ];
                     $DB->insert_record('grade_grades', $newgrade);
                 }
-
             }
         } else if ($type === 'S') {
             $group = $DB->get_record('groups', ['courseid' => $cm->course, 'name' => $rewardname]);
