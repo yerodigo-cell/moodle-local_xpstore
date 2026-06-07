@@ -22,8 +22,8 @@ The store allows teachers to configure different types of benefits based on stan
 * **⏳ 24h Extension:** Works only with Assignments. Students can redeem their points to get extra time to submit a task.
 * **⭐ Bonus:** Adds extra points directly to **any grade item** within the Moodle gradebook. It is fully compatible with assignments, quizzes, forums, or any other gradable element. Perfect for "Extra Credit" or "Second Chance" mechanics.
 * **🔓 Special:** Unlocks hidden content or VIP groups. Upon purchase, the student is **automatically added** to a predefined Moodle group.
-* ⚠ **Note:** The teacher must create the group in the course beforehand and configure the content's "Restrict access" settings to point to that specific group.
-
+  - ⚠ **Note:** The teacher must create the group in the course beforehand and configure the content's "Restrict access" settings to point to that specific group.
+  - ⚠️ **Crucial Requirement:** The label of this reward **must match exactly** the name of the group created by the teacher.
 ---
 
 ## Store Configuration
