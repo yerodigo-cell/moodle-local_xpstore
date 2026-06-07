@@ -30,7 +30,7 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new admin_setting_heading(
         'local_xpstore_settings_heading',
-        '', // Sin título
+        '', // Sin título.
         get_string('global_settings_info', 'local_xpstore')
     ));
 

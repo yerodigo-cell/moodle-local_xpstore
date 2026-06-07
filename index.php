@@ -151,8 +151,8 @@ foreach ($todoslosproductos as $item) {
             $boughtthis = ($status === 'success' && $boughtcmid == $cid && $tipocompra == $tipochar);
             $gotogradebook = ($boughtthis && $tipochar == 'G');
 
-            $cmurl = isset($modinfo->cms[$cid]) ? 
-                $modinfo->cms[$cid]->url->out(false) : 
+            $cmurl = isset($modinfo->cms[$cid]) ?
+                $modinfo->cms[$cid]->url->out(false) :
                 (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
             $gradebookurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
 
@@ -199,7 +199,7 @@ foreach ($storecategories as $nombreseccion => $productos) {
     $formattedcategories[] = [
         'nombreseccion' => $nombreseccion,
         'caticon' => $caticon,
-        'productos' => $productos
+        'productos' => $productos,
     ];
 }
 
@@ -235,7 +235,7 @@ $templatedata = [
     'str_storeempty_desc' => get_string('storeempty_desc', 'local_xpstore'),
     'categoriastienda' => $formattedcategories,
     'gradebookurl' => (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false),
-    'str_gotogradebook' => get_string('gotogradebook', 'local_xpstore')
+    'str_gotogradebook' => get_string('gotogradebook', 'local_xpstore'),
 ];
 
 echo $OUTPUT->header();

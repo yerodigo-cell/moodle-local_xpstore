@@ -148,8 +148,10 @@ if ($logs) {
 
             $cmurl = '';
             if ($tipostr === 'g') {
-                $cmurl = (new moodle_url('/grade/report/user/index.php', 
-                    ['id' => $courseid, 'userid' => $log->userid]))->out(false);
+                $cmurl = (new moodle_url(
+                    '/grade/report/user/index.php',
+                    ['id' => $courseid, 'userid' => $log->userid]
+                ))->out(false);
             } else if (isset($modinfo->cms[$log->itemid])) {
                 $cmurl = $modinfo->cms[$log->itemid]->url->out(false);
             }
