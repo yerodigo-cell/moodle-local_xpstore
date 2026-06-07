@@ -31,10 +31,10 @@ require_once(__DIR__ . '/lib.php');
 global $USER, $PAGE, $OUTPUT, $DB, $SESSION;
 
 $courseid = optional_param('id', 0, PARAM_INT);
-if ($courseid <= 0) { 
-    if (!empty($PAGE->course->id) && $PAGE->course->id != SITEID) { 
-        $courseid = $PAGE->course->id; 
-    } 
+if ($courseid <= 0) {
+    if (!empty($PAGE->course->id) && $PAGE->course->id != SITEID) {
+        $courseid = $PAGE->course->id;
+    }
 }
 
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
@@ -57,11 +57,11 @@ if ($action === 'comprar' && confirm_sesskey()) {
     $cmid = required_param('cmid', PARAM_INT);
     $tipo = required_param('tipo', PARAM_ALPHA);
     $costo = required_param('costo', PARAM_INT);
-    
+
     $productosraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
     $items = array_filter(explode(',', $productosraw));
     $limitecompra = 0;
-    
+
     foreach ($items as $it) {
         $ptipo = substr($it, 0, 1);
         $pparts = explode(':', substr($it, 1));
@@ -74,11 +74,11 @@ if ($action === 'comprar' && confirm_sesskey()) {
     $limitealcanzado = false;
     if ($limitecompra > 0) {
         $comprasprevias = $DB->count_records(
-            'local_xpstore_gastos', 
+            'local_xpstore_gastos',
             ['userid' => $USER->id, 'itemid' => $cmid, 'itemtype' => $tipo]
         );
-        if ($comprasprevias >= $limitecompra) { 
-            $limitealcanzado = true; 
+        if ($comprasprevias >= $limitecompra) {
+            $limitealcanzado = true;
         }
     }
 
@@ -88,7 +88,7 @@ if ($action === 'comprar' && confirm_sesskey()) {
         if (local_xpstore_purchase($USER->id, $tipo, $cmid, $costo, $courseid)) {
             local_xpstore_deliver_product($USER->id, $cmid, $tipo, $courseid);
             redirect(new moodle_url(
-                $url, 
+                $url,
                 ['status' => 'success', 'cmid' => $cmid, 'tipo_compra' => $tipo]
             ));
         } else {
@@ -109,7 +109,7 @@ $modinfo = get_fast_modinfo($courseid);
 
 $cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
 $cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
-$cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800'; 
+$cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800';
 $ccstore = get_config('local_xpstore', 'color_cat_icon_course_' . $courseid) ?: $cpstore;
 
 $caticons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid), true) ?: [];
@@ -119,55 +119,55 @@ foreach ($todoslosproductos as $item) {
     $tipochar = substr($item, 0, 1);
     $rest = substr($item, 1);
     $parts = explode(':', $rest);
-    
+
     if (count($parts) >= 2) {
-        $cid = $parts[0] ?? ''; 
-        $costo = $parts[1] ?? ''; 
+        $cid = $parts[0] ?? '';
+        $costo = $parts[1] ?? '';
         $ncustom = $parts[2] ?? '';
-        $boost = $parts[3] ?? '0'; 
+        $boost = $parts[3] ?? '0';
         $nombrecat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
         $limite = (int)($parts[5] ?? 0);
-        
+
         $cm = $DB->get_record('course_modules', ['id' => $cid, 'course' => $courseid]);
-        if ($cm) { 
+        if ($cm) {
             $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
             $nreal = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
             $iconmap = [
-                'Q' => 'bolt', 
-                'A' => 'file-text', 
-                'F' => 'comments', 
-                'G' => 'star', 
+                'Q' => 'bolt',
+                'A' => 'file-text',
+                'F' => 'comments',
+                'G' => 'star',
                 'S' => 'unlock-alt'
             ];
             $icon = $iconmap[$tipochar] ?? 'gift';
-            
+
             $comprasparams = ['userid' => $USER->id, 'itemid' => $cid, 'itemtype' => $tipochar];
             $comprasactuales = $DB->count_records('local_xpstore_gastos', $comprasparams);
             $limitealcanzado = ($limite > 0 && $comprasactuales >= $limite);
-            
+
             $is_bonus = ($tipochar == 'G' && !empty($boost) && $boost != '0');
             $is_special = ($tipochar == 'S');
-            
+
             $bought_this = ($status === 'success' && $boughtcmid == $cid && $tipocompra == $tipochar);
             $gotogradebook = ($bought_this && $tipochar == 'G');
-            
+
             $cmurl = isset($modinfo->cms[$cid]) ? $modinfo->cms[$cid]->url->out(false) : (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
             $gradebookurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
-            
+
             $disabled = ($saldo < $costo);
             $btntext = $disabled ? get_string('insuficiente', 'local_xpstore') : get_string('canjear', 'local_xpstore');
 
             $storecategories[$nombrecat][] = [
-                'tipo' => $tipochar, 
-                'cid' => $cid, 
-                'costo' => $costo, 
+                'tipo' => $tipochar,
+                'cid' => $cid,
+                'costo' => $costo,
                 'displayname' => $ncustom ?: $nreal,
                 'nreal' => $nreal,
                 'icon' => $icon,
-                'boost' => $boost, 
+                'boost' => $boost,
                 'is_bonus' => $is_bonus,
                 'is_special' => $is_special,
-                'limite' => $limite, 
+                'limite' => $limite,
                 'has_limit' => ($limite > 0),
                 'comprasactuales' => $comprasactuales,
                 'limitealcanzado' => $limitealcanzado,
@@ -185,7 +185,7 @@ foreach ($todoslosproductos as $item) {
                 'str_soldout' => get_string('soldout', 'local_xpstore'),
                 'actionurl' => $url->out(false),
                 'sesskey' => sesskey()
-            ]; 
+            ];
         }
     }
 }

@@ -48,7 +48,7 @@ function local_xpstore_extend_navigation_course(navigation_node $parentnode, $co
 
     // 2. Check the specific visibility configuration for THIS COURSE.
     $showinmenu = get_config('local_xpstore', 'show_menu_course_' . $course->id);
-    
+
     // MAGIC HERE: If the menu is hidden ('0') AND the user is NOT a teacher (cannot update course), hide it.
     if ($showinmenu === '0' && !has_capability('moodle/course:update', $context)) {
         return; // Exit, hiding the menu only for students.
@@ -57,11 +57,11 @@ function local_xpstore_extend_navigation_course(navigation_node $parentnode, $co
     // 3. If it is a student (and it's visible) or a teacher (always visible), draw the store menu.
     $url = new moodle_url('/local/xpstore/index.php', ['id' => $course->id]);
     $shopnode = navigation_node::create(
-        get_string('tiendaxp', 'local_xpstore'), 
-        $url, 
-        navigation_node::TYPE_SETTING, 
-        null, 
-        'tiendaxp', 
+        get_string('tiendaxp', 'local_xpstore'),
+        $url,
+        navigation_node::TYPE_SETTING,
+        null,
+        'tiendaxp',
         new pix_icon('i/store', '')
     );
     $parentnode->add_node($shopnode);
@@ -70,11 +70,11 @@ function local_xpstore_extend_navigation_course(navigation_node $parentnode, $co
     if (has_capability('moodle/course:update', $context)) {
         $reporturl = new moodle_url('/local/xpstore/report.php', ['id' => $course->id]);
         $parentnode->add_node(navigation_node::create(
-            get_string('audit', 'local_xpstore'), 
-            $reporturl, 
-            navigation_node::TYPE_SETTING, 
-            null, 
-            'tiendareport', 
+            get_string('audit', 'local_xpstore'),
+            $reporturl,
+            navigation_node::TYPE_SETTING,
+            null,
+            'tiendareport',
             new pix_icon('i/report', '')
         ));
     }
@@ -90,23 +90,23 @@ function local_xpstore_extend_navigation_course(navigation_node $parentnode, $co
 function local_xpstore_get_balance($userid, $courseid) {
     global $DB;
     $xp = $DB->get_field_sql(
-        "SELECT SUM(xp) FROM {block_xp_log} WHERE userid = ? AND courseid = ?", 
+        "SELECT SUM(xp) FROM {block_xp_log} WHERE userid = ? AND courseid = ?",
         [$userid, $courseid]
     );
     if (!$xp) {
         $xp = $DB->get_field_sql(
-            "SELECT xp FROM {block_xp} WHERE userid = ? AND courseid = ?", 
+            "SELECT xp FROM {block_xp} WHERE userid = ? AND courseid = ?",
             [$userid, $courseid]
         );
     }
     $totalxp = (int)($xp ?: 0);
-    
-    $sqlg = "SELECT SUM(g.amount) 
-             FROM {local_xpstore_gastos} g 
-             JOIN {course_modules} cm ON g.itemid = cm.id 
+
+    $sqlg = "SELECT SUM(g.amount)
+             FROM {local_xpstore_gastos} g
+             JOIN {course_modules} cm ON g.itemid = cm.id
              WHERE g.userid = ? AND cm.course = ?";
     $expenses = $DB->get_field_sql($sqlg, [$userid, $courseid]) ?: 0;
-    
+
     return max(0, $totalxp - (int)$expenses);
 }
 
@@ -124,10 +124,10 @@ function local_xpstore_purchase($userid, $type, $cmid, $cost, $courseid) {
     global $DB;
     if (local_xpstore_get_balance($userid, $courseid) >= $cost) {
         $record = new stdClass();
-        $record->userid = $userid; 
-        $record->itemtype = $type; 
+        $record->userid = $userid;
+        $record->itemtype = $type;
         $record->itemid = $cmid;
-        $record->amount = $cost; 
+        $record->amount = $cost;
         $record->timecreated = time();
         $DB->insert_record('local_xpstore_gastos', $record);
         return true;
@@ -146,7 +146,7 @@ function local_xpstore_purchase($userid, $type, $cmid, $cost, $courseid) {
  */
 function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) {
     global $DB;
-    
+
     try {
         $cm = $DB->get_record('course_modules', ['id' => $cmid], '*', MUST_EXIST);
         $deadline = time() + (24 * 60 * 60);
@@ -176,16 +176,16 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
         if ($type === 'Q') {
             $quiz = $DB->get_record('quiz', ['id' => $cm->instance], '*', MUST_EXIST);
             $override = $DB->get_record('quiz_overrides', ['quiz' => $quiz->id, 'userid' => $userid]);
-            
+
             if ($override) {
                 $override->attempts = ($override->attempts ?: $quiz->attempts) + 1;
                 $override->timeclose = max($override->timeclose, $deadline);
                 $DB->update_record('quiz_overrides', $override);
             } else {
                 $new = (object)[
-                    'quiz' => $quiz->id, 
-                    'userid' => $userid, 
-                    'attempts' => ($quiz->attempts ?: 1) + 1, 
+                    'quiz' => $quiz->id,
+                    'userid' => $userid,
+                    'attempts' => ($quiz->attempts ?: 1) + 1,
                     'timeclose' => $deadline
                 ];
                 $DB->insert_record('quiz_overrides', $new);
@@ -193,33 +193,33 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
         } else if ($type === 'A') {
             $assign = $DB->get_record('assign', ['id' => $cm->instance], '*', MUST_EXIST);
             $override = $DB->get_record('assign_overrides', ['assignid' => $assign->id, 'userid' => $userid]);
-            
+
             if ($override) {
                 $override->duedate = $deadline;
                 $override->cutoffdate = $deadline;
                 $DB->update_record('assign_overrides', $override);
             } else {
                 $new = (object)[
-                    'assignid' => $assign->id, 
-                    'userid' => $userid, 
-                    'duedate' => $deadline, 
+                    'assignid' => $assign->id,
+                    'userid' => $userid,
+                    'duedate' => $deadline,
                     'cutoffdate' => $deadline
                 ];
                 $DB->insert_record('assign_overrides', $new);
             }
-            
+
             $flag = $DB->get_record('assign_user_flags', ['assignid' => $assign->id, 'userid' => $userid]);
-            
+
             if ($flag) {
                 $flag->extensionduedate = $deadline;
                 $flag->locked = 0;
                 $DB->update_record('assign_user_flags', $flag);
             } else {
                 $newflag = (object)[
-                    'assignid' => $assign->id, 
-                    'userid' => $userid, 
-                    'extensionduedate' => $deadline, 
-                    'locked' => 0, 
+                    'assignid' => $assign->id,
+                    'userid' => $userid,
+                    'extensionduedate' => $deadline,
+                    'locked' => 0,
                     'mailed' => 0
                 ];
                 $DB->insert_record('assign_user_flags', $newflag);
@@ -227,15 +227,15 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
         } else if ($type === 'G') {
             $itemmodule = $DB->get_field('modules', 'name', ['id' => $cm->module]);
             $gradeitem = $DB->get_record('grade_items', [
-                'itemtype' => 'mod', 
-                'itemmodule' => $itemmodule, 
-                'iteminstance' => $cm->instance, 
+                'itemtype' => 'mod',
+                'itemmodule' => $itemmodule,
+                'iteminstance' => $cm->instance,
                 'courseid' => $cm->course
             ]);
-            
+
             if ($gradeitem) {
                 $grade = $DB->get_record('grade_grades', ['itemid' => $gradeitem->id, 'userid' => $userid]);
-                
+
                 if ($grade) {
                     $newvalue = $grade->finalgrade + $gradevalue;
                     $grade->finalgrade = ($newvalue > $gradeitem->grademax) ? $gradeitem->grademax : $newvalue;
@@ -243,12 +243,12 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
                     $DB->update_record('grade_grades', $grade);
                 } else {
                     $newgrade = (object)[
-                        'itemid' => $gradeitem->id, 
-                        'userid' => $userid, 
-                        'rawgrade' => $gradevalue, 
-                        'finalgrade' => $gradevalue, 
-                        'overridden' => time(), 
-                        'timecreated' => time(), 
+                        'itemid' => $gradeitem->id,
+                        'userid' => $userid,
+                        'rawgrade' => $gradevalue,
+                        'finalgrade' => $gradevalue,
+                        'overridden' => time(),
+                        'timecreated' => time(),
                         'timemodified' => time()
                     ];
                     $DB->insert_record('grade_grades', $newgrade);
@@ -257,23 +257,23 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
             }
         } else if ($type === 'S') {
             $group = $DB->get_record('groups', ['courseid' => $cm->course, 'name' => $rewardname]);
-            
+
             if (!$group) {
                 $newgroup = (object)[
-                    'courseid' => $cm->course, 
-                    'name' => $rewardname, 
-                    'timecreated' => time(), 
+                    'courseid' => $cm->course,
+                    'name' => $rewardname,
+                    'timecreated' => time(),
                     'timemodified' => time()
                 ];
                 $groupid = $DB->insert_record('groups', $newgroup);
-            } else { 
-                $groupid = $group->id; 
+            } else {
+                $groupid = $group->id;
             }
-            
+
             if (!$DB->record_exists('groups_members', ['groupid' => $groupid, 'userid' => $userid])) {
                 $newmember = (object)[
-                    'groupid' => $groupid, 
-                    'userid' => $userid, 
+                    'groupid' => $groupid,
+                    'userid' => $userid,
                     'timeadded' => time()
                 ];
                 $DB->insert_record('groups_members', $newmember);
@@ -282,8 +282,8 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
 
         rebuild_course_cache($cm->course, true);
         return true;
-    } catch (Exception $e) { 
-        return false; 
+    } catch (Exception $e) {
+        return false;
     }
 }
 
@@ -307,8 +307,8 @@ function local_xpstore_reset_course_form_definition(&$mform) {
 function local_xpstore_reset_userdata($data) {
     global $DB;
     if (!empty($data->reset_tiendagamificada_gastos)) {
-        $sql = "DELETE g FROM {local_xpstore_gastos} g 
-                JOIN {course_modules} cm ON g.itemid = cm.id 
+        $sql = "DELETE g FROM {local_xpstore_gastos} g
+                JOIN {course_modules} cm ON g.itemid = cm.id
                 WHERE cm.course = ?";
         $DB->execute($sql, [$data->courseid]);
     }

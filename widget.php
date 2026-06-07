@@ -79,7 +79,7 @@ foreach ($items as $item) {
 
 if (!$producto) {
     echo $OUTPUT->header();
-    echo "<div style='padding:20px; text-align:center;'>".get_string('widgeterror', 'local_xpstore')."</div>";
+    echo "<div style='padding:20px; text-align:center;'>" . get_string('widgeterror', 'local_xpstore') . "</div>";
     echo $OUTPUT->footer();
     die();
 }
@@ -124,12 +124,12 @@ $cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '
 $cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
 $cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800';
 
-$isBonus = ($producto['tipo'] == 'G' && $producto['boost'] != '0');
-$isSpecial = ($producto['tipo'] == 'S');
-$statusSuccess = ($status === 'success');
+$isbonus = ($producto['tipo'] == 'G' && $producto['boost'] != '0');
+$isspecial = ($producto['tipo'] == 'S');
+$statussuccess = ($status === 'success');
 
 $desturl = null;
-if ($statusSuccess) {
+if ($statussuccess) {
     $dest = ($producto['tipo'] == 'G') ? '/grade/report/user/index.php' : '/course/view.php';
     $destmoodleurl = new moodle_url($dest, ['id' => $courseid]);
 
@@ -148,11 +148,11 @@ $templatedata = [
     'cbstore' => $cbstore,
     'cistore' => $cistore,
     'saldo' => $saldo,
-    'status_success' => $statusSuccess,
+    'status_success' => $statussuccess,
     'icon' => $icon,
-    'is_bonus' => $isBonus,
+    'is_bonus' => $isbonus,
     'boost' => $producto['boost'],
-    'is_special' => $isSpecial,
+    'is_special' => $isspecial,
     'displayname' => $producto['n_custom'] ?: $producto['n_real'],
     'n_real' => $producto['n_real'],
     'desturl' => $desturl,
@@ -170,7 +170,9 @@ $templatedata = [
     'str_widgetunlockeddesc' => get_string('widgetunlockeddesc', 'local_xpstore'),
     'str_points' => get_string('points', 'local_xpstore'),
     'str_specialcontent' => get_string('specialcontent', 'local_xpstore'),
-    'str_goto_dest' => ($producto['tipo'] == 'G') ? get_string('gotogradebook', 'local_xpstore') : get_string('gotoactivity', 'local_xpstore'),
+    'str_goto_dest' => ($producto['tipo'] == 'G') ? 
+        get_string('gotogradebook', 'local_xpstore') : 
+        get_string('gotoactivity', 'local_xpstore'),
     'str_redemptions_count' => get_string('redemptions_count', 'local_xpstore'),
     'str_soldout' => get_string('soldout', 'local_xpstore'),
 ];

@@ -65,10 +65,10 @@ if ($action === 'add' && confirm_sesskey()) {
     $valornota = optional_param('valor_nota', '0', PARAM_FLOAT);
     $categoria = optional_param('categoria', '', PARAM_TEXT);
     $limite = optional_param('limite', 0, PARAM_INT);
-    
+
     $categorialimpia = str_replace(':', '-', trim($categoria));
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
-    
+
     $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:{$limite}";
     $updated = $currentconfig ? $currentconfig . ',' . $newitem : $newitem;
     set_config($catalogkey, $updated, 'local_xpstore');
@@ -96,20 +96,20 @@ if ($action === 'edit_save' && confirm_sesskey()) {
     $valornota = optional_param('valor_nota', '0', PARAM_FLOAT);
     $categoria = optional_param('categoria', '', PARAM_TEXT);
     $limite = optional_param('limite', 0, PARAM_INT);
-    
+
     $categorialimpia = str_replace(':', '-', trim($categoria));
     $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:{$limite}";
-    
+
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
     $items = explode(',', $currentconfig);
-    
+
     foreach ($items as $key => $item) {
         if (trim($item) === trim($olditem)) {
             $items[$key] = $newitem;
             break;
         }
     }
-    
+
     set_config($catalogkey, implode(',', $items), 'local_xpstore');
     redirect($url, get_string('productupdated', 'local_xpstore'));
 }
@@ -117,7 +117,7 @@ if ($action === 'edit_save' && confirm_sesskey()) {
 if ($action === 'delete' && confirm_sesskey()) {
     $itemtodelete = required_param('item', PARAM_TEXT);
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
-    
+
     $items = explode(',', $currentconfig);
     $newitems = [];
     foreach ($items as $i) {
@@ -125,7 +125,7 @@ if ($action === 'delete' && confirm_sesskey()) {
             $newitems[] = $i;
         }
     }
-    
+
     set_config($catalogkey, implode(',', $newitems), 'local_xpstore');
     redirect($url, get_string('productdeleted', 'local_xpstore'));
 }
@@ -140,12 +140,12 @@ if ($action === 'savecolors' && confirm_sesskey()) {
     $cp = required_param('color_primary', PARAM_TEXT);
     $cb = required_param('color_secondary', PARAM_TEXT);
     $ci = required_param('color_icon', PARAM_TEXT);
-    $cc = required_param('color_cat_icon', PARAM_TEXT); 
-    
+    $cc = required_param('color_cat_icon', PARAM_TEXT);
+
     set_config('color_primary_course_' . $courseid, $cp, 'local_xpstore');
     set_config('color_secondary_course_' . $courseid, $cb, 'local_xpstore');
     set_config('color_icon_course_' . $courseid, $ci, 'local_xpstore');
-    set_config('color_cat_icon_course_' . $courseid, $cc, 'local_xpstore'); 
+    set_config('color_cat_icon_course_' . $courseid, $cc, 'local_xpstore');
     redirect($url, get_string('colorssaved', 'local_xpstore'));
 }
 
@@ -153,7 +153,7 @@ if ($action === 'resetcolors' && confirm_sesskey()) {
     unset_config('color_primary_course_' . $courseid, 'local_xpstore');
     unset_config('color_secondary_course_' . $courseid, 'local_xpstore');
     unset_config('color_icon_course_' . $courseid, 'local_xpstore');
-    unset_config('color_cat_icon_course_' . $courseid, 'local_xpstore'); 
+    unset_config('color_cat_icon_course_' . $courseid, 'local_xpstore');
     redirect($url, get_string('colorsreset', 'local_xpstore'));
 }
 
@@ -179,16 +179,16 @@ if ($action === 'savecaticons' && confirm_sesskey()) {
 
 $cpactual = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
 $cbactual = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
-$ciactual = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800'; 
-$ccactual = get_config('local_xpstore', 'color_cat_icon_course_' . $courseid) ?: $cpactual; 
+$ciactual = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800';
+$ccactual = get_config('local_xpstore', 'color_cat_icon_course_' . $courseid) ?: $cpactual;
 
 $isediting = false;
-$etipo = ''; 
-$ecmid = 0; 
-$ecosto = ''; 
-$ecat = ''; 
-$enombre = ''; 
-$evalor = '0'; 
+$etipo = '';
+$ecmid = 0;
+$ecosto = '';
+$ecat = '';
+$enombre = '';
+$evalor = '0';
 $elimite = '0';
 $olditemval = '';
 
@@ -197,7 +197,7 @@ if ($action === 'load_edit') {
     $tipochar = substr($itemtoedit, 0, 1);
     $rest = substr($itemtoedit, 1);
     $parts = explode(':', $rest);
-    
+
     if (count($parts) >= 2) {
         $etipo = $tipochar;
         $ecmid = (int)$parts[0];
@@ -250,7 +250,7 @@ $has_items = false;
 if (!empty($configraw)) {
     $has_items = true;
     $itemsraw = array_filter(explode(',', $configraw));
-    
+
     foreach ($itemsraw as $it) {
         $parts = explode(':', substr($it, 1));
         if (count($parts) >= 2) {
@@ -258,24 +258,24 @@ if (!empty($configraw)) {
             $categoriasunicas[$cat] = $cat;
         }
     }
-    
+
     if (!empty($categoriasunicas)) {
         $has_categories = true;
         $savedicons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid), true) ?: [];
         $availableicons = [
-            'trophy' => get_string('icon_trophy', 'local_xpstore'), 
-            'star' => get_string('icon_star', 'local_xpstore'), 
-            'medal' => get_string('icon_medal', 'local_xpstore'), 
+            'trophy' => get_string('icon_trophy', 'local_xpstore'),
+            'star' => get_string('icon_star', 'local_xpstore'),
+            'medal' => get_string('icon_medal', 'local_xpstore'),
             'award' => get_string('icon_award', 'local_xpstore'),
-            'money' => get_string('icon_money', 'local_xpstore'), 
-            'diamond' => get_string('icon_diamond', 'local_xpstore'), 
-            'gift' => get_string('icon_gift', 'local_xpstore'), 
-            'shopping-cart' => get_string('icon_cart', 'local_xpstore'), 
-            'bolt' => get_string('icon_bolt', 'local_xpstore'), 
-            'shield' => get_string('icon_shield', 'local_xpstore'), 
+            'money' => get_string('icon_money', 'local_xpstore'),
+            'diamond' => get_string('icon_diamond', 'local_xpstore'),
+            'gift' => get_string('icon_gift', 'local_xpstore'),
+            'shopping-cart' => get_string('icon_cart', 'local_xpstore'),
+            'bolt' => get_string('icon_bolt', 'local_xpstore'),
+            'shield' => get_string('icon_shield', 'local_xpstore'),
             'gamepad' => get_string('icon_gamepad', 'local_xpstore')
         ];
-        
+
         foreach ($categoriasunicas as $catname) {
             $currenticon = isset($savedicons[$catname]) ? $savedicons[$catname] : 'trophy';
             $icon_list = [];
@@ -286,18 +286,18 @@ if (!empty($configraw)) {
                     'selected' => ($currenticon === $icoval)
                 ];
             }
-            
+
             $category_icon_options[] = [
                 'catname' => $catname,
                 'cathash' => md5($catname),
                 'currenticon' => $currenticon,
                 'icons' => $icon_list
             ];
-            
+
             global $CFG;
             $urlcat = $CFG->wwwroot . "/local/xpstore/widget_category.php?id={$courseid}&cat=".rawurlencode($catname);
             $iframecat = '<iframe src="' . $urlcat . '" width="100%" height="650" style="border: none; border-radius: 15px;" allowfullscreen></iframe>';
-            
+
             $category_iframe_options[] = [
                 'catname' => $catname,
                 'iframecat' => $iframecat,
@@ -305,7 +305,7 @@ if (!empty($configraw)) {
             ];
         }
     }
-    
+
     foreach ($itemsraw as $item) {
         $tipo = substr($item, 0, 1);
         $rest = substr($item, 1);
@@ -317,23 +317,23 @@ if (!empty($configraw)) {
             $val = $parts[3] ?? '0';
             $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
             $limiteactual = isset($parts[5]) ? (int)$parts[5] : 0;
-            
+
             $cm = $DB->get_record('course_modules', ['id' => $cid, 'course' => $courseid]);
             if (!$cm) {
                 continue;
             }
-            
+
             $realname = $DB->get_field(
-                $DB->get_field('modules', 'name', ['id' => $cm->module]), 
-                'name', 
+                $DB->get_field('modules', 'name', ['id' => $cm->module]),
+                'name',
                 ['id' => $cm->instance]
             );
             $labeltipo = get_string('type_' . strtolower($tipo), 'local_xpstore');
-            
+
             global $CFG;
             $widgeturl = $CFG->wwwroot . "/local/xpstore/widget.php?id={$courseid}&tipo={$tipo}&cmid={$cid}";
             $iframecode = '<iframe src="' . $widgeturl . '" style="width: 280px !important; max-width: 100%; height: 350px !important; border: none; overflow: hidden; border-radius: 15px; display: inline-block; margin: 10px;" scrolling="no"></iframe>';
-            
+
             $catalog_items[] = [
                 'tipolower' => strtolower($tipo),
                 'labeltipo' => $labeltipo,
@@ -372,83 +372,83 @@ $templatedata = [
     'help_menuvisibility' => $OUTPUT->help_icon('menuvisibility', 'local_xpstore'),
     'storeurl' => (new moodle_url('/local/xpstore/index.php', ['id' => $courseid]))->out(false),
     'str_tiendaxp' => get_string('tiendaxp', 'local_xpstore'),
-    
+
     'isediting' => $isediting,
     'str_edit' => get_string('edit', 'local_xpstore'),
     'str_addproduct' => get_string('addproduct', 'local_xpstore'),
     'olditemval' => $olditemval,
-    
+
     'str_type' => get_string('type', 'local_xpstore'),
     'help_type' => $OUTPUT->help_icon('type', 'local_xpstore'),
     'help_label' => $OUTPUT->help_icon('label', 'local_xpstore'),
     'str_choosetype' => get_string('choosetype', 'local_xpstore'),
     'type_options' => $type_options,
     'etipo' => $etipo,
-    
+
     'str_activity' => get_string('activity', 'local_xpstore'),
     'str_chooseactivity' => get_string('chooseactivity', 'local_xpstore'),
     'activity_options' => $activity_options,
     'ecmid' => $ecmid,
-    
+
     'str_cost' => get_string('cost', 'local_xpstore'),
     'ecosto' => $ecosto,
-    
+
     'str_limit' => get_string('limit', 'local_xpstore'),
     'str_limitzero' => get_string('limitzero', 'local_xpstore'),
     'elimite' => $elimite,
-    
+
     'str_category' => get_string('category', 'local_xpstore'),
     'ecat' => $ecat,
-    
+
     'str_label' => get_string('label', 'local_xpstore'),
     'enombre' => $enombre,
-    
+
     'str_gradepoints' => get_string('gradepoints', 'local_xpstore'),
     'evalor' => $evalor,
-    
+
     'str_cancel' => get_string('cancel', 'local_xpstore'),
     'str_update' => get_string('update', 'local_xpstore'),
     'str_add' => get_string('add', 'local_xpstore'),
-    
+
     'str_colorconfig' => get_string('colorconfig', 'local_xpstore'),
     'cpactual' => $cpactual,
     'cbactual' => $cbactual,
     'ciactual' => $ciactual,
     'ccactual' => $ccactual,
-    
+
     'str_primarycolor' => get_string('primarycolor', 'local_xpstore'),
     'str_secondarycolor' => get_string('secondarycolor', 'local_xpstore'),
     'str_iconcolor' => get_string('iconcolor', 'local_xpstore'),
     'str_color_cat_icon' => get_string('color_cat_icon', 'local_xpstore'),
-    
+
     'resetcolorsurl' => (new moodle_url($url, ['action' => 'resetcolors', 'sesskey' => sesskey()]))->out(false),
     'str_confirmresetcolors' => get_string('confirmresetcolors', 'local_xpstore'),
     'str_resetcolors' => get_string('resetcolors', 'local_xpstore'),
     'str_savecolors' => get_string('savecolors', 'local_xpstore'),
-    
+
     'has_categories' => $has_categories,
     'str_categoryicons' => get_string('categoryicons', 'local_xpstore'),
     'category_icon_options' => $category_icon_options,
     'str_saveicons' => get_string('saveicons', 'local_xpstore'),
-    
+
     'str_widget_panel_title' => get_string('widget_panel_title', 'local_xpstore'),
     'str_widget_panel_desc' => get_string('widget_panel_desc', 'local_xpstore'),
-    
+
     'iframestore' => $iframestore,
     'str_full_store' => get_string('full_store', 'local_xpstore'),
-    
+
     'iframehistory' => $iframehistory,
     'str_history_button' => get_string('history_button', 'local_xpstore'),
-    
+
     'category_iframe_options' => $category_iframe_options,
     'str_category_short' => get_string('category_short', 'local_xpstore'),
-    
+
     'str_currentcatalog' => get_string('currentcatalog', 'local_xpstore'),
     'has_items' => $has_items,
     'deleteallurl' => (new moodle_url($url, ['action' => 'deleteall', 'sesskey' => sesskey()]))->out(false),
     'str_confirmdeleteall' => get_string('confirmdeleteall', 'local_xpstore'),
     'str_deleteall' => get_string('deleteall', 'local_xpstore'),
-    
+
     'str_coltype' => get_string('coltype', 'local_xpstore'),
     'str_colcategory' => get_string('colcategory', 'local_xpstore'),
     'str_colactivity' => get_string('colactivity', 'local_xpstore'),
@@ -456,7 +456,7 @@ $templatedata = [
     'str_collabel' => get_string('collabel', 'local_xpstore'),
     'str_colaction' => get_string('colaction', 'local_xpstore'),
     'str_norewardscreated' => get_string('norewardscreated', 'local_xpstore'),
-    
+
     'catalog_items' => $catalog_items,
     'str_copysinglecard' => get_string('copysinglecard', 'local_xpstore'),
     'str_delete' => get_string('delete', 'local_xpstore'),

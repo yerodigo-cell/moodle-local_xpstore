@@ -41,17 +41,16 @@ use core_privacy\local\request\writer;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements
-        \core_privacy\local\metadata\provider,
-        \core_privacy\local\request\core_userlist_provider,
-        \core_privacy\local\request\plugin\provider {
-
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\core_userlist_provider,
+    \core_privacy\local\request\plugin\provider {
     /**
      * Returns meta data about this system.
      *
      * @param   collection     $collection The initialised collection to add items to.
      * @return  collection     A listing of user data stored through this system.
      */
-    public static function get_metadata(collection $collection) : collection {
+    public static function get_metadata(collection $collection): collection {
         $collection->add_database_table(
             'local_xpstore_gastos',
             [
@@ -73,7 +72,7 @@ class provider implements
      * @param   int         $userid     The user to search.
      * @return  contextlist   $contextlist  The contextlist containing the list of contexts used in this plugin.
      */
-    public static function get_contexts_for_userid(int $userid) : contextlist {
+    public static function get_contexts_for_userid(int $userid): contextlist {
         $contextlist = new contextlist();
 
         $sql = "SELECT c.id
@@ -119,7 +118,7 @@ class provider implements
         }
 
         $userid = $contextlist->get_user()->id;
-        list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
+        [$contextsql, $contextparams] = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
 
         $sql = "SELECT g.*, c.id as contextid
                   FROM {local_xpstore_gastos} g
@@ -137,7 +136,10 @@ class provider implements
                 'amount' => $gasto->amount,
                 'timecreated' => transform::datetime($gasto->timecreated),
             ];
-            writer::with_context($context)->export_data([get_string('pluginname', 'local_xpstore'), get_string('purchases', 'local_xpstore')], $data);
+            writer::with_context($context)->export_data(
+                [get_string('pluginname', 'local_xpstore'), get_string('purchases', 'local_xpstore')],
+                $data
+            );
         }
         $gastos->close();
     }
@@ -168,7 +170,7 @@ class provider implements
         }
 
         $userid = $contextlist->get_user()->id;
-        list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
+        [$contextsql, $contextparams] = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
 
         $sql = "SELECT g.id
                   FROM {local_xpstore_gastos} g
@@ -180,7 +182,7 @@ class provider implements
         $ids = $DB->get_fieldset_sql($sql, $params);
 
         if (!empty($ids)) {
-            list($idsql, $idparams) = $DB->get_in_or_equal($ids);
+            [$idsql, $idparams] = $DB->get_in_or_equal($ids);
             $DB->delete_records_select('local_xpstore_gastos', "id {$idsql}", $idparams);
         }
     }
@@ -204,7 +206,7 @@ class provider implements
             return;
         }
 
-        list($usersql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        [$usersql, $userparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
 
         $sql = "SELECT g.id
                   FROM {local_xpstore_gastos} g
@@ -214,7 +216,7 @@ class provider implements
         $ids = $DB->get_fieldset_sql($sql, $params);
 
         if (!empty($ids)) {
-            list($idsql, $idparams) = $DB->get_in_or_equal($ids);
+            [$idsql, $idparams] = $DB->get_in_or_equal($ids);
             $DB->delete_records_select('local_xpstore_gastos', "id {$idsql}", $idparams);
         }
     }

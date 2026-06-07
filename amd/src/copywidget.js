@@ -1,4 +1,4 @@
-define([], function() {
+define(['core/notification'], function(notification) {
     return {
         init: function(copyAlertStr, copyErrorStr) {
             document.addEventListener('click', function(e) {
@@ -19,12 +19,12 @@ define([], function() {
                         try {
                             var successful = document.execCommand('copy');
                             if (successful) {
-                                alert(copyAlertStr);
+                                notification.addNotification({ message: copyAlertStr, type: 'success' });
                             } else {
-                                alert(copyErrorStr);
+                                notification.addNotification({ message: copyErrorStr, type: 'error' });
                             }
                         } catch (err) {
-                            alert(copyErrorStr + ": " + err);
+                            notification.addNotification({ message: copyErrorStr, type: 'error' });
                         }
                         document.body.removeChild(textArea);
                     };
@@ -36,12 +36,13 @@ define([], function() {
 
                     navigator.clipboard.writeText(code).then(
                         function() {
-                            alert(copyAlertStr);
-                        },
-                        function() {
-                            fallbackCopyTextToClipboard(code);
+                            notification.addNotification({ message: copyAlertStr, type: 'success' });
+                            return true;
                         }
-                    );
+                    ).catch(function() {
+                        fallbackCopyTextToClipboard(code);
+                        return false;
+                    });
                 }
             });
         }

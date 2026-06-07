@@ -71,10 +71,10 @@ $templatedata = [
     'str_gotoactivity' => get_string('gotoactivity', 'local_xpstore')
 ];
 
-$sql = "SELECT g.*, cm.module, cm.instance 
-        FROM {local_xpstore_gastos} g 
-        JOIN {course_modules} cm ON g.itemid = cm.id 
-        WHERE g.userid = ? AND cm.course = ? 
+$sql = "SELECT g.*, cm.module, cm.instance
+        FROM {local_xpstore_gastos} g
+        JOIN {course_modules} cm ON g.itemid = cm.id
+        WHERE g.userid = ? AND cm.course = ?
         ORDER BY g.timecreated DESC";
 
 $logs = $DB->get_records_sql($sql, [$USER->id, $courseid]);
@@ -84,25 +84,25 @@ if ($logs) {
     foreach ($logs as $log) {
         $modname = $DB->get_field('modules', 'name', ['id' => $log->module]);
         $activityname = $DB->get_field($modname, 'name', ['id' => $log->instance]);
-        
+
         $tipostr = strtolower($log->itemtype);
-        
-        $labeltipo = get_string_manager()->string_exists('type_' . $tipostr, 'local_xpstore') 
-            ? get_string('type_' . $tipostr, 'local_xpstore') 
+
+        $labeltipo = get_string_manager()->string_exists('type_' . $tipostr, 'local_xpstore')
+            ? get_string('type_' . $tipostr, 'local_xpstore')
             : 'Legacy';
-            
+
         $is_grade = ($log->itemtype === 'G');
         $gradeurl = '';
         $cmurl = '';
-        
+
         if ($is_grade) {
             $gradeurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
         } else {
-            $cmurl = isset($modinfo->cms[$log->itemid]) 
-                ? $modinfo->cms[$log->itemid]->url->out(false) 
+            $cmurl = isset($modinfo->cms[$log->itemid])
+                ? $modinfo->cms[$log->itemid]->url->out(false)
                 : (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
         }
-            
+
         $templatedata['logs'][] = [
             'activityname' => htmlspecialchars($activityname),
             'tipostr' => $tipostr,

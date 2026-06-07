@@ -30,7 +30,7 @@ $plugin->requires  = 2024100700;
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->release   = 'v1.0.2';
 
-// Required dependencies for the plugin to work
-$plugin->dependencies = array(
-    'block_xp' => ANY_VERSION // Requires Level Up XP to be installed
-);
+// Required dependencies for the plugin to work.
+$plugin->dependencies = [
+    'block_xp' => ANY_VERSION, // Requires Level Up XP to be installed.
+];

@@ -25,7 +25,7 @@
 /**
  * Report.php
  */
- 
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
@@ -45,8 +45,8 @@ $PAGE->set_title(get_string('audit', 'local_xpstore'));
 // Logic to reset the cycle.
 $action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'reset' && confirm_sesskey()) {
-    $resetsql = "DELETE g FROM {local_xpstore_gastos} g 
-                 JOIN {course_modules} cm ON g.itemid = cm.id 
+    $resetsql = "DELETE g FROM {local_xpstore_gastos} g
+                 JOIN {course_modules} cm ON g.itemid = cm.id
                  WHERE cm.course = ?";
     $DB->execute($resetsql, [$courseid]);
     redirect($url, get_string('productdeleted', 'local_xpstore'));
@@ -92,11 +92,11 @@ $templatedata = [
     'users' => []
 ];
 
-$sql = "SELECT g.*, u.firstname, u.lastname, u.picture, u.imagealt, u.email 
-        FROM {local_xpstore_gastos} g 
-        JOIN {user} u ON g.userid = u.id 
-        JOIN {course_modules} cm ON g.itemid = cm.id 
-        WHERE cm.course = ? 
+$sql = "SELECT g.*, u.firstname, u.lastname, u.picture, u.imagealt, u.email
+        FROM {local_xpstore_gastos} g
+        JOIN {user} u ON g.userid = u.id
+        JOIN {course_modules} cm ON g.itemid = cm.id
+        WHERE cm.course = ?
         ORDER BY u.firstname ASC, g.timecreated DESC";
 
 $logs = $DB->get_records_sql($sql, [$courseid]);
@@ -114,8 +114,8 @@ if ($logs) {
         $userfullname = $realuser->firstname . ' ' . $realuser->lastname;
         $totalcanjes = count($userlogs);
         $profileurl = (new moodle_url('/user/view.php', ['id' => $userid, 'course' => $courseid]))->out(false);
-        
-        $user_data = [
+
+        $userdata = [
             'userid' => $userid,
             'userpichtml' => $userpichtml,
             'userfullname' => $userfullname,
@@ -124,26 +124,26 @@ if ($logs) {
             'profileurl' => $profileurl,
             'logs' => []
         ];
-        
+
         foreach ($userlogs as $log) {
             $cm = $DB->get_record('course_modules', ['id' => $log->itemid]);
-            
+
             if ($cm) {
                 $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
                 $activityname = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
             } else {
                 $activityname = 'Actividad / Recurso eliminado';
             }
-            
+
             $tipostr = strtolower($log->itemtype);
             $tipocharupper = strtoupper($tipostr);
-            
-            $labeltipo = get_string_manager()->string_exists('type_' . $tipostr, 'local_xpstore') 
-                ? get_string('type_' . $tipostr, 'local_xpstore') 
+
+            $labeltipo = get_string_manager()->string_exists('type_' . $tipostr, 'local_xpstore')
+                ? get_string('type_' . $tipostr, 'local_xpstore')
                 : 'Legacy';
 
-            $categoriatexto = isset($mapcategorias[$tipocharupper][$log->itemid]) 
-                ? $mapcategorias[$tipocharupper][$log->itemid] 
+            $categoriatexto = isset($mapcategorias[$tipocharupper][$log->itemid])
+                ? $mapcategorias[$tipocharupper][$log->itemid]
                 : '-';
 
             $cmurl = '';
@@ -159,22 +159,22 @@ if ($logs) {
                                  'style="color: #0056D2; text-decoration: none; transition: 0.2s;" ' .
                                  'onmouseover="this.style.color=\'#00C9A7\'" ' .
                                  'onmouseout="this.style.color=\'#0056D2\'">' .
-                                 '<i class="fa fa-external-link mr-1" style="font-size: 0.8rem;"></i>' . 
-                                 $activityhtml . 
+                                 '<i class="fa fa-external-link mr-1" style="font-size: 0.8rem;"></i>' .
+                                 $activityhtml .
                                  '</a>';
             }
-            
-            $user_data['logs'][] = [
+
+            $userdata['logs'][] = [
                 'activityhtml' => $activityhtml,
                 'categoriatexto' => htmlspecialchars($categoriatexto),
                 'tipostr' => $tipostr,
                 'labeltipo' => $labeltipo,
                 'amount' => $log->amount,
-                'date' => userdate($log->timecreated, get_string('strftimedatetime', 'langconfig'))
+                'date' => userdate($log->timecreated, get_string('strftimedatetime', 'langconfig')),
             ];
         }
-        
-        $templatedata['users'][] = $user_data;
+
+        $templatedata['users'][] = $userdata;
     }
 }
 

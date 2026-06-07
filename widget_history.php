@@ -40,7 +40,7 @@ $PAGE->set_url($url);
 $PAGE->set_context($context);
 
 // Embedded mode so Moodle menus are not loaded.
-$PAGE->set_pagelayout('embedded'); 
+$PAGE->set_pagelayout('embedded');
 
 echo $OUTPUT->header();
 
