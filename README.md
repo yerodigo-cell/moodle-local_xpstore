@@ -54,9 +54,3 @@ From this panel you can:
 3. **Individual Card Widget:** Displays a single product or reward available for direct purchase.
 
 4. **Floating History Button:** A clean and minimalist shortcut for students to review their previous redemptions.
-
----
-
-## 📝 Release Notes
-
-- **v1.0.2:**
