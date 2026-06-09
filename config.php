@@ -297,7 +297,7 @@ if (!empty($configraw)) {
             global $CFG;
             $urlcat = $CFG->wwwroot . "/local/xpstore/widget_category.php?id={$courseid}&cat=" . rawurlencode($catname);
             $iframecat = '<iframe src="' . $urlcat . '" width="100%" height="650" ' .
-                'style="border: none; border-radius: 15px;" allowfullscreen></iframe>';
+                'style="border: none; border-radius: 15px;" allowfullscreen allowtransparency="true"></iframe>';
 
             $categoryiframeoptions[] = [
                 'catname' => $catname,
@@ -335,7 +335,7 @@ if (!empty($configraw)) {
             $widgeturl = $CFG->wwwroot . "/local/xpstore/widget.php?id={$courseid}&tipo={$tipo}&cmid={$cid}";
             $iframecode = '<iframe src="' . $widgeturl . '" ' .
                 'style="width: 280px !important; max-width: 100%; height: 350px !important; border: none; ' .
-                'overflow: hidden; border-radius: 15px; display: inline-block; margin: 10px;" scrolling="no"></iframe>';
+                'overflow: hidden; border-radius: 15px; display: inline-block; margin: 10px;" scrolling="no" allowtransparency="true"></iframe>';
 
             $catalogitems[] = [
                 'tipolower' => strtolower($tipo),

@@ -1,5 +1,13 @@
 /* local_xpstore styles */
 
+/* Fix for embedded layouts in themes like Moove where the body has a background color */
+body.pagelayout-embedded,
+body.pagelayout-embedded #page,
+body.pagelayout-embedded #page-wrapper,
+body.pagelayout-embedded #page-content {
+    background-color: transparent !important;
+}
+
 /* Global forcing of thick icons for the store context */
 .local_xpstore-container .fa,
 .local_xpstore-container .fas,
