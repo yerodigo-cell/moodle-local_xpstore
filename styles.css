@@ -5,7 +5,7 @@ body.pagelayout-embedded,
 body.pagelayout-embedded #page,
 body.pagelayout-embedded #page-wrapper,
 body.pagelayout-embedded #page-content {
-    background-color: transparent !important;
+    background-color: transparent;
 }
 
 /* Global forcing of thick icons for the store context */

@@ -335,7 +335,8 @@ if (!empty($configraw)) {
             $widgeturl = $CFG->wwwroot . "/local/xpstore/widget.php?id={$courseid}&tipo={$tipo}&cmid={$cid}";
             $iframecode = '<iframe src="' . $widgeturl . '" ' .
                 'style="width: 280px !important; max-width: 100%; height: 350px !important; border: none; ' .
-                'overflow: hidden; border-radius: 15px; display: inline-block; margin: 10px;" scrolling="no" allowtransparency="true"></iframe>';
+                'overflow: hidden; border-radius: 15px; display: inline-block; margin: 10px;" ' .
+                'scrolling="no" allowtransparency="true"></iframe>';
 
             $catalogitems[] = [
                 'tipolower' => strtolower($tipo),
