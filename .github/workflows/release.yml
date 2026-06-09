@@ -1,0 +1,17 @@
+name: Release to Moodle.org
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Publish plugin to Moodle plugins directory
+        uses: moodlehq/moodle-plugin-release@v3
+        with:
+          token: ${{ secrets.MOODLE_ORG_TOKEN }}
