@@ -5,7 +5,9 @@ body.pagelayout-embedded,
 body.pagelayout-embedded #page,
 body.pagelayout-embedded #page-wrapper,
 body.pagelayout-embedded #page-content {
-    background-color: transparent;
+    /* stylelint-disable declaration-no-important */
+    background-color: transparent !important;
+    /* stylelint-enable declaration-no-important */
 }
 
 /* Global forcing of thick icons for the store context */
