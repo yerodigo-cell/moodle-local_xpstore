@@ -297,7 +297,8 @@ if (!empty($configraw)) {
             global $CFG;
             $urlcat = $CFG->wwwroot . "/local/xpstore/widget_category.php?id={$courseid}&cat=" . rawurlencode($catname);
             $iframecat = '<iframe src="' . $urlcat . '" width="100%" height="650" ' .
-                'style="border: none; border-radius: 15px; overflow: hidden;" scrolling="no" allowfullscreen allowtransparency="true"></iframe>';
+                'style="border: none; border-radius: 15px; overflow: hidden;" ' .
+                'scrolling="no" allowfullscreen allowtransparency="true"></iframe>';
 
             $categoryiframeoptions[] = [
                 'catname' => $catname,
@@ -357,7 +358,8 @@ if (!empty($configraw)) {
 global $CFG;
 $urlstore = $CFG->wwwroot . "/local/xpstore/widget_category.php?id={$courseid}";
 $iframestore = '<iframe src="' . $urlstore . '" width="100%" height="800" ' .
-    'style="border: none; border-radius: 15px; overflow: hidden;" scrolling="no" allowfullscreen allowtransparency="true"></iframe>';
+    'style="border: none; border-radius: 15px; overflow: hidden;" ' .
+    'scrolling="no" allowfullscreen allowtransparency="true"></iframe>';
 
 $urlhistoryw = $CFG->wwwroot . "/local/xpstore/widget_history.php?id={$courseid}";
 $iframehistory = '<iframe src="' . $urlhistoryw . '" width="100%" height="150" ' .

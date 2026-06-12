@@ -16,7 +16,6 @@
 /**
  * XP Store (local_xpstore)
  *
- * @package    local_xpstore
  * @copyright  2026 Yeison Díaz
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,10 +25,12 @@ define([], function() {
         init: function() {
             var typeSelect = document.getElementById('type_select');
             var activitySelect = document.getElementById('activity_select');
-            if (!typeSelect || !activitySelect) return;
+            if (!typeSelect || !activitySelect) {
+                return;
+            }
 
             var allOptions = Array.from(activitySelect.querySelectorAll('option:not([disabled])'));
-            
+
             // Fallback original options for older browsers that don't support hiding options well
             var backupOptions = allOptions.map(function(opt) {
                 return {
@@ -40,10 +41,13 @@ define([], function() {
                 };
             });
 
+            /**
+             * Filter activities based on selected type
+             */
             function filterActivities() {
                 var selectedType = typeSelect.value;
                 var currentSelectedValue = activitySelect.value;
-                
+
                 // Clear all options except the first disabled one
                 while (activitySelect.options.length > 1) {
                     activitySelect.remove(1);
@@ -73,7 +77,7 @@ define([], function() {
                         activitySelect.appendChild(newOption);
                     }
                 });
-                
+
                 // Handle Bonus field visibility
                 var bonusContainer = document.getElementById('bonus_container');
                 if (bonusContainer) {
@@ -83,7 +87,7 @@ define([], function() {
                         bonusContainer.style.display = 'none';
                     }
                 }
-                
+
                 // Reset selection if it disappeared
                 if (activitySelect.selectedIndex === -1) {
                     activitySelect.selectedIndex = 0;
