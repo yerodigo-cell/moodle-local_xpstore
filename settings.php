@@ -25,12 +25,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($ADMIN->fulltree) {
-    // Llamamos al nombre del plugin desde el archivo de idioma para que sea bilingüe.
+    // Call the plugin name from the language file to support multiple languages.
     $settings = new admin_settingpage('local_xpstore', get_string('pluginname', 'local_xpstore'));
 
     $settings->add(new admin_setting_heading(
         'local_xpstore_settings_heading',
-        '', // Sin título.
+        '', // Without title.
         get_string('global_settings_info', 'local_xpstore')
     ));
 

@@ -124,10 +124,11 @@ foreach ($todoslosproductos as $item) {
         $limite = (int)($parts[5] ?? 0);
 
         if ($catreq === '' || strtolower($nombrecat) === strtolower($catreq)) {
-            $cm = $DB->get_record('course_modules', ['id' => $cid, 'course' => $courseid]);
-            if ($cm) {
-                $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
-                $nreal = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
+            $modinfo = get_fast_modinfo($courseid);
+            $cms = $modinfo->get_cms();
+            if (isset($cms[$cid])) {
+                $cm = $cms[$cid];
+                $nreal = $cm->name;
                 $iconmap = [
                     'Q' => 'bolt',
                     'A' => 'file-text',

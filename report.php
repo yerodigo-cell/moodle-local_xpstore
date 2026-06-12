@@ -132,7 +132,7 @@ if ($logs) {
                 $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
                 $activityname = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
             } else {
-                $activityname = 'Actividad / Recurso eliminado';
+                $activityname = get_string('activitydeleted', 'local_xpstore');
             }
 
             $tipostr = strtolower($log->itemtype);

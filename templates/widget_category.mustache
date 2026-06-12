@@ -42,9 +42,9 @@
         <div class="text-uppercase small mb-1" style="letter-spacing: 1px; font-weight: bold; opacity: 0.9;">
             {{str_saldo}}
         </div>
-        <div class="xp-balance">{{saldo}} XP</div>
+        <div class="xp-balance"><span class="xp-balance-value">{{saldo}}</span> XP</div>
         <a href="{{historyurl}}" target="_top" class="btn-history">
-            <i class="fa fa-history"></i> {{str_history}}
+            {{str_history}}
         </a>
     </div>
 
@@ -123,17 +123,17 @@
                             {{#bought_this}}
                                 {{#gotogradebook}}
                                     <a href="{{gradebookurl}}" target="_top" class="btn-go-activity">
-                                        <i class="fa fa-bar-chart mr-1"></i> {{str_gotogradebook}}
+                                        {{str_gotogradebook}}
                                     </a>
                                 {{/gotogradebook}}
                                 {{^gotogradebook}}
                                     <a href="{{cmurl}}" target="_top" class="btn-go-activity">
-                                        <i class="fa fa-external-link mr-1"></i> {{str_gotoactivity}}
+                                        {{str_gotoactivity}}
                                     </a>
                                 {{/gotogradebook}}
                             {{/bought_this}}
                             {{^bought_this}}
-                                <form method="POST" action="{{actionurl}}">
+                                <form method="POST" action="{{actionurl}}" onsubmit="var b=this.querySelector('button[type=submit]'); if(b){b.disabled=true; b.classList.add('btn-loading'); b.innerHTML='<span class=\'ai-sparkles-group\'><i class=\'ai-sparkle s1\'></i><i class=\'ai-sparkle s2\'></i><i class=\'ai-sparkle s3\'></i><i class=\'ai-sparkle s4\'></i></span>';}">
                                     <input type="hidden" name="sesskey" value="{{sesskey}}">
                                     <input type="hidden" name="action" value="comprar">
                                     <input type="hidden" name="cmid" value="{{cid}}">
@@ -159,3 +159,123 @@
         {{/categoriastienda}}
     {{/isempty}}
 </div>
+
+{{#status_success}}
+{{#js}}
+require([], function() {
+    function fireConfetti() {
+        var colors = ['#0056D2', '#00C9A7', '#ff9800', '#ff0000', '#ffd700', '#9c27b0'];
+        for (var i = 0; i < 80; i++) {
+            var confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.width = (Math.random() * 8 + 6) + 'px';
+            confetti.style.height = (Math.random() * 8 + 6) + 'px';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.top = '50%';
+            confetti.style.left = '50%';
+            confetti.style.borderRadius = (Math.random() > 0.5 ? '50%' : '0');
+            confetti.style.zIndex = '9999';
+            confetti.style.pointerEvents = 'none';
+            document.body.appendChild(confetti);
+
+            var angle = Math.random() * Math.PI * 2;
+            var velocity = 80 + Math.random() * 250;
+            var tx = Math.cos(angle) * velocity;
+            var ty = Math.sin(angle) * velocity - 100;
+
+            confetti.animate([
+                { transform: 'translate(-50%, -50%) scale(0) rotate(0deg)', opacity: 1 },
+                { transform: 'translate(calc(-50% + ' + tx + 'px), calc(-50% + ' + ty + 'px)) scale(1.5) rotate(' + (Math.random() * 720) + 'deg)', opacity: 1, offset: 0.7 },
+                { transform: 'translate(calc(-50% + ' + tx + 'px), calc(-50% + ' + ty + 150 + 'px)) scale(0) rotate(' + (Math.random() * 1080) + 'deg)', opacity: 0 }
+            ], {
+                duration: 1500 + Math.random() * 1000,
+                easing: 'cubic-bezier(.25,.1,.25,1)',
+                fill: 'forwards'
+            }).onfinish = function() {
+                this.effect.target.remove();
+            };
+        }
+    }
+    function playSuccessSound() {
+        try {
+            var AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            var ctx = new AudioContext();
+            
+            function playNote(freq, delay) {
+                var osc = ctx.createOscillator();
+                var gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+                
+                gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+                gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + delay + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 1.0);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start(ctx.currentTime + delay);
+                osc.stop(ctx.currentTime + delay + 1.1);
+            }
+
+            playNote(523.25, 0.0);
+            playNote(659.25, 0.08);
+            playNote(783.99, 0.16);
+            playNote(1046.50, 0.24);
+            playNote(1318.51, 0.32);
+        } catch(e) {}
+    }
+    
+    setTimeout(fireConfetti, 50);
+    setTimeout(playSuccessSound, 50);
+});
+{{/js}}
+{{/status_success}}
+
+<script>
+(function() {
+    function autoResizeXpStore() {
+        try {
+            if (window.frameElement) {
+                var container = document.querySelector('.local_xpstore-embedded-container');
+                if (container) {
+                    var newH = container.scrollHeight;
+                    if (newH > 200) {
+                        window.frameElement.style.height = (newH + 30) + 'px';
+                    }
+                }
+            }
+        } catch(e) {}
+    }
+    
+    var count = 0;
+    var interval = setInterval(function() {
+        autoResizeXpStore();
+        count++;
+        if (count > 10) clearInterval(interval);
+    }, 500);
+    
+    window.addEventListener('load', autoResizeXpStore);
+    window.addEventListener('resize', autoResizeXpStore);
+})();
+
+(function() {
+    try {
+        if (window.BroadcastChannel) {
+            var bc = new BroadcastChannel('xpstore_balance_sync');
+            bc.onmessage = function(ev) {
+                if (ev.data && ev.data.type === 'update_balance' && ev.data.newBalance !== undefined) {
+                    var els = document.querySelectorAll('.xp-balance-value');
+                    els.forEach(function(el) { el.textContent = ev.data.newBalance; });
+                }
+            };
+            {{#status_success}}
+            setTimeout(function() {
+                bc.postMessage({ type: 'update_balance', newBalance: '{{saldo}}' });
+            }, 100);
+            {{/status_success}}
+        }
+    } catch(e) {}
+})();
+</script>

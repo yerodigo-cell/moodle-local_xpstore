@@ -297,7 +297,7 @@ if (!empty($configraw)) {
             global $CFG;
             $urlcat = $CFG->wwwroot . "/local/xpstore/widget_category.php?id={$courseid}&cat=" . rawurlencode($catname);
             $iframecat = '<iframe src="' . $urlcat . '" width="100%" height="650" ' .
-                'style="border: none; border-radius: 15px;" allowfullscreen allowtransparency="true"></iframe>';
+                'style="border: none; border-radius: 15px; overflow: hidden;" scrolling="no" allowfullscreen allowtransparency="true"></iframe>';
 
             $categoryiframeoptions[] = [
                 'catname' => $catname,
@@ -319,16 +319,13 @@ if (!empty($configraw)) {
             $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
             $limiteactual = isset($parts[5]) ? (int)$parts[5] : 0;
 
-            $cm = $DB->get_record('course_modules', ['id' => $cid, 'course' => $courseid]);
-            if (!$cm) {
+            $modinfo = get_fast_modinfo($courseid);
+            $cms = $modinfo->get_cms();
+            if (!isset($cms[$cid])) {
                 continue;
             }
-
-            $realname = $DB->get_field(
-                $DB->get_field('modules', 'name', ['id' => $cm->module]),
-                'name',
-                ['id' => $cm->instance]
-            );
+            $cm = $cms[$cid];
+            $realname = $cm->name;
             $labeltipo = get_string('type_' . strtolower($tipo), 'local_xpstore');
 
             global $CFG;
@@ -359,8 +356,8 @@ if (!empty($configraw)) {
 
 global $CFG;
 $urlstore = $CFG->wwwroot . "/local/xpstore/widget_category.php?id={$courseid}";
-$iframestore = '<iframe src="' . $urlstore . '" width="100%" height="700" ' .
-    'style="border: none; border-radius: 15px;" allowfullscreen></iframe>';
+$iframestore = '<iframe src="' . $urlstore . '" width="100%" height="800" ' .
+    'style="border: none; border-radius: 15px; overflow: hidden;" scrolling="no" allowfullscreen allowtransparency="true"></iframe>';
 
 $urlhistoryw = $CFG->wwwroot . "/local/xpstore/widget_history.php?id={$courseid}";
 $iframehistory = '<iframe src="' . $urlhistoryw . '" width="100%" height="150" ' .

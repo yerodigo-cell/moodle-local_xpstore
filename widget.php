@@ -79,7 +79,7 @@ foreach ($items as $item) {
 
 if (!$producto) {
     echo $OUTPUT->header();
-    echo "<div style='padding:20px; text-align:center;'>" . get_string('widgeterror', 'local_xpstore') . "</div>";
+    echo $OUTPUT->notification(get_string('widgeterror', 'local_xpstore'), 'error');
     echo $OUTPUT->footer();
     die();
 }

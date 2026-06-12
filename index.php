@@ -128,10 +128,10 @@ foreach ($todoslosproductos as $item) {
         $nombrecat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
         $limite = (int)($parts[5] ?? 0);
 
-        $cm = $DB->get_record('course_modules', ['id' => $cid, 'course' => $courseid]);
-        if ($cm) {
-            $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
-            $nreal = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
+        $cms = $modinfo->get_cms();
+        if (isset($cms[$cid])) {
+            $cm = $cms[$cid];
+            $nreal = $cm->name;
             $iconmap = [
                 'Q' => 'bolt',
                 'A' => 'file-text',

@@ -20,24 +20,41 @@ body.pagelayout-embedded #page-content {
 /* Base wrapper to avoid modifying body directly */
 .local_xpstore-container {
     font-family: "Montserrat", sans-serif;
-    /* Removed white background forcing to avoid global page style breakage,
-       but container sets it to white where appropriate */
+    position: relative;
+    z-index: 1;
 }
 
 .local_xpstore-embedded-container {
     background: transparent;
     margin: 0;
     padding: 20px;
-    min-height: 100vh;
     box-sizing: border-box;
 }
 
 body#page-local-xpstore-widget,
 body#page-local-xpstore-widget_history,
 body#page-local-xpstore-widget_category,
-body.pagelayout-embedded {
-    background-color: transparent;
-    overflow-y: auto; /* Only show scrollbar if content actually overflows */
+body.pagelayout-embedded,
+.pagelayout-embedded #page-wrapper,
+.pagelayout-embedded #page,
+.pagelayout-embedded #page-content,
+.pagelayout-embedded #region-main,
+.pagelayout-embedded [role="main"] {
+    background-color: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+/* Hide scrollbar completely but allow scrolling if needed */
+.pagelayout-embedded, .pagelayout-embedded * {
+    -ms-overflow-style: none !important;  /* IE and Edge */
+    scrollbar-width: none !important;  /* Firefox */
+}
+
+.pagelayout-embedded::-webkit-scrollbar,
+.pagelayout-embedded *::-webkit-scrollbar {
+    display: none !important;
 }
 
 /* Allow scrolling on category if needed, but usually we just hide the main body scroll
@@ -53,6 +70,8 @@ body.pagelayout-embedded {
 
 .local_xpstore-container .btn-history-widget {
     background: var(--gradient);
+    background-size: 200% 200%;
+    animation: gradientFlow 5s ease infinite;
     background-repeat: no-repeat;
     color: white;
     text-decoration: none;
@@ -266,12 +285,58 @@ body.pagelayout-embedded {
 .local_xpstore-container .wallet-header {
     position: relative;
     background: var(--gradient);
+    background-size: 200% 200%;
+    animation: gradientFlow 5s ease infinite;
     border-radius: 16px;
-    padding: 20px 15px;
+    padding: 40px 15px;
     color: white;
     text-align: center;
     box-shadow: 0 6px 15px rgba(0, 86, 210, 0.15);
     margin-bottom: 25px;
+    overflow: hidden;
+}
+
+@keyframes flowBorder {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+@keyframes flowIcon {
+    0% { background-position: 0% 50%, 0% 0%; }
+    50% { background-position: 100% 50%, 0% 0%; }
+    100% { background-position: 0% 50%, 0% 0%; }
+}
+
+/* Animated gradient fill for category icons */
+.local_xpstore-container h4 i.fa.mr-2 {
+    background-image: 
+        linear-gradient(
+            115deg,
+            rgba(255,255,255,0) 0%,
+            rgba(255,255,255,0.35) 12.5%,
+            rgba(255,255,255,0) 25%,
+            rgba(0,0,0,0.2) 37.5%,
+            rgba(255,255,255,0) 50%,
+            rgba(255,255,255,0.35) 62.5%,
+            rgba(255,255,255,0) 75%,
+            rgba(0,0,0,0.2) 87.5%,
+            rgba(255,255,255,0) 100%
+        ),
+        linear-gradient(var(--cc), var(--cc));
+    background-size: 200% 100%, 100% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent !important;
+    animation: flowIcon 4s linear infinite;
+    display: inline-block;
+    padding: 0 12px;
+    margin: 0 -4px 0 -12px !important;
+}
+
+@keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .local_xpstore-container .xp-balance {
@@ -308,16 +373,21 @@ body.pagelayout-embedded {
 }
 
 .local_xpstore-container .p-card {
-    background: white;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: 16px;
     padding: 15px;
     text-align: center;
     border: 1px solid #eee;
-    transition: transform 0.2s;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     height: auto;
+    position: relative;
+    overflow: hidden;
 }
 
 /* Config Page Inline Styles Replacements */
@@ -459,6 +529,8 @@ body.pagelayout-embedded {
 
 .local_xpstore-container .btn-buy {
     background: var(--gradient);
+    background-size: 200% 200%;
+    animation: gradientFlow 5s ease infinite;
     color: white;
     border: none;
     border-radius: 8px;
@@ -477,13 +549,60 @@ body.pagelayout-embedded {
     color: #888;
 }
 
+.local_xpstore-container .btn-buy.btn-loading:disabled {
+    background-color: #ffffff !important;
+    background-image: linear-gradient(90deg, var(--cp) 0%, var(--cb) 25%, var(--ci) 50%, transparent 50%, transparent 100%) !important;
+    background-repeat: no-repeat !important;
+    background-size: 200% 100% !important;
+    background-position: 100% 0;
+    animation: fillUpPos 3s cubic-bezier(0.1, 0.8, 0.2, 1) forwards;
+    box-shadow: inset 0 0 0 1px #ddd !important; /* To see the white button bounds */
+    color: #333;
+    border: none !important;
+}
+
+@keyframes fillUpPos {
+    0% { background-position: 100% 0; color: #333; }
+    20% { color: white; }
+    100% { background-position: 0% 0; color: white; }
+}
+
+.ai-sparkles-group {
+    position: relative;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    vertical-align: middle;
+}
+
+.ai-sparkle {
+    position: absolute;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml;utf8,%3Csvg%20viewBox%3D%270%200%2024%2024%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3Cpath%20d%3D%27M12%200%20Q12%2012%2024%2012%20Q12%2012%2012%2024%20Q12%2012%200%2012%20Q12%2012%2012%200%27%2F%3E%3C%2Fsvg%3E") no-repeat center / contain;
+    mask: url("data:image/svg+xml;utf8,%3Csvg%20viewBox%3D%270%200%2024%2024%27%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%3E%3Cpath%20d%3D%27M12%200%20Q12%2012%2024%2012%20Q12%2012%2012%2024%20Q12%2012%200%2012%20Q12%2012%2012%200%27%2F%3E%3C%2Fsvg%3E") no-repeat center / contain;
+    animation: sparkleBlink 1.5s ease-in-out infinite;
+    transform: scale(0);
+    opacity: 0;
+}
+
+.ai-sparkle.s1 { top: 0px; left: 10px; width: 14px; height: 14px; animation-delay: 0s; }
+.ai-sparkle.s2 { top: 8px; left: 0px; width: 10px; height: 10px; animation-delay: 0.3s; }
+.ai-sparkle.s3 { top: 12px; left: 12px; width: 12px; height: 12px; animation-delay: 0.6s; }
+.ai-sparkle.s4 { top: 2px; left: 2px; width: 8px; height: 8px; animation-delay: 0.9s; }
+
+@keyframes sparkleBlink {
+    0% { transform: scale(0) rotate(0deg); opacity: 0; }
+    50% { transform: scale(1) rotate(45deg); opacity: 1; }
+    100% { transform: scale(0) rotate(90deg); opacity: 0; }
+}
+
 .local_xpstore-container .btn-buy:hover:not(:disabled) {
     opacity: 0.9;
 }
 
 .local_xpstore-container .btn-go-activity {
-    background: #28a745;
-    color: white;
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white !important;
     border: none;
     border-radius: 8px;
     padding: 8px;
@@ -491,14 +610,26 @@ body.pagelayout-embedded {
     width: 100%;
     margin-top: 10px;
     display: inline-block;
-    text-decoration: none;
+    text-decoration: none !important;
     box-sizing: border-box;
     font-size: 0.85rem;
+    box-shadow: 0 4px 10px rgba(56, 239, 125, 0.3);
+    transition: all 0.3s ease;
+}
+
+.local_xpstore-container .btn-go-activity:hover {
+    text-decoration: none !important;
+    opacity: 1;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(56, 239, 125, 0.4);
+    color: white !important;
 }
 
 /* Individual Widget */
 .local_xpstore-container .widget-card {
-    background: white;
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
     border-radius: 18px;
     text-align: center;
     border: 1px solid #eee;
@@ -509,6 +640,100 @@ body.pagelayout-embedded {
     overflow: hidden;
     transition: transform 0.3s ease;
     box-sizing: border-box;
+    position: relative;
+    isolation: isolate;
+    transform: translateZ(0);
+}
+
+/* Premium ambient glow for cards */
+@property --border-angle {
+    syntax: "<angle>";
+    inherits: true;
+    initial-value: 0turn;
+}
+
+@keyframes borderRotate {
+    to { --border-angle: 1turn; }
+}
+
+@keyframes floatOrbsCombined {
+    0% { background-position: 0% 0%, 100% 100%; }
+    100% { background-position: 10% 10%, 90% 90%; }
+}
+
+/* Base glowing orbs using ::before */
+.local_xpstore-container .p-card::before,
+.local_xpstore-container .widget-card::before {
+    content: '';
+    position: absolute;
+    inset: -60px;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.04;
+    transition: opacity 0.5s ease;
+    background-image: 
+        radial-gradient(circle at center, var(--cp) 0%, var(--cp) 30%, transparent 70%),
+        radial-gradient(circle at center, var(--cb) 0%, var(--cb) 30%, transparent 70%);
+    background-size: 115px 115px, 115px 115px;
+    background-repeat: no-repeat;
+    background-position: 0% 0%, 100% 100%;
+    filter: blur(15px);
+    animation: floatOrbsCombined 8s ease-in-out infinite alternate;
+}
+
+.local_xpstore-container .p-card::before {
+    background-size: 110px 110px, 110px 110px;
+}
+
+.local_xpstore-container .p-card:hover::before,
+.local_xpstore-container .widget-card:hover::before {
+    opacity: 0.07;
+}
+
+/* Animated Gradient Border on hover using ::after */
+.local_xpstore-container .p-card::after,
+.local_xpstore-container .widget-card::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 5px;
+    background: conic-gradient(
+        from var(--border-angle),
+        var(--cp) 0%,
+        var(--cb) 20%,
+        var(--ci) 40%,
+        var(--cp) 60%,
+        var(--cb) 80%,
+        var(--cp) 100%
+    );
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: borderRotate 3s linear infinite;
+}
+
+.local_xpstore-container .p-card:hover::after,
+.local_xpstore-container .widget-card:hover::after {
+    opacity: 1;
+}
+
+/* Hide default border on hover */
+.local_xpstore-container .p-card:hover,
+.local_xpstore-container .widget-card:hover {
+    border-color: transparent;
+}
+
+/* Ensure content stays above the background orbs */
+.local_xpstore-container .p-card > *,
+.local_xpstore-container .widget-card > * {
+    position: relative;
+    z-index: 1;
 }
 
 .local_xpstore-container .widget-card:hover {
@@ -517,11 +742,12 @@ body.pagelayout-embedded {
 
 .local_xpstore-container .mini-wallet {
     background: var(--gradient);
+    background-size: 200% 200%;
+    animation: gradientFlow 5s ease infinite;
     padding: 8px;
     color: white;
     font-size: 0.75rem;
     font-weight: 800;
-    letter-spacing: 1px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
@@ -584,28 +810,37 @@ body.pagelayout-embedded {
 
 .local_xpstore-container .widget-card .card-footer {
     padding: 12px 15px;
-    background: #fafafa;
-    border-top: 1px solid #f0f0f0;
+    background: transparent;
+    border-top: none;
 }
 
 .local_xpstore-container .w-cost {
     font-size: 1.15rem;
     font-weight: 800;
-    color: #333;
     margin-bottom: 2px;
 }
 
 .local_xpstore-container .btn-success-w {
-    background: #28a745;
-    color: white;
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white !important;
     border: none;
     border-radius: 8px;
     padding: 8px 12px;
     font-weight: 800;
     width: 100%;
     display: block;
-    text-decoration: none;
+    text-decoration: none !important;
     font-size: 0.85rem;
+    box-shadow: 0 4px 10px rgba(56, 239, 125, 0.3);
+    transition: all 0.3s ease;
+}
+
+.local_xpstore-container .btn-success-w:hover {
+    text-decoration: none !important;
+    opacity: 1;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(56, 239, 125, 0.4);
+    color: white !important;
 }
 
 /* History Page */
@@ -663,9 +898,13 @@ body.pagelayout-embedded {
     border-radius: 10px;
     font-weight: bold;
     font-size: 0.85rem;
-    text-decoration: none;
+    text-decoration: none !important;
     transition: 0.2s;
     white-space: nowrap;
+}
+
+.local_xpstore-container .btn-action-history:hover {
+    text-decoration: none !important;
 }
 
 .local_xpstore-container .btn-activity {
@@ -783,10 +1022,23 @@ body.pagelayout-embedded {
 }
 
 .local_xpstore-container .card-body-logs {
-    display: none;
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0 25px;
+    border-top: 1px solid transparent;
+    background: #fff;
+    overflow: hidden;
+}
+
+.local_xpstore-container .card-body-logs.expanded {
+    grid-template-rows: 1fr;
     padding: 20px 25px;
     border-top: 1px solid #eee;
-    background: #fff;
+}
+
+.local_xpstore-container .card-body-logs-inner {
+    min-height: 0;
 }
 
 .local_xpstore-container .table-logs {
@@ -862,9 +1114,13 @@ body.pagelayout-embedded {
     border-radius: 50px;
     font-size: 0.75rem;
     font-weight: bold;
-    text-decoration: none;
+    text-decoration: none !important;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     display: inline-block;
+}
+
+.local_xpstore-container .admin-btn:hover {
+    text-decoration: none !important;
 }
 
 @media (max-width: 768px) {
@@ -920,13 +1176,14 @@ body.pagelayout-embedded {
     padding: 8px 20px;
     border-radius: 50px;
     font-weight: bold;
-    text-decoration: none;
+    text-decoration: none !important;
     transition: 0.2s;
     margin-right: 10px;
 }
 
 .btn-tienda:hover {
     background: #f0f0f0;
+    text-decoration: none !important;
 }
 
 .local_xpstore-config-wrapper .form-box {
