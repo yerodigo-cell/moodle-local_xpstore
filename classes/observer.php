@@ -5,10 +5,16 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace local_xpstore;
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Event observer for local_xpstore.
@@ -22,7 +28,7 @@ class observer {
     /**
      * Intercepts course restores/clones to update hardcoded widget IDs in HTML labels and pages.
      *
-     * @param \core\event\course_restored $event
+     * @param \core\event\course_restored $event The course restored event.
      */
     public static function course_restored(\core\event\course_restored $event) {
         global $DB;
@@ -36,7 +42,7 @@ class observer {
 
         $oldcourseid = null;
 
-        // Fix labels and find old course id
+        // Fix labels and find old course id.
         if ($DB->get_manager()->table_exists('label')) {
             $labels = $DB->get_records('label', ['course' => $newcourseid]);
             foreach ($labels as $label) {
@@ -52,7 +58,7 @@ class observer {
             }
         }
 
-        // Fix pages and find old course id if not found yet
+        // Fix pages and find old course id if not found yet.
         if ($DB->get_manager()->table_exists('page')) {
             $pages = $DB->get_records('page', ['course' => $newcourseid]);
             foreach ($pages as $page) {
@@ -63,7 +69,7 @@ class observer {
                     if (!$oldcourseid && preg_match($pattern, $page->content, $matches)) {
                         $oldcourseid = (int)$matches[2];
                     }
-                    
+
                     $newintro = preg_replace($pattern, $replacement, $page->intro);
                     $newcontent = preg_replace($pattern, $replacement, $page->content);
                     if ($newintro !== $page->intro || $newcontent !== $page->content) {
@@ -74,20 +80,20 @@ class observer {
             }
         }
 
-        // Fallback to Moodle event data if we still don't have the old course id
+        // Fallback to Moodle event data if we still don't have the old course id.
         if (!$oldcourseid && isset($event->other['originalcourseid'])) {
             $oldcourseid = $event->other['originalcourseid'];
         }
 
-        // Copy store configuration and map CMIDs
+        // Copy store configuration and map CMIDs.
         if ($oldcourseid && $oldcourseid != $newcourseid) {
-            // 1. Copy simple string configs (colors, icons)
+            // 1. Copy simple string configs (colors, icons).
             $keys = [
                 'color_primary',
                 'color_secondary',
                 'color_icon',
                 'color_cat_icon',
-                'cat_icons'
+                'cat_icons',
             ];
             foreach ($keys as $key) {
                 $oldval = get_config('local_xpstore', $key . '_course_' . $oldcourseid);
@@ -96,12 +102,12 @@ class observer {
                 }
             }
 
-            // 2. Copy and map the catalog string
+            // 2. Copy and map the catalog string.
             $oldcatalog = get_config('local_xpstore', 'catalog_course_' . $oldcourseid);
             if (!empty($oldcatalog)) {
                 $oldmodinfo = get_fast_modinfo($oldcourseid);
                 $newmodinfo = get_fast_modinfo($newcourseid);
-                
+
                 $items = array_filter(array_map('trim', explode(',', $oldcatalog)));
                 $newcatalogparts = [];
 
@@ -112,14 +118,14 @@ class observer {
 
                     if (count($parts) >= 2) {
                         $oldcmid = (int)$parts[0];
-                        
-                        // Find the old cm's name and modname
+
+                        // Find the old cm's name and modname.
                         if (isset($oldmodinfo->cms[$oldcmid])) {
                             $oldcm = $oldmodinfo->cms[$oldcmid];
                             $oldname = $oldcm->name;
                             $oldmodname = $oldcm->modname;
 
-                            // Search for the corresponding cm in the new course
+                            // Search for the corresponding cm in the new course.
                             $newcmid = null;
                             foreach ($newmodinfo->get_cms() as $newcm) {
                                 if ($newcm->name === $oldname && $newcm->modname === $oldmodname) {
@@ -128,20 +134,20 @@ class observer {
                                 }
                             }
 
-                            // If we found it, update the ID in the catalog string and in the widget URLs
+                            // If we found it, update the ID in the catalog string and in the widget URLs.
                             if ($newcmid) {
                                 $parts[0] = $newcmid;
                                 $newcatalogparts[] = $tipochar . implode(':', $parts);
 
-                                // Replace cmid=OLD in all labels/pages so individual widgets keep working
-                                $cmid_pattern = '/([?&]|&amp;)cmid=' . $oldcmid . '([&"\']|&amp;)/';
-                                $cmid_replacement = '${1}cmid=' . $newcmid . '${2}';
+                                // Replace cmid=OLD in all labels/pages so individual widgets keep working.
+                                $cmidpattern = '/([?&]|&amp;)cmid=' . $oldcmid . '([&"\']|&amp;)/';
+                                $cmidreplacement = '${1}cmid=' . $newcmid . '${2}';
 
                                 if ($DB->get_manager()->table_exists('label')) {
-                                    $all_labels = $DB->get_records('label', ['course' => $newcourseid]);
-                                    foreach ($all_labels as $l) {
+                                    $alllabels = $DB->get_records('label', ['course' => $newcourseid]);
+                                    foreach ($alllabels as $l) {
                                         if (strpos($l->intro, 'cmid=' . $oldcmid) !== false) {
-                                            $newl = preg_replace($cmid_pattern, $cmid_replacement, $l->intro);
+                                            $newl = preg_replace($cmidpattern, $cmidreplacement, $l->intro);
                                             if ($newl !== $l->intro) {
                                                 $DB->set_field('label', 'intro', $newl, ['id' => $l->id]);
                                             }
@@ -150,16 +156,16 @@ class observer {
                                 }
 
                                 if ($DB->get_manager()->table_exists('page')) {
-                                    $all_pages = $DB->get_records('page', ['course' => $newcourseid]);
-                                    foreach ($all_pages as $p) {
+                                    $allpages = $DB->get_records('page', ['course' => $newcourseid]);
+                                    foreach ($allpages as $p) {
                                         if (strpos($p->intro, 'cmid=' . $oldcmid) !== false) {
-                                            $newintro = preg_replace($cmid_pattern, $cmid_replacement, $p->intro);
+                                            $newintro = preg_replace($cmidpattern, $cmidreplacement, $p->intro);
                                             if ($newintro !== $p->intro) {
                                                 $DB->set_field('page', 'intro', $newintro, ['id' => $p->id]);
                                             }
                                         }
                                         if (strpos($p->content, 'cmid=' . $oldcmid) !== false) {
-                                            $newcontent = preg_replace($cmid_pattern, $cmid_replacement, $p->content);
+                                            $newcontent = preg_replace($cmidpattern, $cmidreplacement, $p->content);
                                             if ($newcontent !== $p->content) {
                                                 $DB->set_field('page', 'content', $newcontent, ['id' => $p->id]);
                                             }
