@@ -201,18 +201,18 @@ foreach ($storecategories as $nombreseccion => $productos) {
 }
 
 $redirecturl = '';
-$str_goto_dest = '';
-$str_success_unlock = '';
+$strgotodest = '';
+$strsuccessunlock = '';
 if ($status === 'success') {
     $itemname = '';
     $activityname = '';
-    $success_icon = 'gift';
+    $successicon = 'gift';
     foreach ($storecategories as $cat => $prods) {
         foreach ($prods as $p) {
             if ($p['tipo'] === $tipocompra && (int)$p['cid'] === $boughtcmid) {
                 $itemname = $p['displayname'];
                 $activityname = $p['nreal'];
-                $success_icon = isset($caticons[$cat]) ? $caticons[$cat] : 'trophy';
+                $successicon = isset($caticons[$cat]) ? $caticons[$cat] : 'trophy';
                 break 2;
             }
         }
@@ -227,21 +227,21 @@ if ($status === 'success') {
             $activityname = get_string('course', 'local_xpstore');
         }
     }
-    
+
     $a = new stdClass();
     $a->reward = $itemname;
     $a->activity = $activityname;
 
     if ($tipocompra === 'G') {
         $redirecturl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
-        $str_goto_dest = get_string('gotogradebook', 'local_xpstore');
-        $str_success_unlock = get_string('success_unlock_gradebook', 'local_xpstore', $a);
+        $strgotodest = get_string('gotogradebook', 'local_xpstore');
+        $strsuccessunlock = get_string('success_unlock_gradebook', 'local_xpstore', $a);
     } else {
-        $redirecturl = isset($modinfo->cms[$boughtcmid]) ? 
-            $modinfo->cms[$boughtcmid]->url->out(false) : 
+        $redirecturl = isset($modinfo->cms[$boughtcmid]) ?
+            $modinfo->cms[$boughtcmid]->url->out(false) :
             (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
-        $str_goto_dest = get_string('gotoactivity', 'local_xpstore');
-        $str_success_unlock = get_string('success_unlock_reward', 'local_xpstore', $a);
+        $strgotodest = get_string('gotoactivity', 'local_xpstore');
+        $strsuccessunlock = get_string('success_unlock_reward', 'local_xpstore', $a);
     }
 }
 
@@ -254,9 +254,9 @@ $templatedata = [
     'status_error' => ($status === 'error'),
     'status_limit' => ($status === 'limit'),
     'redirecturl' => $redirecturl,
-    'str_goto_dest' => $str_goto_dest,
-    'success_icon' => $success_icon ?? 'gift',
-    'str_success_unlock' => $str_success_unlock,
+    'strgotodest' => $strgotodest,
+    'successicon' => $successicon ?? 'gift',
+    'strsuccessunlock' => $strsuccessunlock,
     'str_congratulations' => get_string('congratulations', 'local_xpstore'),
     'str_exito' => get_string('exito', 'local_xpstore'),
     'str_insuficiente' => get_string('insuficiente', 'local_xpstore'),

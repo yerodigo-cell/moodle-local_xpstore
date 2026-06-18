@@ -43,12 +43,12 @@
         <div class="mini-wallet">
             {{str_balance}}:&nbsp;<span class="xp-balance-value">{{saldo}}</span> XP
         </div>
-        
+
         <div class="card-body">
                 <div class="w-icon">
                     <i class="fa fa-{{icon}}"></i>
                 </div>
-                
+
                 {{#is_bonus}}
                     <div class="w-badge">
                         +{{boost}} {{str_points}}
@@ -59,7 +59,7 @@
                         {{str_specialcontent}}
                     </div>
                 {{/is_special}}
-                
+
                 <div class="w-title">
                     {{displayname}}
                 </div>
@@ -67,12 +67,12 @@
                     {{n_real}}
                 </div>
         </div>
-        
+
         <div class="card-footer">
                 <div class="w-cost text-primary">
                     {{costo}} XP
                 </div>
-                
+
                 {{#has_limit}}
                     <div class="w-limit">
                         {{str_redemptions_count}} {{comprasactuales}} / {{limite}}
@@ -81,17 +81,17 @@
                 {{^has_limit}}
                     <div style="margin-bottom: 8px;"></div>
                 {{/has_limit}}
-                
+
                 <form method="POST" action="{{actionurl}}" onsubmit="var b=this.querySelector('button[type=submit]'); if(b){b.disabled=true; b.classList.add('btn-loading'); b.innerHTML='<span class=\'ai-sparkles-group\'><i class=\'ai-sparkle s1\'></i><i class=\'ai-sparkle s2\'></i><i class=\'ai-sparkle s3\'></i><i class=\'ai-sparkle s4\'></i></span>';}">
                     <input type="hidden" name="sesskey" value="{{sesskey}}">
                     <input type="hidden" name="action" value="comprar">
-                    
+
                     {{#limitealcanzado}}
                         <button type="button" class="btn-buy btn-buy-disabled" onclick="var c = this.closest('.p-card') || this.closest('.widget-card'); c.classList.remove('shake-error'); void c.offsetWidth; c.classList.add('shake-error');">
                             {{str_soldout}}
                         </button>
                     {{/limitealcanzado}}
-                    
+
                     {{^limitealcanzado}}
                         <button type="{{#disabled}}button{{/disabled}}{{^disabled}}submit{{/disabled}}" class="btn-buy {{#disabled}}btn-buy-disabled{{/disabled}}" {{#disabled}}onclick="var c = this.closest('.p-card') || this.closest('.widget-card'); c.classList.remove('shake-error'); void c.offsetWidth; c.classList.add('shake-error');"{{/disabled}}>
                             {{btntext}}
@@ -120,7 +120,7 @@
                 confetti.style.borderRadius = (Math.random() > 0.5 ? '50%' : '0');
                 confetti.style.zIndex = '10001';
                 confetti.style.pointerEvents = 'none';
-                
+
                 var targetBody = (window.top && window.top.document) ? window.top.document.body : document.body;
                 targetBody.appendChild(confetti);
 
@@ -142,26 +142,26 @@
                 };
             }
         }
-        
+
         function playSuccessSound() {
             try {
                 var AudioContext = window.AudioContext || window.webkitAudioContext;
                 if (!AudioContext) return;
                 var ctx = new AudioContext();
-                
+
                 function playNote(freq, delay) {
                     var osc = ctx.createOscillator();
                     var gain = ctx.createGain();
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
-                    
+
                     gain.gain.setValueAtTime(0, ctx.currentTime + delay);
                     gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + delay + 0.05);
                     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 1.0);
-                    
+
                     osc.connect(gain);
                     gain.connect(ctx.destination);
-                    
+
                     osc.start(ctx.currentTime + delay);
                     osc.stop(ctx.currentTime + delay + 1.1);
                 }
@@ -173,14 +173,14 @@
                 playNote(1318.51, 0.32);
             } catch(e) {}
         }
-        
+
         setTimeout(fireConfetti, 50);
         setTimeout(playSuccessSound, 50);
-        
+
         ModalFactory.create({
             type: ModalFactory.types.DEFAULT,
             title: '{{str_congratulations}}',
-            body: '<div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{success_icon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{desturl}}" target="_top" class="btn-claim-reward">{{str_goto_dest}}</a></div>',
+            body: '<div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{successicon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{strsuccessunlock}}}</div><a href="{{desturl}}" target="_top" class="btn-claim-reward">{{strgotodest}}</a></div>',
         }).then(function(modal) {
             modal.getRoot().addClass('epic-celebration-modal');
             var rootNode = modal.getRoot()[0];

@@ -37,7 +37,7 @@
     }
 }}
 <div class="local_xpstore-container local_xpstore-full-container tienda-wrapper" style="--cp: {{cpstore}}; --cb: {{cbstore}}; --ci: {{cistore}}; --cc: {{ccstore}}; --gradient: linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%);">
-    
+
     <div class="wallet-header">
         {{#isteacher}}
             <div class="admin-controls">
@@ -49,7 +49,7 @@
                 </a>
             </div>
         {{/isteacher}}
-        
+
         <h6 class="text-uppercase small mb-1" style="letter-spacing: 1px; opacity: 0.9;">
             {{str_saldo}}
         </h6>
@@ -82,7 +82,7 @@
             <h4 class="mt-4 mb-4 font-weight-bold" style="color: #333; font-size: 1.8rem; text-align: center; letter-spacing: -0.5px;">
                 <i class="fa fa-{{caticon}} mr-2" style="color: var(--cc);"></i> {{nombreseccion}}
             </h4>
-            
+
             <div class="product-grid" style="margin-bottom: 50px;">
                 {{#productos}}
                     <div class="p-card">
@@ -91,19 +91,19 @@
                             <div style="font-size: 20px; color: var(--ci); margin-bottom: 10px;">
                                 <i class="fa fa-{{icon}}"></i>
                             </div>
-                            
+
                             {{#is_bonus}}
                                 <div class="grade-badge">
                                     +{{boost}} {{str_points}}
                                 </div>
                             {{/is_bonus}}
-                            
+
                             {{#is_special}}
                                 <div class="grade-badge" style="background: var(--cb); color: white;">
                                     {{str_specialcontent}}
                                 </div>
                             {{/is_special}}
-                            
+
                             <div class="font-weight-bold" style="font-size: 1rem; line-height: 1.2; margin-bottom: 4px;">
                                 {{displayname}}
                             </div>
@@ -111,10 +111,10 @@
                                 {{nreal}}
                             </div>
                         </div>
-                        
+
                         <div>
                             <div class="h5 font-weight-bold text-primary m-0">{{costo}} XP</div>
-                            
+
                             {{#has_limit}}
                                 <div class="w-limit">
                                     {{str_redemptions_count}} {{comprasactuales}} / {{limite}}
@@ -123,7 +123,7 @@
                             {{^has_limit}}
                                 <div style="margin-bottom: 8px;"></div>
                             {{/has_limit}}
-                            
+
                             {{#bought_this}}
                                 {{#gotogradebook}}
                                     <a href="{{gradebookurl}}" class="btn-go-activity">
@@ -143,7 +143,7 @@
                                     <input type="hidden" name="cmid" value="{{cid}}">
                                     <input type="hidden" name="tipo" value="{{tipo}}">
                                     <input type="hidden" name="costo" value="{{costo}}">
-                                    
+
                                     {{#limitealcanzado}}
                                         <button type="button" class="btn-buy btn-buy-disabled" onclick="var c = this.closest('.p-card') || this.closest('.widget-card'); c.classList.remove('shake-error'); void c.offsetWidth; c.classList.add('shake-error');">
                                             {{str_soldout}}
@@ -180,7 +180,7 @@ require(['core/modal_factory'], function(ModalFactory) {
                 confetti.style.borderRadius = (Math.random() > 0.5 ? '50%' : '0');
                 confetti.style.zIndex = '10001';
                 confetti.style.pointerEvents = 'none';
-                
+
                 var targetBody = (window.top && window.top.document) ? window.top.document.body : document.body;
                 targetBody.appendChild(confetti);
 
@@ -207,20 +207,20 @@ require(['core/modal_factory'], function(ModalFactory) {
                 var AudioContext = window.AudioContext || window.webkitAudioContext;
                 if (!AudioContext) return;
                 var ctx = new AudioContext();
-                
+
                 function playNote(freq, delay) {
                     var osc = ctx.createOscillator();
                     var gain = ctx.createGain();
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
-                    
+
                     gain.gain.setValueAtTime(0, ctx.currentTime + delay);
                     gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + delay + 0.05);
                     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 1.0);
-                    
+
                     osc.connect(gain);
                     gain.connect(ctx.destination);
-                    
+
                     osc.start(ctx.currentTime + delay);
                     osc.stop(ctx.currentTime + delay + 1.1);
                 }
@@ -232,14 +232,14 @@ require(['core/modal_factory'], function(ModalFactory) {
                 playNote(1318.51, 0.32);
             } catch(e) {}
         }
-        
+
         setTimeout(fireConfetti, 50);
         setTimeout(playSuccessSound, 50);
-        
+
         ModalFactory.create({
             type: ModalFactory.types.DEFAULT,
             title: '{{str_congratulations}}',
-            body: '<div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{success_icon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{redirecturl}}" class="btn-claim-reward">{{str_goto_dest}}</a></div>',
+            body: '<div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{successicon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{strsuccessunlock}}}</div><a href="{{redirecturl}}" class="btn-claim-reward">{{strgotodest}}</a></div>',
         }).then(function(modal) {
             modal.getRoot().addClass('epic-celebration-modal');
             var rootNode = modal.getRoot()[0];
@@ -270,14 +270,14 @@ require(['core/modal_factory'], function(ModalFactory) {
             }
         } catch(e) {}
     }
-    
+
     var count = 0;
     var interval = setInterval(function() {
         autoResizeXpStore();
         count++;
         if (count > 10) clearInterval(interval);
     }, 500);
-    
+
     window.addEventListener('load', autoResizeXpStore);
     window.addEventListener('resize', autoResizeXpStore);
 })();
