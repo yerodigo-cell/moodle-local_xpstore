@@ -129,15 +129,33 @@ $isspecial = ($producto['tipo'] == 'S');
 $statussuccess = ($status === 'success');
 
 $desturl = null;
+$str_success_unlock = '';
 if ($statussuccess) {
     $dest = ($producto['tipo'] == 'G') ? '/grade/report/user/index.php' : '/course/view.php';
     $destmoodleurl = new moodle_url($dest, ['id' => $courseid]);
 
+    $activityname = '';
+    $modinfo = get_fast_modinfo($courseid);
     if ($producto['tipo'] != 'G') {
-        $modinfo = get_fast_modinfo($courseid);
         $destmoodleurl = $modinfo->cms[$producto['cid']]->url ?? $destmoodleurl;
     }
+    if (isset($modinfo->cms[$producto['cid']])) {
+        $activityname = $modinfo->cms[$producto['cid']]->name;
+    }
     $desturl = $destmoodleurl->out(false);
+
+    $a = new stdClass();
+    $a->reward = $producto['n_custom'] ?: $producto['n_real'];
+    if (empty($a->reward)) {
+        $a->reward = get_string('points', 'local_xpstore');
+    }
+    $a->activity = $activityname ?: get_string('course', 'local_xpstore');
+
+    if ($producto['tipo'] == 'G') {
+        $str_success_unlock = get_string('success_unlock_gradebook', 'local_xpstore', $a);
+    } else {
+        $str_success_unlock = get_string('success_unlock_reward', 'local_xpstore', $a);
+    }
 }
 
 $disabled = ($saldo < $producto['costo']);
@@ -173,6 +191,9 @@ $templatedata = [
     'str_goto_dest' => ($producto['tipo'] == 'G') ?
         get_string('gotogradebook', 'local_xpstore') :
         get_string('gotoactivity', 'local_xpstore'),
+    'success_icon' => $icon,
+    'str_success_unlock' => $str_success_unlock,
+    'str_congratulations' => get_string('congratulations', 'local_xpstore'),
     'str_redemptions_count' => get_string('redemptions_count', 'local_xpstore'),
     'str_soldout' => get_string('soldout', 'local_xpstore'),
 ];

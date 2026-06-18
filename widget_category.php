@@ -200,6 +200,51 @@ foreach ($storecategories as $nombreseccion => $productos) {
     ];
 }
 
+$redirecturl = '';
+$str_goto_dest = '';
+$str_success_unlock = '';
+if ($status === 'success') {
+    $itemname = '';
+    $activityname = '';
+    $success_icon = 'gift';
+    foreach ($storecategories as $cat => $prods) {
+        foreach ($prods as $p) {
+            if ($p['tipo'] === $tipocompra && (int)$p['cid'] === $boughtcmid) {
+                $itemname = $p['displayname'];
+                $activityname = $p['nreal'];
+                $success_icon = isset($caticons[$cat]) ? $caticons[$cat] : 'trophy';
+                break 2;
+            }
+        }
+    }
+    if (empty($itemname)) {
+        $itemname = get_string('points', 'local_xpstore');
+    }
+    if (empty($activityname)) {
+        if (isset($modinfo->cms[$boughtcmid])) {
+            $activityname = $modinfo->cms[$boughtcmid]->name;
+        } else {
+            $activityname = get_string('course', 'local_xpstore');
+        }
+    }
+    
+    $a = new stdClass();
+    $a->reward = $itemname;
+    $a->activity = $activityname;
+
+    if ($tipocompra === 'G') {
+        $redirecturl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
+        $str_goto_dest = get_string('gotogradebook', 'local_xpstore');
+        $str_success_unlock = get_string('success_unlock_gradebook', 'local_xpstore', $a);
+    } else {
+        $redirecturl = isset($modinfo->cms[$boughtcmid]) ? 
+            $modinfo->cms[$boughtcmid]->url->out(false) : 
+            (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
+        $str_goto_dest = get_string('gotoactivity', 'local_xpstore');
+        $str_success_unlock = get_string('success_unlock_reward', 'local_xpstore', $a);
+    }
+}
+
 $templatedata = [
     'cpstore' => $cpstore,
     'cbstore' => $cbstore,
@@ -208,6 +253,11 @@ $templatedata = [
     'status_success' => ($status === 'success'),
     'status_error' => ($status === 'error'),
     'status_limit' => ($status === 'limit'),
+    'redirecturl' => $redirecturl,
+    'str_goto_dest' => $str_goto_dest,
+    'success_icon' => $success_icon ?? 'gift',
+    'str_success_unlock' => $str_success_unlock,
+    'str_congratulations' => get_string('congratulations', 'local_xpstore'),
     'str_exito' => get_string('exito', 'local_xpstore'),
     'str_insuficiente' => get_string('insuficiente', 'local_xpstore'),
     'str_limitreached' => get_string('limitreached', 'local_xpstore'),

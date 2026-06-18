@@ -48,11 +48,7 @@
         </a>
     </div>
 
-    {{#status_success}}
-        <div class="alert alert-success text-center mb-3" style="border-radius: 10px; padding: 10px;">
-            {{str_exito}}
-        </div>
-    {{/status_success}}
+
     
     {{#status_error}}
         <div class="alert alert-danger text-center mb-3" style="border-radius: 10px; padding: 10px;">
@@ -81,6 +77,7 @@
             <div class="product-grid" style="margin-bottom: 50px;">
                 {{#productos}}
                     <div class="p-card">
+                        <div class="glass-shine"></div>
                         <div>
                             <div style="font-size: 20px; color: var(--ci); margin-bottom: 8px;">
                                 <i class="fa fa-{{icon}}"></i>
@@ -141,12 +138,12 @@
                                     <input type="hidden" name="costo" value="{{costo}}">
                                     
                                     {{#limitealcanzado}}
-                                        <button type="button" class="btn-buy" disabled style="background: #e0e0e0; color: #888;">
+                                        <button type="button" class="btn-buy btn-buy-disabled" onclick="var c = this.closest('.p-card') || this.closest('.widget-card'); c.classList.remove('shake-error'); void c.offsetWidth; c.classList.add('shake-error');">
                                             {{str_soldout}}
                                         </button>
                                     {{/limitealcanzado}}
                                     {{^limitealcanzado}}
-                                        <button type="submit" class="btn-buy" {{#disabled}}disabled{{/disabled}}>
+                                        <button type="{{#disabled}}button{{/disabled}}{{^disabled}}submit{{/disabled}}" class="btn-buy {{#disabled}}btn-buy-disabled{{/disabled}}" {{#disabled}}onclick="var c = this.closest('.p-card') || this.closest('.widget-card'); c.classList.remove('shake-error'); void c.offsetWidth; c.classList.add('shake-error');"{{/disabled}}>
                                             {{btntext}}
                                         </button>
                                     {{/limitealcanzado}}
@@ -159,10 +156,9 @@
         {{/categoriastienda}}
     {{/isempty}}
 </div>
-
 {{#status_success}}
 {{#js}}
-require([], function() {
+require(['core/modal_factory'], function(ModalFactory) {
     function fireConfetti() {
         var colors = ['#0056D2', '#00C9A7', '#ff9800', '#ff0000', '#ffd700', '#9c27b0'];
         for (var i = 0; i < 80; i++) {
@@ -174,7 +170,7 @@ require([], function() {
             confetti.style.top = '50%';
             confetti.style.left = '50%';
             confetti.style.borderRadius = (Math.random() > 0.5 ? '50%' : '0');
-            confetti.style.zIndex = '9999';
+            confetti.style.zIndex = '10001';
             confetti.style.pointerEvents = 'none';
             document.body.appendChild(confetti);
 
@@ -227,9 +223,25 @@ require([], function() {
         } catch(e) {}
     }
     
-    setTimeout(fireConfetti, 50);
-    setTimeout(playSuccessSound, 50);
-});
+        setTimeout(fireConfetti, 50);
+        setTimeout(playSuccessSound, 50);
+        
+        ModalFactory.create({
+            type: ModalFactory.types.DEFAULT,
+            title: '{{str_congratulations}}',
+            body: '<div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{success_icon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{redirecturl}}" target="_top" class="btn-claim-reward">{{str_goto_dest}}</a></div>',
+        }).then(function(modal) {
+            modal.getRoot().addClass('epic-celebration-modal');
+            var rootNode = modal.getRoot()[0];
+            if (rootNode && rootNode.parentElement) {
+                rootNode.parentElement.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                rootNode.parentElement.style.backdropFilter = 'blur(10px)';
+            }
+            modal.show();
+        }).catch(function(e) {
+            console.error("ModalFactory error:", e);
+        });
+    });
 {{/js}}
 {{/status_success}}
 

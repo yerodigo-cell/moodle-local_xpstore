@@ -1,6 +1,7 @@
 /* stylelint-disable */
 
 /* local_xpstore styles */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap');
 
 /* Fix for embedded layouts in themes like Moove where the body has a background color */
 body.pagelayout-embedded,
@@ -545,10 +546,22 @@ body.pagelayout-embedded,
     font-size: 0.85rem;
 }
 
-.local_xpstore-container .btn-buy:disabled {
+.local_xpstore-container .btn-buy:disabled,
+.local_xpstore-container .btn-buy.btn-buy-disabled {
     background: #e0e0e0;
     cursor: not-allowed;
     color: #888;
+}
+
+@keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.local_xpstore-container .p-card.shake-error,
+.local_xpstore-container .widget-card.shake-error {
+    animation: shakeError 0.4s cubic-bezier(.36,.07,.19,.97) both;
 }
 
 .local_xpstore-container .btn-buy.btn-loading:disabled {
@@ -598,7 +611,7 @@ body.pagelayout-embedded,
     100% { transform: scale(0) rotate(90deg); opacity: 0; }
 }
 
-.local_xpstore-container .btn-buy:hover:not(:disabled) {
+.local_xpstore-container .btn-buy:hover:not(:disabled):not(.btn-buy-disabled) {
     opacity: 0.9;
 }
 
@@ -736,6 +749,63 @@ body.pagelayout-embedded,
 .local_xpstore-container .widget-card > * {
     position: relative;
     z-index: 1;
+}
+
+/* Cascade Entrance Animation */
+@keyframes cascadeEntrance {
+    from {
+        opacity: 0;
+        margin-top: 30px;
+    }
+    to {
+        opacity: 1;
+        margin-top: 0;
+    }
+}
+
+.local_xpstore-container .p-card,
+.local_xpstore-container .widget-card {
+    animation: cascadeEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger delays for up to 15 cards */
+.local_xpstore-container .p-card:nth-child(1) { animation-delay: 0.05s; }
+.local_xpstore-container .p-card:nth-child(2) { animation-delay: 0.10s; }
+.local_xpstore-container .p-card:nth-child(3) { animation-delay: 0.15s; }
+.local_xpstore-container .p-card:nth-child(4) { animation-delay: 0.20s; }
+.local_xpstore-container .p-card:nth-child(5) { animation-delay: 0.25s; }
+.local_xpstore-container .p-card:nth-child(6) { animation-delay: 0.30s; }
+.local_xpstore-container .p-card:nth-child(7) { animation-delay: 0.35s; }
+.local_xpstore-container .p-card:nth-child(8) { animation-delay: 0.40s; }
+.local_xpstore-container .p-card:nth-child(9) { animation-delay: 0.45s; }
+.local_xpstore-container .p-card:nth-child(10) { animation-delay: 0.50s; }
+.local_xpstore-container .p-card:nth-child(11) { animation-delay: 0.55s; }
+.local_xpstore-container .p-card:nth-child(12) { animation-delay: 0.60s; }
+.local_xpstore-container .p-card:nth-child(n+13) { animation-delay: 0.65s; }
+.local_xpstore-container .widget-card { animation-delay: 0.10s; }
+
+
+/* Glass Shine Effect on hover */
+.local_xpstore-container .glass-shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
+    transform: skewX(-20deg);
+    z-index: 20;
+    pointer-events: none;
+}
+
+.local_xpstore-container .p-card:hover .glass-shine,
+.local_xpstore-container .widget-card:hover .glass-shine {
+    animation: glassShineAnim 0.8s ease-out forwards;
+}
+
+@keyframes glassShineAnim {
+    0% { left: -100%; }
+    100% { left: 200%; }
 }
 
 .local_xpstore-container .widget-card:hover {
@@ -1326,4 +1396,133 @@ body.pagelayout-embedded,
         align-items: flex-start;
         gap: 15px;
     }
+}
+
+/* Epic Celebration Modal */
+.epic-celebration-modal .modal-content {
+    background: linear-gradient(135deg, #fad0ff 0%, #cbfbfe 100%);
+    color: #333;
+    border-radius: 24px;
+    text-align: center;
+    border: none;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    overflow: hidden;
+}
+
+.epic-celebration-modal .modal-header {
+    display: none;
+}
+
+.epic-celebration-modal .modal-body {
+    padding: 50px 40px;
+}
+
+.epic-celebration-modal .modal-footer {
+    display: none;
+}
+
+.epic-icon-wrapper {
+    position: relative;
+    z-index: 1;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 40px auto;
+    border-radius: 32px;
+    --neon-gradient: conic-gradient(from 0deg, #5500ff 0%, #0055ff 8%, #00d2ff 15%, #00ff66 25%, #ccff00 38%, #00d2ff 50%, #0044ff 62%, #6a00ff 75%, #ff0080 88%, #5500ff 100%);
+    background: var(--neon-gradient);
+    padding: 4px;
+    animation: epicIconPopIn 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s both;
+}
+
+@keyframes epicIconPopIn {
+    0% { transform: scale(0) translateY(40px); opacity: 0; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.epic-icon-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--neon-gradient);
+    z-index: -1;
+    border-radius: inherit;
+    filter: blur(14px);
+    opacity: 0.9;
+}
+
+.epic-icon-container {
+    position: relative;
+    z-index: 2;
+    background: #250172;
+    width: 100%;
+    height: 100%;
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 55px;
+    color: #ffda44;
+}
+
+.epic-sparkle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    animation: epicSparkleAnim 1s ease-in-out infinite alternate;
+}
+
+.epic-sparkle::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #ffffff;
+    clip-path: path('M18 0 Q18 18 36 18 Q18 18 18 36 Q18 18 0 18 Q18 18 18 0 Z');
+}
+
+@keyframes epicSparkleAnim {
+    0% { transform: scale(0.7); opacity: 0.8; }
+    100% { transform: scale(1.1); opacity: 1; }
+}
+
+.epic-title {
+    font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: #100b38;
+    margin-bottom: 15px;
+    letter-spacing: -1.5px;
+}
+
+.epic-desc {
+    font-size: 1.15rem;
+    color: #444;
+    line-height: 1.5;
+    margin-bottom: 30px;
+}
+
+.epic-desc b {
+    color: #222;
+    font-weight: 700;
+}
+
+.btn-claim-reward {
+    background: #2ea043;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    padding: 12px 28px;
+    font-size: 1.15rem;
+    border: none;
+    transition: 0.2s;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-claim-reward:hover {
+    background: #238636;
+    color: white;
+    transform: translateY(-2px);
+    text-decoration: none;
 }

@@ -61,19 +61,7 @@
         </div>
     </div>
 
-    {{#status_success}}
-        {{#is_grade_success}}
-            <div class="alert alert-success text-center mb-3" style="border-radius: 15px; border: none; background: #d4edda; color: #155724; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-                <div style="font-size: 2rem; margin-bottom: 10px; color: #28a745;">
-                    <i class="fa fa-star"></i>
-                </div>
-                <h5 class="font-weight-bold mb-3">{{str_exito}}</h5>
-                <a href="{{gradebookurl}}" class="btn btn-success rounded-pill px-4 py-2" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; font-size: 1rem; font-weight: bold; box-shadow: 0 4px 10px rgba(40,167,69,0.3);">
-                    <i class="fa fa-bar-chart mr-2"></i> {{str_gotogradebook}}
-                </a>
-            </div>
-        {{/is_grade_success}}
-    {{/status_success}}
+
 
     {{#status_limit}}
         <div class="alert alert-warning text-center mb-3" style="border-radius: 10px; padding: 15px; font-weight: bold;">
@@ -98,6 +86,7 @@
             <div class="product-grid" style="margin-bottom: 50px;">
                 {{#productos}}
                     <div class="p-card">
+                        <div class="glass-shine"></div>
                         <div>
                             <div style="font-size: 20px; color: var(--ci); margin-bottom: 10px;">
                                 <i class="fa fa-{{icon}}"></i>
@@ -156,12 +145,12 @@
                                     <input type="hidden" name="costo" value="{{costo}}">
                                     
                                     {{#limitealcanzado}}
-                                        <button type="button" class="btn-buy" disabled style="background: #e0e0e0; color: #888;">
+                                        <button type="button" class="btn-buy btn-buy-disabled" onclick="var c = this.closest('.p-card') || this.closest('.widget-card'); c.classList.remove('shake-error'); void c.offsetWidth; c.classList.add('shake-error');">
                                             {{str_soldout}}
                                         </button>
                                     {{/limitealcanzado}}
                                     {{^limitealcanzado}}
-                                        <button type="submit" class="btn-buy" {{#disabled}}disabled{{/disabled}}>
+                                        <button type="{{#disabled}}button{{/disabled}}{{^disabled}}submit{{/disabled}}" class="btn-buy {{#disabled}}btn-buy-disabled{{/disabled}}" {{#disabled}}onclick="var c = this.closest('.p-card') || this.closest('.widget-card'); c.classList.remove('shake-error'); void c.offsetWidth; c.classList.add('shake-error');"{{/disabled}}>
                                             {{btntext}}
                                         </button>
                                     {{/limitealcanzado}}
@@ -177,74 +166,92 @@
 
 {{#status_success}}
 {{#js}}
-require([], function() {
-    function fireConfetti() {
-        var colors = ['#0056D2', '#00C9A7', '#ff9800', '#ff0000', '#ffd700', '#9c27b0'];
-        for (var i = 0; i < 80; i++) {
-            var confetti = document.createElement('div');
-            confetti.style.position = 'fixed';
-            confetti.style.width = (Math.random() * 8 + 6) + 'px';
-            confetti.style.height = (Math.random() * 8 + 6) + 'px';
-            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            confetti.style.top = '50%';
-            confetti.style.left = '50%';
-            confetti.style.borderRadius = (Math.random() > 0.5 ? '50%' : '0');
-            confetti.style.zIndex = '9999';
-            confetti.style.pointerEvents = 'none';
-            document.body.appendChild(confetti);
+require(['core/modal_factory'], function(ModalFactory) {
+        function fireConfetti() {
+            var colors = ['#0056D2', '#00C9A7', '#ff9800', '#ff0000', '#ffd700', '#9c27b0'];
+            for (var i = 0; i < 80; i++) {
+                var confetti = document.createElement('div');
+                confetti.style.position = 'fixed';
+                confetti.style.width = (Math.random() * 8 + 6) + 'px';
+                confetti.style.height = (Math.random() * 8 + 6) + 'px';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.top = '50%';
+                confetti.style.left = '50%';
+                confetti.style.borderRadius = (Math.random() > 0.5 ? '50%' : '0');
+                confetti.style.zIndex = '10001';
+                confetti.style.pointerEvents = 'none';
+                
+                var targetBody = (window.top && window.top.document) ? window.top.document.body : document.body;
+                targetBody.appendChild(confetti);
 
-            var angle = Math.random() * Math.PI * 2;
-            var velocity = 80 + Math.random() * 250;
-            var tx = Math.cos(angle) * velocity;
-            var ty = Math.sin(angle) * velocity - 100;
+                var angle = Math.random() * Math.PI * 2;
+                var velocity = 80 + Math.random() * 250;
+                var tx = Math.cos(angle) * velocity;
+                var ty = Math.sin(angle) * velocity - 100;
 
-            confetti.animate([
-                { transform: 'translate(-50%, -50%) scale(0) rotate(0deg)', opacity: 1 },
-                { transform: 'translate(calc(-50% + ' + tx + 'px), calc(-50% + ' + ty + 'px)) scale(1.5) rotate(' + (Math.random() * 720) + 'deg)', opacity: 1, offset: 0.7 },
-                { transform: 'translate(calc(-50% + ' + tx + 'px), calc(-50% + ' + ty + 150 + 'px)) scale(0) rotate(' + (Math.random() * 1080) + 'deg)', opacity: 0 }
-            ], {
-                duration: 1500 + Math.random() * 1000,
-                easing: 'cubic-bezier(.25,.1,.25,1)',
-                fill: 'forwards'
-            }).onfinish = function() {
-                this.effect.target.remove();
-            };
-        }
-    }
-    function playSuccessSound() {
-        try {
-            var AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            var ctx = new AudioContext();
-            
-            function playNote(freq, delay) {
-                var osc = ctx.createOscillator();
-                var gain = ctx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
-                
-                gain.gain.setValueAtTime(0, ctx.currentTime + delay);
-                gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + delay + 0.05);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 1.0);
-                
-                osc.connect(gain);
-                gain.connect(ctx.destination);
-                
-                osc.start(ctx.currentTime + delay);
-                osc.stop(ctx.currentTime + delay + 1.1);
+                confetti.animate([
+                    { transform: 'translate(-50%, -50%) scale(0) rotate(0deg)', opacity: 1 },
+                    { transform: 'translate(calc(-50% + ' + tx + 'px), calc(-50% + ' + ty + 'px)) scale(1.5) rotate(' + (Math.random() * 720) + 'deg)', opacity: 1, offset: 0.7 },
+                    { transform: 'translate(calc(-50% + ' + tx + 'px), calc(-50% + ' + ty + 150 + 'px)) scale(0) rotate(' + (Math.random() * 1080) + 'deg)', opacity: 0 }
+                ], {
+                    duration: 1500 + Math.random() * 1000,
+                    easing: 'cubic-bezier(.25,.1,.25,1)',
+                    fill: 'forwards'
+                }).onfinish = function() {
+                    this.effect.target.remove();
+                };
             }
+        }
+        function playSuccessSound() {
+            try {
+                var AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                var ctx = new AudioContext();
+                
+                function playNote(freq, delay) {
+                    var osc = ctx.createOscillator();
+                    var gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+                    
+                    gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+                    gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + delay + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 1.0);
+                    
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    
+                    osc.start(ctx.currentTime + delay);
+                    osc.stop(ctx.currentTime + delay + 1.1);
+                }
 
-            playNote(523.25, 0.0);
-            playNote(659.25, 0.08);
-            playNote(783.99, 0.16);
-            playNote(1046.50, 0.24);
-            playNote(1318.51, 0.32);
-        } catch(e) {}
-    }
-    
-    setTimeout(fireConfetti, 50);
-    setTimeout(playSuccessSound, 50);
-});
+                playNote(523.25, 0.0);
+                playNote(659.25, 0.08);
+                playNote(783.99, 0.16);
+                playNote(1046.50, 0.24);
+                playNote(1318.51, 0.32);
+            } catch(e) {}
+        }
+        
+        setTimeout(fireConfetti, 50);
+        setTimeout(playSuccessSound, 50);
+        
+        ModalFactory.create({
+            type: ModalFactory.types.DEFAULT,
+            title: '{{str_congratulations}}',
+            body: '<div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{success_icon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{redirecturl}}" class="btn-claim-reward">{{str_goto_dest}}</a></div>',
+        }).then(function(modal) {
+            modal.getRoot().addClass('epic-celebration-modal');
+            var rootNode = modal.getRoot()[0];
+            if (rootNode && rootNode.parentElement) {
+                rootNode.parentElement.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                rootNode.parentElement.style.backdropFilter = 'blur(10px)';
+            }
+            modal.show();
+        }).catch(function(e) {
+            console.error("ModalFactory error:", e);
+        });
+    });
 {{/js}}
 {{/status_success}}
 

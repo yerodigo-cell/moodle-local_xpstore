@@ -47,6 +47,9 @@ $catalogkey = 'catalog_course_' . $courseid;
 
 if ($action === 'togglemenu' && confirm_sesskey()) {
     $currentmenu = get_config('local_xpstore', 'show_menu_course_' . $courseid);
+    if ($currentmenu === false) {
+        $currentmenu = '0';
+    }
     $newmenu = ($currentmenu === '0') ? '1' : '0';
     set_config('show_menu_course_' . $courseid, $newmenu, 'local_xpstore');
     redirect($url);
@@ -54,7 +57,7 @@ if ($action === 'togglemenu' && confirm_sesskey()) {
 
 $menuvisible = get_config('local_xpstore', 'show_menu_course_' . $courseid);
 if ($menuvisible === false) {
-    $menuvisible = '1';
+    $menuvisible = '0';
 }
 
 if ($action === 'add' && confirm_sesskey()) {

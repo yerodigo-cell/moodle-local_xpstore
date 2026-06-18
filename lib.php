@@ -47,6 +47,11 @@ function local_xpstore_extend_navigation_course(navigation_node $parentnode, $co
     // 2. Check the specific visibility configuration for THIS COURSE.
     $showinmenu = get_config('local_xpstore', 'show_menu_course_' . $course->id);
 
+    // If it's not set (false), default it to '0' (hidden).
+    if ($showinmenu === false) {
+        $showinmenu = '0';
+    }
+
     // MAGIC HERE: If the menu is hidden ('0') AND the user is NOT a teacher (cannot update course), hide it.
     if ($showinmenu === '0' && !has_capability('moodle/course:update', $context)) {
         return; // Exit, hiding the menu only for students.

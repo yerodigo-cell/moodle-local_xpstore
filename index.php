@@ -204,8 +204,45 @@ foreach ($storecategories as $nombreseccion => $productos) {
 }
 
 $isgradesuccess = ($status === 'success' && $tipocompra === 'G');
-if ($status === 'success' && !$isgradesuccess) {
-    \core\notification::add(get_string('exito', 'local_xpstore'), \core\output\notification::NOTIFY_SUCCESS);
+$redirecturl = '';
+$str_goto_dest = '';
+$str_success_unlock = '';
+if ($status === 'success') {
+    $itemname = '';
+    $activityname = '';
+    $success_icon = 'gift';
+    foreach ($todoslosproductos as $it) {
+        $ptipo = substr($it, 0, 1);
+        $pparts = explode(':', substr($it, 1));
+        if ($ptipo === $tipocompra && (int)$pparts[0] === $boughtcmid) {
+            $itemname = !empty($pparts[2]) ? $pparts[2] : (isset($modinfo->cms[$boughtcmid]) ? $modinfo->cms[$boughtcmid]->name : '');
+            $itemcat = !empty($pparts[4]) ? trim($pparts[4]) : get_string('defaultcategory', 'local_xpstore');
+            $success_icon = isset($caticons[$itemcat]) ? $caticons[$itemcat] : 'trophy';
+            break;
+        }
+    }
+    if (isset($modinfo->cms[$boughtcmid])) {
+        $activityname = $modinfo->cms[$boughtcmid]->name;
+    }
+    if (empty($itemname)) {
+        $itemname = get_string('points', 'local_xpstore');
+    }
+    
+    $a = new stdClass();
+    $a->reward = $itemname;
+    $a->activity = $activityname;
+
+    if ($tipocompra === 'G') {
+        $redirecturl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
+        $str_goto_dest = get_string('gotogradebook', 'local_xpstore');
+        $str_success_unlock = get_string('success_unlock_gradebook', 'local_xpstore', $a);
+    } else {
+        $redirecturl = isset($modinfo->cms[$boughtcmid]) ? 
+            $modinfo->cms[$boughtcmid]->url->out(false) : 
+            (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
+        $str_goto_dest = get_string('gotoactivity', 'local_xpstore');
+        $str_success_unlock = get_string('success_unlock_reward', 'local_xpstore', $a);
+    }
 } else if ($status === 'error') {
     \core\notification::add(get_string('insuficiente', 'local_xpstore'), \core\output\notification::NOTIFY_ERROR);
 }
@@ -219,6 +256,11 @@ $templatedata = [
     'status_error' => ($status === 'error'),
     'status_limit' => ($status === 'limit'),
     'is_grade_success' => $isgradesuccess,
+    'redirecturl' => $redirecturl,
+    'str_goto_dest' => $str_goto_dest,
+    'success_icon' => $success_icon ?? 'gift',
+    'str_success_unlock' => $str_success_unlock,
+    'str_congratulations' => get_string('congratulations', 'local_xpstore'),
     'str_exito' => get_string('exito', 'local_xpstore'),
     'str_limitreached' => get_string('limitreached', 'local_xpstore'),
     'str_saldo' => get_string('saldo', 'local_xpstore'),
