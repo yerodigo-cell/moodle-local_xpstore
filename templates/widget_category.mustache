@@ -237,6 +237,17 @@ require(['core/modal_factory'], function(ModalFactory) {
                 rootNode.parentElement.style.backgroundColor = 'rgba(0,0,0,0.8)';
                 rootNode.parentElement.style.backdropFilter = 'blur(10px)';
             }
+            var titleEl = rootNode.querySelector('.epic-title');
+            if (titleEl) {
+                var text = titleEl.innerText;
+                titleEl.innerHTML = '';
+                for (var i = 0; i < text.length; i++) {
+                    var span = document.createElement('span');
+                    span.innerText = text[i] === ' ' ? '\u00A0' : text[i];
+                    span.style.animationDelay = (i * 0.05) + 's';
+                    titleEl.appendChild(span);
+                }
+            }
             modal.show();
         }).catch(function(e) {
             console.error("ModalFactory error:", e);

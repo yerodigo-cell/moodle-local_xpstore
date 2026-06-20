@@ -1495,10 +1495,20 @@ body.pagelayout-embedded,
 .epic-title {
     font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
     font-size: 3rem;
-    font-weight: 800;
+    font-weight: 700;
     color: #100b38;
     margin-bottom: 15px;
     letter-spacing: -1.5px;
+}
+
+.epic-title span {
+    display: inline-block;
+    animation: textWaveAnim 1.5s ease-in-out infinite;
+}
+
+@keyframes textWaveAnim {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
 }
 
 .epic-desc {
