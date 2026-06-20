@@ -1501,16 +1501,6 @@ body.pagelayout-embedded,
     letter-spacing: -1.5px;
 }
 
-.epic-title span {
-    display: inline-block;
-    animation: textWaveAnim 1.5s ease-in-out infinite;
-}
-
-@keyframes textWaveAnim {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
-}
-
 .epic-desc {
     font-size: 1.15rem;
     color: #444;
