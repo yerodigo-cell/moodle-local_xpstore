@@ -1402,9 +1402,9 @@ body.pagelayout-embedded,
 .epic-celebration-modal .modal-content {
     background: linear-gradient(135deg, #fad0ff 0%, #cbfbfe 100%);
     color: #333;
-    border-radius: 24px;
+    border-radius: 32px !important;
     text-align: center;
-    border: none;
+    border: 0 !important;
     box-shadow: 0 15px 40px rgba(0,0,0,0.15);
     overflow: hidden;
 }
