@@ -188,11 +188,11 @@ $templatedata = [
     'str_widgetunlockeddesc' => get_string('widgetunlockeddesc', 'local_xpstore'),
     'str_points' => get_string('points', 'local_xpstore'),
     'str_specialcontent' => get_string('specialcontent', 'local_xpstore'),
-    'strgotodest' => ($producto['tipo'] == 'G') ?
+    'str_goto_dest' => ($producto['tipo'] == 'G') ?
         get_string('gotogradebook', 'local_xpstore') :
         get_string('gotoactivity', 'local_xpstore'),
-    'successicon' => $icon,
-    'strsuccessunlock' => $strsuccessunlock,
+    'success_icon' => $icon,
+    'str_success_unlock' => $strsuccessunlock,
     'str_congratulations' => get_string('congratulations', 'local_xpstore'),
     'str_redemptions_count' => get_string('redemptions_count', 'local_xpstore'),
     'str_soldout' => get_string('soldout', 'local_xpstore'),

@@ -180,24 +180,13 @@
         ModalFactory.create({
             type: ModalFactory.types.DEFAULT,
             title: '{{str_congratulations}}',
-            body: '<div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{successicon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{strsuccessunlock}}}</div><a href="{{desturl}}" target="_top" class="btn-claim-reward">{{strgotodest}}</a></div>',
+            body: '<div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{success_icon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{desturl}}" target="_top" class="btn-claim-reward">{{str_goto_dest}}</a></div>',
         }).then(function(modal) {
             modal.getRoot().addClass('epic-celebration-modal');
             var rootNode = modal.getRoot()[0];
             if (rootNode && rootNode.parentElement) {
                 rootNode.parentElement.style.backgroundColor = 'rgba(0,0,0,0.8)';
                 rootNode.parentElement.style.backdropFilter = 'blur(10px)';
-            }
-            var titleEl = rootNode.querySelector('.epic-title');
-            if (titleEl) {
-                var text = titleEl.innerText;
-                titleEl.innerHTML = '';
-                for (var i = 0; i < text.length; i++) {
-                    var span = document.createElement('span');
-                    span.innerText = text[i] === ' ' ? '\u00A0' : text[i];
-                    span.style.animationDelay = (i * 0.05) + 's';
-                    titleEl.appendChild(span);
-                }
             }
             modal.show();
         }).catch(function(e) {
