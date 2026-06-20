@@ -1399,13 +1399,19 @@ body.pagelayout-embedded,
 }
 
 /* Epic Celebration Modal */
+.epic-celebration-modal,
+.epic-celebration-modal .modal-dialog,
+.epic-celebration-modal .modal-content {
+    outline: 0 !important;
+}
+
 .epic-celebration-modal .modal-content {
     background: linear-gradient(135deg, #fad0ff 0%, #cbfbfe 100%);
     color: #333;
     border-radius: 32px !important;
     text-align: center;
     border: 0 !important;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15) !important;
     overflow: hidden;
 }
 
