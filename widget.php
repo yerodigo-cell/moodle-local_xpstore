@@ -69,7 +69,9 @@ foreach ($items as $item) {
                 'costo' => (int)($parts[1] ?? 0),
                 'n_custom' => $parts[2] ?? '',
                 'boost' => $parts[3] ?? '0',
-                'cat' => isset($parts[4]) && trim($parts[4]) !== '' ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore'),
+                'cat' => isset($parts[4]) && trim($parts[4]) !== ''
+                    ? trim($parts[4])
+                    : get_string('defaultcategory', 'local_xpstore'),
                 'limite' => (int)($parts[5] ?? 0),
                 'n_real' => $DB->get_field($modname, 'name', ['id' => $cm->instance]),
             ];
