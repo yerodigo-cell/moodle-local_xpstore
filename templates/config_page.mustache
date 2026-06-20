@@ -235,17 +235,20 @@
                         <label class="small font-weight-bold mb-1 form-label-block">
                             {{catname}}
                         </label>
-                        <div class="input-group input-group-sm">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text input-group-text-white">
-                                    <i class="fa fa-{{currenticon}} icon-preview" id="preview_{{cathash}}" style="color: {{ccactual}};"></i>
-                                </span>
-                            </div>
-                            <select name="caticon_{{cathash}}" class="form-control" onchange="document.getElementById('preview_{{cathash}}').className = 'fa fa-' + this.value">
+                        <div class="dropdown w-100">
+                            <button class="btn bg-white border dropdown-toggle w-100 text-left d-flex align-items-center justify-content-between" type="button" id="btn_{{cathash}}" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="background: white; height: 32px; padding: 0 10px;">
+                                <i class="fa fa-{{currenticon}} icon-preview" id="preview_{{cathash}}" style="color: {{ccactual}};"></i>
+                            </button>
+                            <div class="dropdown-menu p-2 shadow-sm" aria-labelledby="btn_{{cathash}}" style="min-width: 170px; z-index: 1050;">
+                                <div class="d-flex flex-wrap" style="gap: 6px;">
                                 {{#icons}}
-                                    <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                                    <button type="button" class="btn btn-light border" onclick="document.getElementById('preview_{{cathash}}').className = 'fa fa-{{value}} icon-preview'; document.getElementById('input_{{cathash}}').value = '{{value}}';" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0;" title="{{label}}">
+                                        <i class="fa fa-{{value}} text-secondary"></i>
+                                    </button>
                                 {{/icons}}
-                            </select>
+                                </div>
+                            </div>
+                            <input type="hidden" name="caticon_{{cathash}}" id="input_{{cathash}}" value="{{currenticon}}">
                         </div>
                     </div>
                 {{/category_icon_options}}

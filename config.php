@@ -276,7 +276,17 @@ if (!empty($configraw)) {
             'shopping-cart' => get_string('icon_cart', 'local_xpstore'),
             'bolt' => get_string('icon_bolt', 'local_xpstore'),
             'shield' => get_string('icon_shield', 'local_xpstore'),
-            'gamepad' => get_string('icon_gamepad', 'local_xpstore'),
+                        'gamepad' => get_string('icon_gamepad', 'local_xpstore'),
+            'heart' => get_string('icon_heart', 'local_xpstore'),
+            'ticket' => get_string('icon_ticket', 'local_xpstore'),
+            'magic' => get_string('icon_magic', 'local_xpstore'),
+            'rocket' => get_string('icon_rocket', 'local_xpstore'),
+            'graduation-cap' => get_string('icon_graduation', 'local_xpstore'),
+            'puzzle-piece' => get_string('icon_puzzle', 'local_xpstore'),
+            'music' => get_string('icon_music', 'local_xpstore'),
+            'camera' => get_string('icon_camera', 'local_xpstore'),
+            'globe' => get_string('icon_globe', 'local_xpstore'),
+            'book' => get_string('icon_book', 'local_xpstore'),
         ];
 
         foreach ($categoriasunicas as $catname) {

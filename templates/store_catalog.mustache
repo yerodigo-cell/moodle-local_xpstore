@@ -166,8 +166,9 @@
 
 {{#status_success}}
 {{#js}}
-require(['core/modal_factory'], function(ModalFactory) {
-        function fireConfetti() {
+
+    (function() {
+                function fireConfetti() {
             var colors = ['#0056D2', '#00C9A7', '#ff9800', '#ff0000', '#ffd700', '#9c27b0'];
             for (var i = 0; i < 80; i++) {
                 var confetti = document.createElement('div');
@@ -178,7 +179,7 @@ require(['core/modal_factory'], function(ModalFactory) {
                 confetti.style.top = '50%';
                 confetti.style.left = '50%';
                 confetti.style.borderRadius = (Math.random() > 0.5 ? '50%' : '0');
-                confetti.style.zIndex = '10001';
+                confetti.style.zIndex = '9999999';
                 confetti.style.pointerEvents = 'none';
 
                 var targetBody = (window.top && window.top.document) ? window.top.document.body : document.body;
@@ -202,29 +203,25 @@ require(['core/modal_factory'], function(ModalFactory) {
                 };
             }
         }
+
         function playSuccessSound() {
             try {
                 var AudioContext = window.AudioContext || window.webkitAudioContext;
                 if (!AudioContext) return;
                 var ctx = new AudioContext();
-
                 function playNote(freq, delay) {
                     var osc = ctx.createOscillator();
                     var gain = ctx.createGain();
                     osc.type = 'sine';
                     osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
-
                     gain.gain.setValueAtTime(0, ctx.currentTime + delay);
                     gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + delay + 0.05);
                     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 1.0);
-
                     osc.connect(gain);
                     gain.connect(ctx.destination);
-
                     osc.start(ctx.currentTime + delay);
                     osc.stop(ctx.currentTime + delay + 1.1);
                 }
-
                 playNote(523.25, 0.0);
                 playNote(659.25, 0.08);
                 playNote(783.99, 0.16);
@@ -236,22 +233,40 @@ require(['core/modal_factory'], function(ModalFactory) {
         setTimeout(fireConfetti, 50);
         setTimeout(playSuccessSound, 50);
 
-        ModalFactory.create({
-            type: ModalFactory.types.DEFAULT,
-            title: '{{str_congratulations}}',
-            body: '<div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{success_icon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{redirecturl}}" class="btn-claim-reward">{{str_goto_dest}}</a></div>',
-        }).then(function(modal) {
-            modal.getRoot().addClass('epic-celebration-modal');
-            var rootNode = modal.getRoot()[0];
-            if (rootNode && rootNode.parentElement) {
-                rootNode.parentElement.style.backgroundColor = 'rgba(0,0,0,0.8)';
-                rootNode.parentElement.style.backdropFilter = 'blur(10px)';
+        var overlay = document.createElement('div');
+        overlay.className = 'epic-celebration-modal';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.backgroundColor = 'rgba(0,0,0,0.6)';
+        overlay.style.backdropFilter = 'blur(10px)';
+        overlay.style.zIndex = '999999';
+        overlay.style.display = 'flex';
+        overlay.style.alignItems = 'center';
+        overlay.style.justifyContent = 'center';
+        
+        overlay.innerHTML = '<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body"><div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{success_icon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{reporturl}}" class="btn-claim-reward">{{str_goto_dest}}</a></div></div></div></div>';
+        
+        // Append to parent document body if inside iframe (widget), otherwise current document body
+        var targetBody = document.body;
+        if (window.parent && window.parent.document && window.parent.document.body) {
+            targetBody = window.parent.document.body;
+        }
+        targetBody.appendChild(overlay);
+
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+                overlay.remove();
             }
-            modal.show();
-        }).catch(function(e) {
-            console.error("ModalFactory error:", e);
         });
-    });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && targetBody.contains(overlay)) {
+                overlay.remove();
+            }
+        });
+    })();
 {{/js}}
 {{/status_success}}
 

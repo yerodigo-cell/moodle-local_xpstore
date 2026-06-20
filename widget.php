@@ -69,6 +69,7 @@ foreach ($items as $item) {
                 'costo' => (int)($parts[1] ?? 0),
                 'n_custom' => $parts[2] ?? '',
                 'boost' => $parts[3] ?? '0',
+                'cat' => isset($parts[4]) && trim($parts[4]) !== '' ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore'),
                 'limite' => (int)($parts[5] ?? 0),
                 'n_real' => $DB->get_field($modname, 'name', ['id' => $cm->instance]),
             ];
@@ -119,6 +120,15 @@ $iconmap = [
     'S' => 'unlock-alt',
 ];
 $icon = $iconmap[$producto['tipo']] ?? 'gift';
+$successicon = $icon;
+
+$caticonsraw = get_config('local_xpstore', 'cat_icons_course_' . $courseid);
+if ($caticonsraw) {
+    $caticons = json_decode($caticonsraw, true);
+    if (isset($producto['cat']) && isset($caticons[$producto['cat']])) {
+        $successicon = $caticons[$producto['cat']];
+    }
+}
 
 $cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
 $cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
@@ -191,7 +201,7 @@ $templatedata = [
     'str_goto_dest' => ($producto['tipo'] == 'G') ?
         get_string('gotogradebook', 'local_xpstore') :
         get_string('gotoactivity', 'local_xpstore'),
-    'success_icon' => $icon,
+    'success_icon' => $successicon,
     'str_success_unlock' => $strsuccessunlock,
     'str_congratulations' => get_string('congratulations', 'local_xpstore'),
     'str_redemptions_count' => get_string('redemptions_count', 'local_xpstore'),
