@@ -239,7 +239,7 @@
         overlay.style.alignItems = 'center';
         overlay.style.justifyContent = 'center';
         
-        overlay.innerHTML = '<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body"><div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{success_icon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{historyurl}}" target="_top" class="btn-claim-reward">{{str_goto_dest}}</a></div></div></div></div>';
+        overlay.innerHTML = '<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body"><div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{success_icon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{redirecturl}}" target="_top" class="btn-claim-reward">{{str_goto_dest}}</a></div></div></div></div>';
         
         // Append to parent document body if inside iframe (widget), otherwise current document body
         var targetBody = document.body;
