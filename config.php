@@ -89,8 +89,8 @@ if ($action === 'add' && confirm_sesskey()) {
         } else {
             $groupid = $group->id;
         }
-        
-        // Auto-apply group restriction to the activity
+
+        // Auto-apply group restriction to the activity.
         local_xpstore_apply_special_restriction($cmid, $groupid, $courseid);
     }
     redirect($url, get_string('productadded', 'local_xpstore'));
@@ -133,8 +133,8 @@ if ($action === 'edit_save' && confirm_sesskey()) {
         } else {
             $groupid = $group->id;
         }
-        
-        // Auto-apply group restriction to the updated activity
+
+        // Auto-apply group restriction to the updated activity.
         local_xpstore_apply_special_restriction($cmid, $groupid, $courseid);
     }
 

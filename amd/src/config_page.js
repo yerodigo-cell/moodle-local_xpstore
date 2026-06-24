@@ -20,7 +20,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery'], function($) {
+define([], function() {
     return {
         init: function() {
             var typeSelect = document.getElementById('type_select');
@@ -94,10 +94,9 @@ define(['jquery'], function($) {
 
             typeSelect.addEventListener('change', filterActivities);
             filterActivities();
-        }
 
-        // Live Preview Logic
-        var livePreview = document.getElementById('xpstore_live_preview');
+            // Live Preview Logic
+            var livePreview = document.getElementById('xpstore_live_preview');
         if (livePreview) {
             var colorPrimary = document.querySelector('input[name="color_primary"]');
             var colorSecondary = document.querySelector('input[name="color_secondary"]');
@@ -134,6 +133,7 @@ define(['jquery'], function($) {
                 colorCatIcon.addEventListener('input', updateCatIcon);
                 colorCatIcon.addEventListener('change', updateCatIcon);
             }
+        }
         }
     };
 });

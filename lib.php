@@ -323,29 +323,31 @@ function local_xpstore_reset_userdata($data) {
  */
 function local_xpstore_get_or_create_forum_role() {
     global $DB, $CFG;
-    require_once($CFG->libdir.'/accesslib.php');
+    require_once($CFG->libdir . '/accesslib.php');
 
     $shortname = 'xpstore_forum_ext';
-    
     if ($role = $DB->get_record('role', ['shortname' => $shortname])) {
         return $role->id;
     }
-    
-    $roleid = create_role('XP Store Forum Extension', $shortname, 'Auto-created role to allow extending forum deadlines via XP Store.');
-    
+
+    $roleid = create_role(
+        'XP Store Forum Extension',
+        $shortname,
+        'Auto-created role to allow extending forum deadlines via XP Store.'
+    );
     if ($roleid) {
         set_role_contextlevels($roleid, [CONTEXT_MODULE]);
         $syscontext = context_system::instance();
         assign_capability('mod/forum:canoverridecutoff', CAP_ALLOW, $roleid, $syscontext->id, true);
         return $roleid;
     }
-    
+
     return false;
 }
 
 /**
  * Automates group restriction injection for Special rewards.
- * 
+ *
  * @param int $cmid The course module ID.
  * @param int $groupid The group ID to restrict access to.
  * @param int $courseid The course ID for cache rebuild.
@@ -367,22 +369,22 @@ function local_xpstore_apply_special_restriction($cmid, $groupid, $courseid) {
             'op' => '&',
             'c' => [$newrestriction],
             'showc' => [false],
-            'show' => false
+            'show' => false,
         ];
         $availability = json_encode($tree);
     } else {
         $tree = json_decode($availability, true);
         if (!is_array($tree) || !isset($tree['c']) || !isset($tree['showc'])) {
-            // Invalid JSON, overwrite safely
+            // Invalid JSON, overwrite safely.
             $tree = [
                 'op' => '&',
                 'c' => [$newrestriction],
                 'showc' => [false],
-                'show' => false
+                'show' => false,
             ];
             $availability = json_encode($tree);
         } else {
-            // Check if this specific group restriction already exists
+            // Check if this specific group restriction already exists.
             $exists = false;
             foreach ($tree['c'] as $cond) {
                 if (isset($cond['type']) && $cond['type'] === 'group' && isset($cond['id']) && $cond['id'] == $groupid) {
@@ -392,8 +394,8 @@ function local_xpstore_apply_special_restriction($cmid, $groupid, $courseid) {
             }
             if (!$exists) {
                 $tree['c'][] = $newrestriction;
-                $tree['showc'][] = false; // Add 'eye closed'
-                $tree['show'] = false; // Ensure root show is false
+                $tree['showc'][] = false; // Add 'eye closed'.
+                $tree['show'] = false; // Ensure root show is false.
                 $availability = json_encode($tree);
             }
         }
