@@ -134,7 +134,7 @@ if ($caticonsraw) {
 
 $cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
 $cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
-$cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800';
+$cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: $cpstore;
 
 $isbonus = ($producto['tipo'] == 'G' && $producto['boost'] != '0');
 $isspecial = ($producto['tipo'] == 'S');
@@ -168,6 +168,7 @@ if ($statussuccess) {
     } else {
         $strsuccessunlock = get_string('success_unlock_reward', 'local_xpstore', $a);
     }
+    $strsuccessunlock = addslashes($strsuccessunlock);
 }
 
 $disabled = ($saldo < $producto['costo']);

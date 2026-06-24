@@ -42,6 +42,7 @@ $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string('configtitle', 'local_xpstore'));
 
 $action = optional_param('action', '', PARAM_ALPHANUMEXT);
+$tab = optional_param('tab', '', PARAM_TEXT);
 
 $catalogkey = 'catalog_course_' . $courseid;
 
@@ -52,7 +53,7 @@ if ($action === 'togglemenu' && confirm_sesskey()) {
     }
     $newmenu = ($currentmenu === '0') ? '1' : '0';
     set_config('show_menu_course_' . $courseid, $newmenu, 'local_xpstore');
-    redirect($url);
+    redirect(new moodle_url($url, ['tab' => 'settings']));
 }
 
 $menuvisible = get_config('local_xpstore', 'show_menu_course_' . $courseid);
@@ -78,14 +79,19 @@ if ($action === 'add' && confirm_sesskey()) {
 
     if ($tipo === 'S') {
         $groupparams = ['courseid' => $courseid, 'name' => $nombre];
-        if (!$DB->record_exists('groups', $groupparams)) {
+        $group = $DB->get_record('groups', $groupparams);
+        if (!$group) {
+            require_once($CFG->dirroot . '/group/lib.php');
             $newgroup = new stdClass();
             $newgroup->courseid = $courseid;
             $newgroup->name = $nombre;
-            $newgroup->timecreated = time();
-            $newgroup->timemodified = time();
-            $DB->insert_record('groups', $newgroup);
+            $groupid = groups_create_group($newgroup);
+        } else {
+            $groupid = $group->id;
         }
+        
+        // Auto-apply group restriction to the activity
+        local_xpstore_apply_special_restriction($cmid, $groupid, $courseid);
     }
     redirect($url, get_string('productadded', 'local_xpstore'));
 }
@@ -114,6 +120,24 @@ if ($action === 'edit_save' && confirm_sesskey()) {
     }
 
     set_config($catalogkey, implode(',', $items), 'local_xpstore');
+
+    if ($tipo === 'S') {
+        $groupparams = ['courseid' => $courseid, 'name' => $nombre];
+        $group = $DB->get_record('groups', $groupparams);
+        if (!$group) {
+            require_once($CFG->dirroot . '/group/lib.php');
+            $newgroup = new stdClass();
+            $newgroup->courseid = $courseid;
+            $newgroup->name = $nombre;
+            $groupid = groups_create_group($newgroup);
+        } else {
+            $groupid = $group->id;
+        }
+        
+        // Auto-apply group restriction to the updated activity
+        local_xpstore_apply_special_restriction($cmid, $groupid, $courseid);
+    }
+
     redirect($url, get_string('productupdated', 'local_xpstore'));
 }
 
@@ -138,8 +162,16 @@ if ($action === 'deleteall' && confirm_sesskey()) {
     redirect($url, get_string('deletedall', 'local_xpstore'));
 }
 
-// Save colors.
-if ($action === 'savecolors' && confirm_sesskey()) {
+if ($action === 'resetcolors' && confirm_sesskey()) {
+    unset_config('color_primary_course_' . $courseid, 'local_xpstore');
+    unset_config('color_secondary_course_' . $courseid, 'local_xpstore');
+    unset_config('color_icon_course_' . $courseid, 'local_xpstore');
+    unset_config('color_cat_icon_course_' . $courseid, 'local_xpstore');
+    redirect(new moodle_url($url, ['tab' => 'settings']), get_string('colorsreset', 'local_xpstore'));
+}
+
+// Save all settings (colors and icons).
+if ($action === 'savesettings' && confirm_sesskey()) {
     $cp = required_param('color_primary', PARAM_TEXT);
     $cb = required_param('color_secondary', PARAM_TEXT);
     $ci = required_param('color_icon', PARAM_TEXT);
@@ -149,19 +181,7 @@ if ($action === 'savecolors' && confirm_sesskey()) {
     set_config('color_secondary_course_' . $courseid, $cb, 'local_xpstore');
     set_config('color_icon_course_' . $courseid, $ci, 'local_xpstore');
     set_config('color_cat_icon_course_' . $courseid, $cc, 'local_xpstore');
-    redirect($url, get_string('colorssaved', 'local_xpstore'));
-}
 
-if ($action === 'resetcolors' && confirm_sesskey()) {
-    unset_config('color_primary_course_' . $courseid, 'local_xpstore');
-    unset_config('color_secondary_course_' . $courseid, 'local_xpstore');
-    unset_config('color_icon_course_' . $courseid, 'local_xpstore');
-    unset_config('color_cat_icon_course_' . $courseid, 'local_xpstore');
-    redirect($url, get_string('colorsreset', 'local_xpstore'));
-}
-
-// Save category icons.
-if ($action === 'savecaticons' && confirm_sesskey()) {
     $caticons = [];
     $configraw = get_config('local_xpstore', $catalogkey) ?: '';
     $itemsraw = array_filter(explode(',', $configraw));
@@ -177,12 +197,12 @@ if ($action === 'savecaticons' && confirm_sesskey()) {
         }
     }
     set_config('cat_icons_course_' . $courseid, json_encode($caticons), 'local_xpstore');
-    redirect($url, get_string('icons_saved', 'local_xpstore'));
+    redirect(new moodle_url($url, ['tab' => 'settings']), get_string('changessaved'));
 }
 
 $cpactual = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
 $cbactual = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
-$ciactual = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800';
+$ciactual = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: $cpactual;
 $ccactual = get_config('local_xpstore', 'color_cat_icon_course_' . $courseid) ?: $cpactual;
 
 $isediting = false;
@@ -219,6 +239,7 @@ $availabletypes = [
     'Q' => get_string('type_q', 'local_xpstore'),
     'A' => get_string('type_a', 'local_xpstore'),
     'G' => get_string('type_g', 'local_xpstore'),
+    'F' => get_string('type_f', 'local_xpstore'),
     'S' => get_string('type_s', 'local_xpstore'),
 ];
 foreach ($availabletypes as $val => $label) {
@@ -378,7 +399,11 @@ $urlhistoryw = $CFG->wwwroot . "/local/xpstore/widget_history.php?id={$courseid}
 $iframehistory = '<iframe src="' . $urlhistoryw . '" width="100%" height="150" ' .
     'style="border: none; overflow: hidden;" scrolling="no"></iframe>';
 
+$activetab = ($tab === 'settings' || in_array($action, ['savesettings', 'resetcolors', 'togglemenu'])) ? 'settings' : 'products';
+
 $templatedata = [
+    'tab_products_active' => ($activetab === 'products'),
+    'tab_settings_active' => ($activetab === 'settings'),
     'str_configtitle' => get_string('configtitle', 'local_xpstore'),
     'url' => $url->out(false),
     'sesskey' => sesskey(),
@@ -391,6 +416,8 @@ $templatedata = [
     'storeurl' => (new moodle_url('/local/xpstore/index.php', ['id' => $courseid]))->out(false),
     'str_tiendaxp' => get_string('tiendaxp', 'local_xpstore'),
 
+    'str_tabproducts' => get_string('str_tabproducts', 'local_xpstore'),
+    'str_tabsettings' => get_string('str_tabsettings', 'local_xpstore'),
     'isediting' => $isediting,
     'str_edit' => get_string('edit', 'local_xpstore'),
     'str_addproduct' => get_string('addproduct', 'local_xpstore'),
@@ -443,6 +470,7 @@ $templatedata = [
     'str_confirmresetcolors' => get_string('confirmresetcolors', 'local_xpstore'),
     'str_resetcolors' => get_string('resetcolors', 'local_xpstore'),
     'str_savecolors' => get_string('savecolors', 'local_xpstore'),
+    'str_savechanges' => get_string('savechanges'),
 
     'has_categories' => $hascategories,
     'str_categoryicons' => get_string('categoryicons', 'local_xpstore'),

@@ -68,7 +68,19 @@
         </div>
     </div>
 
-    <div class="form-box {{#isediting}}editing{{/isediting}}">
+    <ul class="nav nav-tabs mb-4 xpstore-tabs" id="xpstoreConfigTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {{#tab_products_active}}active{{/tab_products_active}}" id="products-tab" data-toggle="tab" data-bs-toggle="tab" href="#products" role="tab" aria-controls="products" aria-selected="{{#tab_products_active}}true{{/tab_products_active}}{{^tab_products_active}}false{{/tab_products_active}}">{{str_tabproducts}}</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link {{#tab_settings_active}}active{{/tab_settings_active}}" id="settings-tab" data-toggle="tab" data-bs-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="{{#tab_settings_active}}true{{/tab_settings_active}}{{^tab_settings_active}}false{{/tab_settings_active}}">{{str_tabsettings}}</a>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="xpstoreConfigTabsContent">
+        <div class="tab-pane fade {{#tab_products_active}}show active{{/tab_products_active}}" id="products" role="tabpanel" aria-labelledby="products-tab">
+
+            <div class="form-box {{#isediting}}editing{{/isediting}}">
         <h5 class="mb-3 font-weight-bold d-flex align-items-center">
             {{#isediting}}
                 <i class="fa fa-pencil mr-2 text-warning"></i> {{str_edit}}
@@ -85,7 +97,7 @@
                 <input type="hidden" name="old_item" value="{{olditemval}}">
             {{/isediting}}
             
-            <div class="col-6 col-md-4 col-lg-2 mb-3">
+            <div class="col-12 col-md-6 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-flex">
                     {{str_type}}
                     {{{help_type}}}
@@ -98,7 +110,7 @@
                 </select>
             </div>
 
-            <div class="col-12 col-md-8 col-lg-3 mb-3">
+            <div class="col-12 col-md-6 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-block">
                     {{str_activity}}
                 </label>
@@ -110,22 +122,22 @@
                 </select>
             </div>
 
-            <div class="col-6 col-md-3 col-lg-1 mb-3">
+            <div class="col-12 col-md-6 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_cost}}</label>
                 <input type="number" name="costo" class="form-control form-control-sm" required value="{{ecosto}}">
             </div>
 
-            <div class="col-6 col-md-3 col-lg-1 mb-3">
+            <div class="col-12 col-md-6 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_limit}}</label>
                 <input type="number" name="limite" min="0" class="form-control form-control-sm" placeholder="{{str_limitzero}}" value="{{elimite}}">
             </div>
 
-            <div class="col-12 col-md-3 col-lg-2 mb-3">
+            <div class="col-12 col-md-6 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-category">{{str_category}}</label>
                 <input type="text" name="categoria" class="form-control form-control-sm" value="{{ecat}}">
             </div>
 
-            <div class="col-12 col-md-4 col-lg-2 mb-3">
+            <div class="col-12 col-md-6 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-flex">
                     {{str_label}}
                     {{{help_label}}}
@@ -133,7 +145,7 @@
                 <input type="text" name="nombre" class="form-control form-control-sm" value="{{enombre}}">
             </div>
 
-            <div id="bonus_container" class="col-6 col-md-2 col-lg-1 mb-3" style="display: none;">
+            <div id="bonus_container" class="col-12 col-md-6 mb-3" style="display: none;">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_gradepoints}}</label>
                 <input type="number" step="0.1" name="valor_nota" class="form-control form-control-sm" value="{{evalor}}">
             </div>
@@ -218,17 +230,46 @@
             </tbody>
         </table>
     </div>
+        <div class="widget-generator mt-4 mb-4" style="background: #e0f7fa; border-radius: 12px; padding: 20px;">
+            <h5 class="mb-3 font-weight-bold">
+                <i class="fa fa-share-alt mr-2 icon-widget-title" style="color: #00838f;"></i> {{str_widget_panel_title}}
+            </h5>
+            <p class="small text-muted mb-3">
+                {{str_widget_panel_desc}}
+            </p>
+            <div>
+                <button class="btn-copy-w btn-copy-w-store" data-action="copy-widget" data-code="{{iframestore}}">
+                    <i class="fa fa-code"></i> {{str_full_store}}
+                </button>
+                
+                <button class="btn-copy-w btn-copy-w-history" data-action="copy-widget" data-code="{{iframehistory}}">
+                    <i class="fa fa-history"></i> {{str_history_button}}
+                </button>
+                
+                {{#category_iframe_options}}
+                    <button class="btn-copy-w" data-action="copy-widget" data-code="{{iframecat}}">
+                        <i class="fa fa-{{currenticon}}"></i> {{str_category_short}} {{catname}}
+                    </button>
+                {{/category_iframe_options}}
+            </div>
+        </div>
+
+    </div>
+    
+        
+        <div class="tab-pane fade {{#tab_settings_active}}show active{{/tab_settings_active}}" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+            <form method="POST" action="{{url}}" class="xpstore-settings-form">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="action" value="savesettings">
 
     {{#has_categories}}
-        <div class="form-box form-box-category">
+        <div class="form-box form-box-category mb-4">
             <h5 class="mb-3 font-weight-bold">
                 <i class="fa fa-star mr-2 icon-category-title"></i> 
                 {{str_categoryicons}}
             </h5>
             
-            <form method="POST" action="{{url}}" class="row align-items-end">
-                <input type="hidden" name="sesskey" value="{{sesskey}}">
-                <input type="hidden" name="action" value="savecaticons">
+            <div class="row align-items-end">
                 
                 {{#category_icon_options}}
                     <div class="col-12 col-md-3 mb-3">
@@ -253,37 +294,10 @@
                     </div>
                 {{/category_icon_options}}
                 
-                <div class="col-12 d-flex justify-content-end mt-2">
-                    <button type="submit" class="btn px-4 py-2 font-weight-bold btn-save-icons">
-                        <i class="fa fa-save"></i> {{str_saveicons}}
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <div class="widget-generator">
-            <h5 class="mb-3 font-weight-bold">
-                <i class="fa fa-share-alt mr-2 icon-widget-title"></i> {{str_widget_panel_title}}
-            </h5>
-            <p class="small text-muted mb-3">
-                {{str_widget_panel_desc}}
-            </p>
-            <div>
-                <button class="btn-copy-w btn-copy-w-store" data-action="copy-widget" data-code="{{iframestore}}">
-                    <i class="fa fa-code"></i> {{str_full_store}}
-                </button>
-                
-                <button class="btn-copy-w btn-copy-w-history" data-action="copy-widget" data-code="{{iframehistory}}">
-                    <i class="fa fa-history"></i> {{str_history_button}}
-                </button>
-                
-                {{#category_iframe_options}}
-                    <button class="btn-copy-w" data-action="copy-widget" data-code="{{iframecat}}">
-                        <i class="fa fa-{{currenticon}}"></i> {{str_category_short}} {{catname}}
-                    </button>
-                {{/category_iframe_options}}
             </div>
         </div>
+
+
     {{/has_categories}}
 
     <div class="form-box mt-4 form-box-colors">
@@ -291,10 +305,96 @@
             <i class="fa fa-paint-brush mr-2" style="color: {{cpactual}};"></i> 
             {{str_colorconfig}}
         </h5>
+
+        <div class="local_xpstore-container local_xpstore-embedded-container mb-4" id="xpstore_live_preview" style="--cp: {{cpactual}}; --cb: {{cbactual}}; --ci: {{ciactual}}; --cc: {{ccactual}}; --gradient: linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%);">
+            <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: flex-start; padding: 25px; background: #f8f9fa; border-radius: 12px; border: 2px dashed #ddd;">
+                
+                <div style="flex: 1; min-width: 250px;">
+                    <p class="small text-muted mb-3 font-weight-bold text-uppercase" style="letter-spacing: 0.5px;"><i class="fa fa-image"></i> {{#str}} mockup_storebanner, local_xpstore {{/str}}</p>
+                    
+                    <div class="wallet-header" style="margin-bottom: 20px; border-radius: 12px;">
+                        <h6 class="text-uppercase small mb-1" style="letter-spacing: 1px; opacity: 0.9;">
+                            {{#str}} saldo, local_xpstore {{/str}}
+                        </h6>
+                        <div class="xp-balance"><span class="xp-balance-value">1200</span> XP</div>
+                        <div class="mt-3">
+                            <a href="#" class="btn btn-outline-light rounded-pill px-3 py-1" style="font-size: 0.85rem; pointer-events: none;">
+                                {{#str}} history, local_xpstore {{/str}}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;">
+                        <h4 class="m-0 font-weight-bold" style="color: #333; font-size: 1.6rem; text-align: center; letter-spacing: -0.5px;">
+                            <i class="fa fa-star mr-2" style="color: var(--cc);" id="preview_header_icon"></i> {{#str}} category, local_xpstore {{/str}}
+                        </h4>
+                    </div>
+                </div>
+
+                <div style="width: 220px;">
+                    <p class="small text-muted mb-3 font-weight-bold text-uppercase" style="letter-spacing: 0.5px;"><i class="fa fa-th-large"></i> {{#str}} mockup_storecard, local_xpstore {{/str}}</p>
+                    <div class="p-card" style="margin: 0; pointer-events: none; height: 100%;">
+                        <div class="glass-shine"></div>
+                        <div>
+                            <div style="font-size: 20px; color: var(--ci); margin-bottom: 8px;">
+                                <i class="fa fa-file-text"></i>
+                            </div>
+                            <div class="font-weight-bold" style="font-size: 0.95rem; line-height: 1.2; margin-bottom: 4px;">
+                                {{#str}} mockup_sampleitem, local_xpstore {{/str}}
+                            </div>
+                            <div class="text-muted small mb-2" style="font-size: 0.75rem;">
+                                {{#str}} mockup_shortdesc, local_xpstore {{/str}}
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="font-weight-bold text-primary m-0" style="font-size: 1.1rem;">
+                                500 XP
+                            </div>
+                            <div style="margin-bottom: 8px;"></div>
+                            <button type="button" class="btn-buy">
+                                {{#str}} canjear, local_xpstore {{/str}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="width: 220px;">
+                    <p class="small text-muted mb-3 font-weight-bold text-uppercase" style="letter-spacing: 0.5px;"><i class="fa fa-puzzle-piece"></i> {{#str}} mockup_widget, local_xpstore {{/str}}</p>
+                    <div class="widget-card" style="width: 100%; margin: 0; pointer-events: none;">
+                        <div class="glass-shine"></div>
+                        <div class="mini-wallet">
+                            {{#str}} balance, local_xpstore {{/str}}:&nbsp;<span class="xp-balance-value">1200</span> XP
+                        </div>
+
+                        <div class="card-body">
+                            <div class="w-icon">
+                                <i class="fa fa-star"></i>
+                            </div>
+                            <div class="w-title">
+                                {{#str}} mockup_sampleitem, local_xpstore {{/str}}
+                            </div>
+                            <div class="w-subtitle">
+                                {{#str}} mockup_shortdesc, local_xpstore {{/str}}
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <div class="w-cost text-primary">
+                                500 XP
+                            </div>
+                            <div style="margin-bottom: 8px;"></div>
+                            <button type="button" class="btn-buy">
+                                {{#str}} canjear, local_xpstore {{/str}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
         
-        <form method="POST" action="{{url}}" class="row align-items-end">
-            <input type="hidden" name="sesskey" value="{{sesskey}}">
-            <input type="hidden" name="action" value="savecolors">
+        <div class="row align-items-end">
 
             <div class="col-6 col-md-3 col-lg-2 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_primarycolor}}</label>
@@ -320,11 +420,15 @@
                 <a href="{{resetcolorsurl}}" class="btn btn-outline-secondary px-3 py-2 font-weight-bold w-50 btn-reset-colors" onclick="return confirm('{{str_confirmresetcolors}}')">
                     <i class="fa fa-undo"></i> {{str_resetcolors}}
                 </a>
-                <button type="submit" class="btn px-3 py-2 font-weight-bold w-50 btn-save-colors" style="background: {{cpactual}};">
-                    {{str_savecolors}}
+                <button type="submit" class="btn px-3 py-2 font-weight-bold w-50 btn-save-colors text-white" style="background: {{cpactual}};">
+                    {{str_savechanges}}
                 </button>
             </div>
-        </form>
+        </div>
+    </div>
+
+    </form>
+        </div>
     </div>
 
 </div>

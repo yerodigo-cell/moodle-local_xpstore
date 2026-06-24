@@ -104,7 +104,7 @@ $historyurl = new moodle_url('/local/xpstore/history.php', ['id' => $courseid]);
 
 $cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
 $cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
-$cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: '#ff9800';
+$cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: $cpstore;
 $ccstore = get_config('local_xpstore', 'color_cat_icon_course_' . $courseid) ?: $cpstore;
 
 $caticons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid), true) ?: [];
@@ -243,6 +243,7 @@ if ($status === 'success') {
         $strgotodest = get_string('gotoactivity', 'local_xpstore');
         $strsuccessunlock = get_string('success_unlock_reward', 'local_xpstore', $a);
     }
+    $strsuccessunlock = addslashes($strsuccessunlock);
 }
 
 $templatedata = [

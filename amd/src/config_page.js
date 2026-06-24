@@ -20,7 +20,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define([], function() {
+define(['jquery'], function($) {
     return {
         init: function() {
             var typeSelect = document.getElementById('type_select');
@@ -59,6 +59,8 @@ define([], function() {
                         show = (optData.modname === 'quiz');
                     } else if (selectedType === 'A') {
                         show = (optData.modname === 'assign');
+                    } else if (selectedType === 'F') {
+                        show = (optData.modname === 'forum');
                     } else if (selectedType === 'G') {
                         var gradables = ['quiz', 'assign', 'forum', 'workshop', 'scorm', 'lesson', 'h5pactivity'];
                         show = gradables.indexOf(optData.modname) !== -1;
@@ -81,11 +83,7 @@ define([], function() {
                 // Handle Bonus field visibility
                 var bonusContainer = document.getElementById('bonus_container');
                 if (bonusContainer) {
-                    if (selectedType === 'G') {
-                        bonusContainer.style.display = '';
-                    } else {
-                        bonusContainer.style.display = 'none';
-                    }
+                    bonusContainer.style.display = (selectedType === 'G') ? '' : 'none';
                 }
 
                 // Reset selection if it disappeared
@@ -96,6 +94,46 @@ define([], function() {
 
             typeSelect.addEventListener('change', filterActivities);
             filterActivities();
+        }
+
+        // Live Preview Logic
+        var livePreview = document.getElementById('xpstore_live_preview');
+        if (livePreview) {
+            var colorPrimary = document.querySelector('input[name="color_primary"]');
+            var colorSecondary = document.querySelector('input[name="color_secondary"]');
+            var colorIcon = document.querySelector('input[name="color_icon"]');
+            var colorCatIcon = document.querySelector('input[name="color_cat_icon"]');
+
+            if (colorPrimary) {
+                var updatePrimary = function(e) {
+                    livePreview.style.setProperty('--cp', e.target.value);
+                    livePreview.style.setProperty('--gradient', 'linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%)');
+                };
+                colorPrimary.addEventListener('input', updatePrimary);
+                colorPrimary.addEventListener('change', updatePrimary);
+            }
+            if (colorSecondary) {
+                var updateSecondary = function(e) {
+                    livePreview.style.setProperty('--cb', e.target.value);
+                    livePreview.style.setProperty('--gradient', 'linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%)');
+                };
+                colorSecondary.addEventListener('input', updateSecondary);
+                colorSecondary.addEventListener('change', updateSecondary);
+            }
+            if (colorIcon) {
+                var updateIcon = function(e) {
+                    livePreview.style.setProperty('--ci', e.target.value);
+                };
+                colorIcon.addEventListener('input', updateIcon);
+                colorIcon.addEventListener('change', updateIcon);
+            }
+            if (colorCatIcon) {
+                var updateCatIcon = function(e) {
+                    livePreview.style.setProperty('--cc', e.target.value);
+                };
+                colorCatIcon.addEventListener('input', updateCatIcon);
+                colorCatIcon.addEventListener('change', updateCatIcon);
+            }
         }
     };
 });

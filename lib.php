@@ -148,7 +148,7 @@ function local_xpstore_purchase($userid, $type, $cmid, $cost, $courseid) {
  * @return bool True if successful, false otherwise.
  */
 function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) {
-    global $DB;
+    global $DB, $CFG;
 
     try {
         $cm = $DB->get_record('course_modules', ['id' => $cmid], '*', MUST_EXIST);
@@ -258,27 +258,26 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
                 }
             }
         } else if ($type === 'S') {
+            require_once($CFG->dirroot . '/group/lib.php');
             $group = $DB->get_record('groups', ['courseid' => $cm->course, 'name' => $rewardname]);
 
             if (!$group) {
-                $newgroup = (object)[
-                    'courseid' => $cm->course,
-                    'name' => $rewardname,
-                    'timecreated' => time(),
-                    'timemodified' => time(),
-                ];
-                $groupid = $DB->insert_record('groups', $newgroup);
+                $newgroup = new stdClass();
+                $newgroup->courseid = $cm->course;
+                $newgroup->name = $rewardname;
+                $groupid = groups_create_group($newgroup);
             } else {
                 $groupid = $group->id;
             }
 
-            if (!$DB->record_exists('groups_members', ['groupid' => $groupid, 'userid' => $userid])) {
-                $newmember = (object)[
-                    'groupid' => $groupid,
-                    'userid' => $userid,
-                    'timeadded' => time(),
-                ];
-                $DB->insert_record('groups_members', $newmember);
+            if (!groups_is_member($groupid, $userid)) {
+                groups_add_member($groupid, $userid);
+            }
+        } else if ($type === 'F') {
+            $context = context_module::instance($cm->id);
+            $roleid = local_xpstore_get_or_create_forum_role();
+            if ($roleid) {
+                role_assign($roleid, $userid, $context->id);
             }
         }
 
@@ -315,4 +314,93 @@ function local_xpstore_reset_userdata($data) {
         $DB->execute($sql, [$data->courseid]);
     }
     return [];
+}
+
+/**
+ * Gets or creates the custom role for extending forum deadlines.
+ *
+ * @return int|bool The role ID or false.
+ */
+function local_xpstore_get_or_create_forum_role() {
+    global $DB, $CFG;
+    require_once($CFG->libdir.'/accesslib.php');
+
+    $shortname = 'xpstore_forum_ext';
+    
+    if ($role = $DB->get_record('role', ['shortname' => $shortname])) {
+        return $role->id;
+    }
+    
+    $roleid = create_role('XP Store Forum Extension', $shortname, 'Auto-created role to allow extending forum deadlines via XP Store.');
+    
+    if ($roleid) {
+        set_role_contextlevels($roleid, [CONTEXT_MODULE]);
+        $syscontext = context_system::instance();
+        assign_capability('mod/forum:canoverridecutoff', CAP_ALLOW, $roleid, $syscontext->id, true);
+        return $roleid;
+    }
+    
+    return false;
+}
+
+/**
+ * Automates group restriction injection for Special rewards.
+ * 
+ * @param int $cmid The course module ID.
+ * @param int $groupid The group ID to restrict access to.
+ * @param int $courseid The course ID for cache rebuild.
+ */
+function local_xpstore_apply_special_restriction($cmid, $groupid, $courseid) {
+    global $DB, $CFG;
+    require_once($CFG->dirroot . '/course/lib.php');
+
+    $cm = $DB->get_record('course_modules', ['id' => $cmid]);
+    if (!$cm) {
+        return;
+    }
+
+    $availability = $cm->availability;
+    $newrestriction = ['type' => 'group', 'id' => (int)$groupid];
+
+    if (empty($availability)) {
+        $tree = [
+            'op' => '&',
+            'c' => [$newrestriction],
+            'showc' => [false],
+            'show' => false
+        ];
+        $availability = json_encode($tree);
+    } else {
+        $tree = json_decode($availability, true);
+        if (!is_array($tree) || !isset($tree['c']) || !isset($tree['showc'])) {
+            // Invalid JSON, overwrite safely
+            $tree = [
+                'op' => '&',
+                'c' => [$newrestriction],
+                'showc' => [false],
+                'show' => false
+            ];
+            $availability = json_encode($tree);
+        } else {
+            // Check if this specific group restriction already exists
+            $exists = false;
+            foreach ($tree['c'] as $cond) {
+                if (isset($cond['type']) && $cond['type'] === 'group' && isset($cond['id']) && $cond['id'] == $groupid) {
+                    $exists = true;
+                    break;
+                }
+            }
+            if (!$exists) {
+                $tree['c'][] = $newrestriction;
+                $tree['showc'][] = false; // Add 'eye closed'
+                $tree['show'] = false; // Ensure root show is false
+                $availability = json_encode($tree);
+            }
+        }
+    }
+
+    if ($cm->availability !== $availability) {
+        $DB->set_field('course_modules', 'availability', $availability, ['id' => $cmid]);
+        rebuild_course_cache($courseid, true);
+    }
 }

@@ -1,0 +1,167 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * XP Store (local_xpstore)
+ *
+ * @package     local_xpstore
+ * @copyright   2026 Yeison Díaz
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+$string['action'] = 'Ekintza';
+$string['activity'] = 'Jarduera';
+$string['activitydeleted'] = 'Jarduera / Baliabidea ezabatuta';
+$string['add'] = 'Gehitu';
+$string['addproduct'] = 'Gehitu produktu berria';
+$string['audit'] = 'XP Trukaketak';
+$string['balance'] = 'SALDOA';
+$string['cancel'] = 'Utzi';
+$string['canjear'] = 'Trukatu';
+$string['catalog'] = 'Aukeratu zure sariak';
+$string['category'] = 'Dendaren Kategoria';
+$string['category_placeholder'] = 'Adib: VIP...';
+$string['category_short'] = 'Kat:';
+$string['categoryicons'] = 'Kategoriaren ikonoak';
+$string['chooseactivity'] = 'Aukeratu jarduera';
+$string['choosetype'] = 'Aukeratu Mota';
+$string['colaction'] = 'Ekintza';
+$string['colactivity'] = 'Lotutako Jarduera';
+$string['colcategory'] = 'Dendaren Kategoria';
+$string['colcost'] = 'Kostua';
+$string['collabel'] = 'Etiketa';
+$string['color_cat_icon'] = 'Kat. Ikonoen Kolorea';
+$string['colorconfig'] = 'Pertsonalizazio Bisuala';
+$string['colorsreset'] = 'Koloreak lehenetsitakoetara leheneratu dira ongi.';
+$string['colorssaved'] = 'Koloreak ongi eguneratu dira.';
+$string['coltype'] = 'Mota';
+$string['configtitle'] = 'XP Store Konfigurazioa';
+$string['configure'] = 'Konfiguratu';
+$string['confirmdelete'] = 'Ziur al zaude produktu hau ezabatu nahi duzula?';
+$string['confirmdeleteall'] = 'Ziur al zaude sari GUZTIAK ezabatu nahi dituzula? Ekintza hau ezin da desegin.';
+$string['confirmreset'] = 'Ziur al zaude ikastaro honen historia osoa garbitu nahi duzula?';
+$string['confirmresetcolors'] = 'Ziur al zaude denda jatorrizko koloreetan berrezarri nahi duzula?';
+$string['congratulations'] = 'Zorionak!';
+$string['copyalert'] = 'Kodea arbelean kopiatu da! Orain joan zure ikastaroko edozein Etiketa edo Orrira, ireki HTML editorea (</>) eta itsatsi.';
+$string['copysinglecard'] = 'Kopiatu Txartel Bakarra';
+$string['cost'] = 'Kostua';
+$string['currentcatalog'] = 'Oraingo Katalogoa';
+$string['date'] = 'Data';
+$string['defaultcategory'] = 'Katalogo Nagusia';
+$string['delete'] = 'Ezabatu';
+$string['deleteall'] = 'Ezabatu Guztia';
+$string['deletedall'] = 'Sari guztiak katalogotik kendu dira.';
+$string['edit'] = 'Editatu';
+$string['error'] = 'Errorea trukea prozesatzean';
+$string['exito'] = 'Trukea arrakastatsua!';
+$string['full_store'] = 'Denda Osoa';
+$string['global_settings_info'] = 'XP Store ongi instalatu da! Plugin honek ez du konfigurazio globalik behar. Denda, koloreak eta produktuak konfiguratzeko, joan edozein ikastaroren orri nagusira eta sakatu "XP Store Konfigurazioa" botoia.';
+$string['gotoactivity'] = 'Joan Jarduerara';
+$string['gotogradebook'] = 'Joan Kalifikazio-liburura';
+$string['gradepoints'] = 'Saria (+)';
+$string['hide_menu_tooltip'] = 'Ezkutatu denda ikastaroko menutik';
+$string['history'] = 'Erosketen Historia';
+$string['history_button'] = 'Historia Botoia';
+$string['icon_award'] = 'Sariaren Zinta';
+$string['icon_bolt'] = 'Tximista';
+$string['icon_book'] = 'Liburua';
+$string['icon_camera'] = 'Kamera';
+$string['icon_cart'] = 'Saskia';
+$string['icon_diamond'] = 'Diamantea';
+$string['icon_gamepad'] = 'Gamepad';
+$string['icon_gift'] = 'Oparia';
+$string['icon_globe'] = 'Mundua';
+$string['icon_graduation'] = 'Graduazioa';
+$string['icon_heart'] = 'Bihotza';
+$string['icon_magic'] = 'Magia';
+$string['icon_medal'] = 'Domina';
+$string['icon_money'] = 'Txanponak';
+$string['icon_music'] = 'Musika';
+$string['icon_puzzle'] = 'Puzzlea';
+$string['icon_rocket'] = 'Suziria';
+$string['icon_shield'] = 'Ezkutua';
+$string['icon_star'] = 'Izarra';
+$string['icon_ticket'] = 'Sarrera';
+$string['icon_trophy'] = 'Garaikurra';
+$string['iconcolor'] = 'Ikonoaren Kolorea';
+$string['icons_saved'] = 'Ikonoak gorde dira.';
+$string['insuficiente'] = 'Puntu nahikorik ez';
+$string['isactive'] = 'Aktiboa';
+$string['label'] = 'Etiketa';
+$string['label_help'] = 'Mota <b>Berezia</b> hautatzen baduzu, etiketa hau duen talde bat automatikoki sortuko da (edo dagoeneko badago, berrerabiliko da) eta hautatutako jarduera talde horretara mugatuko da.';
+$string['limit'] = 'Muga';
+$string['limitreached'] = 'Elementu honen gehienezko erosketa-muga gainditu duzu.';
+$string['limitzero'] = '0 = ∞ (Infinitua)';
+$string['linkedactivity'] = 'Lotutako Jarduera';
+$string['menuhidden'] = 'Menua: Ezkutatuta';
+$string['menuvisibility_help'] = 'Ikasleentzako ikastaroko nabigazio menuan dendara joateko zuzeneko lotura gaitu edo desgaitzen du. Ezkutatuta edukitzea eta dendako Widget-ak erabiltzea gomendatzen dugu, esperientzia murgilgarriagoa eskaintzen baitute (sariak erostean soinu-efektuak eta animazioak barne).';
+$string['menuvisible'] = 'Menua: Ikusgai';
+$string['nopurchases'] = 'Oraindik ez da erosketarik edo trukaketarik erregistratu ikastaro honetan.';
+$string['norewardscreated'] = 'Oraindik ez da saririk sortu.';
+$string['pluginname'] = 'XP Store';
+$string['points'] = 'Puntuak';
+$string['primarycolor'] = 'Kolore Nagusia (Txartelak eta Ikonoak)';
+$string['privacy:metadata:local_xpstore_gastos'] = 'XP dendan erabiltzaileen trukei buruzko informazioa gordetzen du.';
+$string['privacy:metadata:local_xpstore_gastos:amount'] = 'Elementuaren kostua XP-tan.';
+$string['privacy:metadata:local_xpstore_gastos:itemid'] = 'Trukea aplikatu zen ikastaro-moduluaren ID-a.';
+$string['privacy:metadata:local_xpstore_gastos:itemtype'] = 'Trukatutako elementuaren mota.';
+$string['privacy:metadata:local_xpstore_gastos:timecreated'] = 'Trukea noiz egin zen.';
+$string['privacy:metadata:local_xpstore_gastos:userid'] = 'Trukea egin zuen erabiltzailea.';
+$string['productadded'] = 'Produktua ongi gehitu da';
+$string['productdeleted'] = 'Produktua ezabatu da';
+$string['productupdated'] = 'Saria ongi eguneratu da.';
+$string['purchases'] = 'Erosketak';
+$string['redemptions'] = 'trukeak';
+$string['redemptions_count'] = 'Trukeak:';
+$string['reportsubtitle'] = 'XP onuren jarraipen indibiduala';
+$string['reporttitle'] = 'Trukaketen Txostena';
+$string['resetcolors'] = 'Lehenetsira berrezarri';
+$string['resetcycle'] = 'Berrezarri zikloa';
+$string['resethistory'] = 'Garbitu trukaketen historia';
+$string['saldo'] = 'Zure uneko saldoa';
+$string['savecolors'] = 'Gorde Koloreak';
+$string['saveicons'] = 'Gorde ikonoak';
+$string['secondarycolor'] = 'Bigarren Mailako Kolorea (Gradienteak)';
+$string['show_menu_tooltip'] = 'Erakutsi denda ikastaroko menuan';
+$string['showinmenu'] = 'Erakutsi ikastaroko menuan';
+$string['showinmenu_desc'] = 'Hautatzen bada, ikasleek dendara joateko lasterbidea ikusiko dute nabigazio menuan.';
+$string['soldout'] = 'Agortuta';
+$string['specialcontent'] = 'Berezia';
+$string['storeempty_desc'] = 'Oraindik ez da saririk konfiguratu.';
+$string['storeempty_title'] = 'Denda hutsik dago';
+$string['str_tabproducts'] = 'Produktuak';
+$string['str_tabsettings'] = 'Ezarpenak';
+$string['storetitle'] = 'XP Store';
+$string['success_unlock_gradebook'] = '<b>{$a->reward}</b> saria lortu duzu <b>{$a->activity}</b> jardueran!';
+$string['success_unlock_reward'] = '<b>{$a->reward}</b> saria lortu duzu <b>{$a->activity}</b> jardueran!';
+$string['tiendaxp'] = 'XP Store';
+$string['type'] = 'Mota';
+$string['type_a'] = '24h-ko luzapena';
+$string['type_f'] = 'Foroa (Klasikoa)';
+$string['type_g'] = 'Saria';
+$string['type_help'] = 'Hautatu onura mota:<br><br><b>Saiakera Estra:</b> Galdetegiekin funtzionatzen du.<br><b>24h-ko luzapena:</b> Zereginekin soilik funtzionatzen du.<br><b>Foroa (Klasikoa):</b> Ixteko dataren ostean argitaratzea ahalbidetzen du.<br><b>Saria:</b> Puntu gehigarriak gehitzen ditu zuzenean kalifikazio-liburuan.<br><b>Berezia:</b> Ezkutuko edukia edo VIP taldeak desblokeatzen ditu.';
+$string['type_q'] = 'Saiakera Estra';
+$string['type_s'] = 'Berezia';
+$string['update'] = 'Eguneratu';
+$string['user'] = 'Erabiltzailea';
+$string['widget_panel_desc'] = 'Egin klik botoi batean HTML kodea kopiatzeko. Ondoren, itsatsi zure ikastaroko edozein Etiketa edo Orriren HTML editorean.';
+$string['widget_panel_title'] = 'Widget-ak (txertatu denda edo kategoriak)';
+$string['widgeterror'] = 'Saria ez dago eskuragarri.';
+$string['widgetunlocked'] = 'Desblokeatuta!';
+$string['widgetunlockeddesc'] = 'Orain zure saria erabil dezakezu.';
+$string['xpstore:manage'] = 'Kudeatu XP Store';
