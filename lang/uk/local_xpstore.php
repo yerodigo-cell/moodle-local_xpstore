@@ -154,6 +154,7 @@ $string['str_tabsettings'] = 'Налаштування';
 $string['success_unlock_gradebook'] = 'Ви отримали нагороду <b>{$a->reward}</b> за діяльність <b>{$a->activity}</b>!';
 $string['success_unlock_reward'] = 'Ви отримали нагороду <b>{$a->reward}</b> за діяльність <b>{$a->activity}</b>!';
 $string['tiendaxp'] = 'XP Store';
+$string['totalspent'] = 'Total spent: {$a} XP';
 $string['type'] = 'Тип';
 $string['type_a'] = 'Подовження на 24 год';
 $string['type_f'] = 'Форум (Класичний)';

@@ -154,6 +154,7 @@ $string['str_tabsettings'] = '设置';
 $string['success_unlock_gradebook'] = '您在活动 <b>{$a->activity}</b> 中获得了奖励 <b>{$a->reward}</b>！';
 $string['success_unlock_reward'] = '您在活动 <b>{$a->activity}</b> 中获得了奖励 <b>{$a->reward}</b>！';
 $string['tiendaxp'] = 'XP 商店';
+$string['totalspent'] = 'Total spent: {$a} XP';
 $string['type'] = '类型';
 $string['type_a'] = '24小时延期';
 $string['type_f'] = '论坛（经典）';

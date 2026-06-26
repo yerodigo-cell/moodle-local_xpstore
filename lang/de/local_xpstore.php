@@ -154,6 +154,7 @@ $string['str_tabsettings'] = 'Einstellungen';
 $string['success_unlock_gradebook'] = 'Du hast die Belohnung <b>{$a->reward}</b> bei der Aktivität <b>{$a->activity}</b> erhalten!';
 $string['success_unlock_reward'] = 'Du hast die Belohnung <b>{$a->reward}</b> bei der Aktivität <b>{$a->activity}</b> erhalten!';
 $string['tiendaxp'] = 'XP Store';
+$string['totalspent'] = 'Total spent: {$a} XP';
 $string['type'] = 'Typ';
 $string['type_a'] = '24h Verlängerung';
 $string['type_f'] = 'Forum (Klassisch)';

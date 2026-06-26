@@ -154,6 +154,7 @@ $string['str_tabsettings'] = 'الإعدادات';
 $string['success_unlock_gradebook'] = 'لقد حصلت على المكافأة <b>{$a->reward}</b> في النشاط <b>{$a->activity}</b>!';
 $string['success_unlock_reward'] = 'لقد حصلت على المكافأة <b>{$a->reward}</b> في النشاط <b>{$a->activity}</b>!';
 $string['tiendaxp'] = 'متجر XP';
+$string['totalspent'] = 'Total spent: {$a} XP';
 $string['type'] = 'النوع';
 $string['type_a'] = 'تمديد 24 ساعة';
 $string['type_f'] = 'منتدى (كلاسيكي)';

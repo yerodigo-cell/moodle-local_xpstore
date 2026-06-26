@@ -154,6 +154,7 @@ $string['str_tabsettings'] = 'Ezarpenak';
 $string['success_unlock_gradebook'] = '<b>{$a->reward}</b> saria lortu duzu <b>{$a->activity}</b> jardueran!';
 $string['success_unlock_reward'] = '<b>{$a->reward}</b> saria lortu duzu <b>{$a->activity}</b> jardueran!';
 $string['tiendaxp'] = 'XP Store';
+$string['totalspent'] = 'Total spent: {$a} XP';
 $string['type'] = 'Mota';
 $string['type_a'] = '24h-ko luzapena';
 $string['type_f'] = 'Foroa (Klasikoa)';

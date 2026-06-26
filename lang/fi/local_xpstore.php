@@ -154,6 +154,7 @@ $string['str_tabsettings'] = 'Asetukset';
 $string['success_unlock_gradebook'] = 'Sait palkinnon <b>{$a->reward}</b> aktiviteetista <b>{$a->activity}</b>!';
 $string['success_unlock_reward'] = 'Sait palkinnon <b>{$a->reward}</b> aktiviteetista <b>{$a->activity}</b>!';
 $string['tiendaxp'] = 'XP Store';
+$string['totalspent'] = 'Total spent: {$a} XP';
 $string['type'] = 'Tyyppi';
 $string['type_a'] = '24h pidennys';
 $string['type_f'] = 'Foorumi (Klassinen)';

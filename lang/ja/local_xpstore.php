@@ -154,6 +154,7 @@ $string['str_tabsettings'] = '設定';
 $string['success_unlock_gradebook'] = '活動 <b>{$a->activity}</b> で報酬 <b>{$a->reward}</b> を獲得しました！';
 $string['success_unlock_reward'] = '活動 <b>{$a->activity}</b> で報酬 <b>{$a->reward}</b> を獲得しました！';
 $string['tiendaxp'] = 'XP Store';
+$string['totalspent'] = 'Total spent: {$a} XP';
 $string['type'] = 'タイプ';
 $string['type_a'] = '24時間延長';
 $string['type_f'] = 'フォーラム (レガシー)';

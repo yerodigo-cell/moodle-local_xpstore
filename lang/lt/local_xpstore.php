@@ -154,6 +154,7 @@ $string['str_tabsettings'] = 'Nustatymai';
 $string['success_unlock_gradebook'] = 'Gavote apdovanojimą <b>{$a->reward}</b> veikloje <b>{$a->activity}</b>!';
 $string['success_unlock_reward'] = 'Gavote apdovanojimą <b>{$a->reward}</b> veikloje <b>{$a->activity}</b>!';
 $string['tiendaxp'] = 'XP Store';
+$string['totalspent'] = 'Total spent: {$a} XP';
 $string['type'] = 'Tipas';
 $string['type_a'] = '24 val. pratęsimas';
 $string['type_f'] = 'Forumas (Klasikinis)';

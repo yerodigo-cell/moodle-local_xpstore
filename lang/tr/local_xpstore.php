@@ -154,6 +154,7 @@ $string['str_tabsettings'] = 'Ayarlar';
 $string['success_unlock_gradebook'] = '<b>{$a->activity}</b> etkinliğinde <b>{$a->reward}</b> ödülünü aldınız!';
 $string['success_unlock_reward'] = '<b>{$a->activity}</b> etkinliğinde <b>{$a->reward}</b> ödülünü aldınız!';
 $string['tiendaxp'] = 'XP Mağazası';
+$string['totalspent'] = 'Total spent: {$a} XP';
 $string['type'] = 'Tür';
 $string['type_a'] = '24s Uzatma';
 $string['type_f'] = 'Forum (Klasik)';
