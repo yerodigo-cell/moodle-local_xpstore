@@ -1,27 +1,4 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * XP Store (local_xpstore)
- *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'İşlem';
@@ -136,6 +113,10 @@ $string['resethistory'] = 'Kullanım geçmişini temizle';
 $string['saldo'] = 'Mevcut bakiyeniz';
 $string['savecolors'] = 'Renkleri Kaydet';
 $string['saveicons'] = 'İkonları kaydet';
+$string['searchactivity'] = 'Ara (Etkinlik)...';
+$string['searchfilters'] = 'Arama filtreleri';
+$string['searchfilters_help'] = 'Raporu iki kritere göre filtreleyebilirsiniz:<br><br><b>Etkinlik:</b> Moodle etkinlik adıyla veya ödüle atanan özel etiketle arar.<br><b>Tür:</b> Ödül türüne göre arar (örn. Özel, Bonus, vb.).';
+$string['searchtype'] = 'Ara (Tür)...';
 $string['secondarycolor'] = 'İkincil Renk (Gradients)';
 $string['show_menu_tooltip'] = 'Mağazayı kurs menüsünde göster';
 $string['showinmenu'] = 'Kurs menüsünde göster';
@@ -165,8 +146,3 @@ $string['widgeterror'] = 'Ödül mevcut değil.';
 $string['widgetunlocked'] = 'Kilit Açıldı!';
 $string['widgetunlockeddesc'] = 'Artık ödülünüzü kullanabilirsiniz.';
 $string['xpstore:manage'] = 'XP Mağazasını Yönet';
-
-$string['searchfilters'] = 'Arama filtreleri';
-$string['searchfilters_help'] = 'Raporu iki kritere göre filtreleyebilirsiniz:<br><br><b>Etkinlik:</b> Moodle etkinlik adıyla veya ödüle atanan özel etiketle arar.<br><b>Tür:</b> Ödül türüne göre arar (örn. Özel, Bonus, vb.).';
-$string['searchactivity'] = 'Ara (Etkinlik)...';
-$string['searchtype'] = 'Ara (Tür)...';

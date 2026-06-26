@@ -1,27 +1,4 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * XP Store (local_xpstore)
- *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Azione';
@@ -136,6 +113,10 @@ $string['resethistory'] = 'Cancella cronologia riscatti';
 $string['saldo'] = 'Il tuo saldo attuale';
 $string['savecolors'] = 'Salva Colori';
 $string['saveicons'] = 'Salva icone';
+$string['searchactivity'] = 'Cerca (Attività)...';
+$string['searchfilters'] = 'Filtri di ricerca';
+$string['searchfilters_help'] = 'Puoi filtrare il report usando due criteri:<br><br><b>Attività:</b> Cerca tramite il nome dell\'attività Moodle o l\'etichetta personalizzata assegnata alla ricompensa.<br><b>Tipo:</b> Cerca per tipo di ricompensa (es. Speciale, Bonus, ecc.).';
+$string['searchtype'] = 'Cerca (Tipo)...';
 $string['secondarycolor'] = 'Colore Secondario (Sfumature)';
 $string['show_menu_tooltip'] = 'Mostra il negozio nel menu del corso';
 $string['showinmenu'] = 'Mostra nel menu del corso';
@@ -165,8 +146,3 @@ $string['widgeterror'] = 'Ricompensa non disponibile.';
 $string['widgetunlocked'] = 'Sbloccato!';
 $string['widgetunlockeddesc'] = 'Ora puoi utilizzare la tua ricompensa.';
 $string['xpstore:manage'] = 'Gestisci il Negozio XP';
-
-$string['searchfilters'] = 'Filtri di ricerca';
-$string['searchfilters_help'] = 'Puoi filtrare il report usando due criteri:<br><br><b>Attività:</b> Cerca tramite il nome dell\'attività Moodle o l\'etichetta personalizzata assegnata alla ricompensa.<br><b>Tipo:</b> Cerca per tipo di ricompensa (es. Speciale, Bonus, ecc.).';
-$string['searchactivity'] = 'Cerca (Attività)...';
-$string['searchtype'] = 'Cerca (Tipo)...';

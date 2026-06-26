@@ -1,27 +1,4 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * XP Store (local_xpstore)
- *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Dejanje';
@@ -136,6 +113,10 @@ $string['resethistory'] = 'Počisti zgodovino unovčitev';
 $string['saldo'] = 'Vaše trenutno stanje';
 $string['savecolors'] = 'Shrani barve';
 $string['saveicons'] = 'Shrani ikone';
+$string['searchactivity'] = 'Išči (Dejavnost)...';
+$string['searchfilters'] = 'Filtri iskanja';
+$string['searchfilters_help'] = 'Poročilo lahko filtrirate po dveh kriterijih:<br><br><b>Dejavnost:</b> Iskanje po imenu dejavnosti Moodle ali po meri določeni oznaki nagrade.<br><b>Vrsta:</b> Iskanje po vrsti nagrade (npr. Posebna, Bonus itd.).';
+$string['searchtype'] = 'Išči (Vrsta)...';
 $string['secondarycolor'] = 'Sekundarna barva (prelivi)';
 $string['show_menu_tooltip'] = 'Pokaži trgovino v meniju tečaja';
 $string['showinmenu'] = 'Pokaži v meniju tečaja';
@@ -165,8 +146,3 @@ $string['widgeterror'] = 'Nagrada ni na voljo.';
 $string['widgetunlocked'] = 'Odklenjeno!';
 $string['widgetunlockeddesc'] = 'Sedaj lahko uporabite svojo nagrado.';
 $string['xpstore:manage'] = 'Upravljaj XP Store';
-
-$string['searchfilters'] = 'Filtri iskanja';
-$string['searchfilters_help'] = 'Poročilo lahko filtrirate po dveh kriterijih:<br><br><b>Dejavnost:</b> Iskanje po imenu dejavnosti Moodle ali po meri določeni oznaki nagrade.<br><b>Vrsta:</b> Iskanje po vrsti nagrade (npr. Posebna, Bonus itd.).';
-$string['searchactivity'] = 'Išči (Dejavnost)...';
-$string['searchtype'] = 'Išči (Vrsta)...';

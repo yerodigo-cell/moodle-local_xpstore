@@ -1,27 +1,4 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * XP Store (local_xpstore)
- *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Action';
@@ -141,6 +118,10 @@ $string['resethistory'] = 'Clear redemption history';
 $string['saldo'] = 'Your current Balance';
 $string['savecolors'] = 'Save Colors';
 $string['saveicons'] = 'Save icons';
+$string['searchactivity'] = 'Search (Activity)...';
+$string['searchfilters'] = 'Search filters';
+$string['searchfilters_help'] = 'You can filter the report using two criteria:<br><br><b>Activity:</b> Searches by the name of the Moodle activity or the custom label assigned to the reward.<br><b>Type:</b> Searches by the reward type (e.g. Special, Bonus, etc).';
+$string['searchtype'] = 'Search (Type)...';
 $string['secondarycolor'] = 'Secondary Color (Gradients)';
 $string['show_menu_tooltip'] = 'Show store in course menu';
 $string['showinmenu'] = 'Show in course menu';
@@ -170,8 +151,3 @@ $string['widgeterror'] = 'Reward not available.';
 $string['widgetunlocked'] = 'Unlocked!';
 $string['widgetunlockeddesc'] = 'You can now use your reward.';
 $string['xpstore:manage'] = 'Manage the XP Store';
-
-$string['searchfilters'] = 'Search filters';
-$string['searchfilters_help'] = 'You can filter the report using two criteria:<br><br><b>Activity:</b> Searches by the name of the Moodle activity or the custom label assigned to the reward.<br><b>Type:</b> Searches by the reward type (e.g. Special, Bonus, etc).';
-$string['searchactivity'] = 'Search (Activity)...';
-$string['searchtype'] = 'Search (Type)...';

@@ -1,27 +1,4 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * XP Store (local_xpstore)
- *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'إجراء';
@@ -136,6 +113,10 @@ $string['resethistory'] = 'مسح سجل الاسترداد';
 $string['saldo'] = 'رصيدك الحالي';
 $string['savecolors'] = 'حفظ الألوان';
 $string['saveicons'] = 'حفظ الأيقونات';
+$string['searchactivity'] = 'بحث (نشاط)...';
+$string['searchfilters'] = 'مرشحات البحث';
+$string['searchfilters_help'] = 'يمكنك تصفية التقرير باستخدام معيارين:<br><br><b>النشاط:</b> يبحث عن طريق اسم نشاط Moodle أو التسمية المخصصة المخصصة للمكافأة.<br><b>النوع:</b> يبحث حسب نوع المكافأة (مثل خاص، مكافأة، إلخ).';
+$string['searchtype'] = 'بحث (نوع)...';
 $string['secondarycolor'] = 'اللون الثانوي (التدرجات)';
 $string['show_menu_tooltip'] = 'إظهار المتجر في قائمة الدورة التدريبية';
 $string['showinmenu'] = 'إظهار في قائمة الدورة التدريبية';
@@ -165,8 +146,3 @@ $string['widgeterror'] = 'المكافأة غير متوفرة.';
 $string['widgetunlocked'] = 'تم الفتح!';
 $string['widgetunlockeddesc'] = 'يمكنك الآن استخدام مكافأتك.';
 $string['xpstore:manage'] = 'إدارة متجر XP';
-
-$string['searchfilters'] = 'مرشحات البحث';
-$string['searchfilters_help'] = 'يمكنك تصفية التقرير باستخدام معيارين:<br><br><b>النشاط:</b> يبحث عن طريق اسم نشاط Moodle أو التسمية المخصصة المخصصة للمكافأة.<br><b>النوع:</b> يبحث حسب نوع المكافأة (مثل خاص، مكافأة، إلخ).';
-$string['searchactivity'] = 'بحث (نشاط)...';
-$string['searchtype'] = 'بحث (نوع)...';

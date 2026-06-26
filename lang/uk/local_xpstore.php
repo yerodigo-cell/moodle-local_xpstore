@@ -1,27 +1,4 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * XP Store (local_xpstore)
- *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Дія';
@@ -136,6 +113,10 @@ $string['resethistory'] = 'Очистити історію обмінів';
 $string['saldo'] = 'Ваш поточний баланс';
 $string['savecolors'] = 'Зберегти кольори';
 $string['saveicons'] = 'Зберегти значки';
+$string['searchactivity'] = 'Пошук (Діяльність)...';
+$string['searchfilters'] = 'Фільтри пошуку';
+$string['searchfilters_help'] = 'Ви можете відфільтрувати звіт за двома критеріями:<br><br><b>Діяльність:</b> Пошук за назвою діяльності Moodle або спеціальною міткою, призначеною нагороді.<br><b>Тип:</b> Пошук за типом нагороди (наприклад, Спеціальна, Бонус тощо).';
+$string['searchtype'] = 'Пошук (Тип)...';
 $string['secondarycolor'] = 'Другорядний колір (Градієнти)';
 $string['show_menu_tooltip'] = 'Показати магазин у меню курсу';
 $string['showinmenu'] = 'Показати в меню курсу';
@@ -165,8 +146,3 @@ $string['widgeterror'] = 'Нагорода недоступна.';
 $string['widgetunlocked'] = 'Розблоковано!';
 $string['widgetunlockeddesc'] = 'Тепер ви можете використовувати свою нагороду.';
 $string['xpstore:manage'] = 'Керувати XP Store';
-
-$string['searchfilters'] = 'Фільтри пошуку';
-$string['searchfilters_help'] = 'Ви можете відфільтрувати звіт за двома критеріями:<br><br><b>Діяльність:</b> Пошук за назвою діяльності Moodle або спеціальною міткою, призначеною нагороді.<br><b>Тип:</b> Пошук за типом нагороди (наприклад, Спеціальна, Бонус тощо).';
-$string['searchactivity'] = 'Пошук (Діяльність)...';
-$string['searchtype'] = 'Пошук (Тип)...';

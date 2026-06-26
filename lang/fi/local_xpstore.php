@@ -1,27 +1,4 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * XP Store (local_xpstore)
- *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Toiminto';
@@ -136,6 +113,10 @@ $string['resethistory'] = 'Tyhjennä lunastushistoria';
 $string['saldo'] = 'Nykyinen saldosi';
 $string['savecolors'] = 'Tallenna värit';
 $string['saveicons'] = 'Tallenna ikonit';
+$string['searchactivity'] = 'Hae (Aktiviteetti)...';
+$string['searchfilters'] = 'Hakusuodattimet';
+$string['searchfilters_help'] = 'Voit suodattaa raportin kahdella kriteerillä:<br><br><b>Aktiviteetti:</b> Hakee Moodle-aktiviteetin nimen tai palkinnolle määritetyn mukautetun tunnisteen (label) perusteella.<br><b>Tyyppi:</b> Hakee palkinnon tyypin perusteella (esim. Erikois, Bonus jne.).';
+$string['searchtype'] = 'Hae (Tyyppi)...';
 $string['secondarycolor'] = 'Toissijainen väri (Liukuvärit)';
 $string['show_menu_tooltip'] = 'Näytä kauppa kurssivalikossa';
 $string['showinmenu'] = 'Näytä kurssivalikossa';
@@ -165,8 +146,3 @@ $string['widgeterror'] = 'Palkinto ei ole saatavilla.';
 $string['widgetunlocked'] = 'Avattu!';
 $string['widgetunlockeddesc'] = 'Voit nyt käyttää palkintoasi.';
 $string['xpstore:manage'] = 'Hallitse XP Storea';
-
-$string['searchfilters'] = 'Hakusuodattimet';
-$string['searchfilters_help'] = 'Voit suodattaa raportin kahdella kriteerillä:<br><br><b>Aktiviteetti:</b> Hakee Moodle-aktiviteetin nimen tai palkinnolle määritetyn mukautetun tunnisteen (label) perusteella.<br><b>Tyyppi:</b> Hakee palkinnon tyypin perusteella (esim. Erikois, Bonus jne.).';
-$string['searchactivity'] = 'Hae (Aktiviteetti)...';
-$string['searchtype'] = 'Hae (Tyyppi)...';

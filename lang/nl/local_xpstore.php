@@ -1,27 +1,4 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * XP Store (local_xpstore)
- *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Actie';
@@ -136,6 +113,10 @@ $string['resethistory'] = 'Inwisselgeschiedenis wissen';
 $string['saldo'] = 'Je huidige saldo';
 $string['savecolors'] = 'Kleuren Opslaan';
 $string['saveicons'] = 'Iconen opslaan';
+$string['searchactivity'] = 'Zoeken (Activiteit)...';
+$string['searchfilters'] = 'Zoekfilters';
+$string['searchfilters_help'] = 'U kunt het rapport filteren met behulp van twee criteria:<br><br><b>Activiteit:</b> Zoekt op de naam van de Moodle-activiteit of het aangepaste label dat aan de beloning is toegewezen.<br><b>Type:</b> Zoekt op het type beloning (bijv. Speciaal, Bonus, enz.).';
+$string['searchtype'] = 'Zoeken (Type)...';
 $string['secondarycolor'] = 'Secundaire Kleur (Gradiënten)';
 $string['show_menu_tooltip'] = 'Toon winkel in cursusmenu';
 $string['showinmenu'] = 'Toon in cursusmenu';
@@ -165,8 +146,3 @@ $string['widgeterror'] = 'Beloning niet beschikbaar.';
 $string['widgetunlocked'] = 'Ontgrendeld!';
 $string['widgetunlockeddesc'] = 'Je kunt nu je beloning gebruiken.';
 $string['xpstore:manage'] = 'Beheer de XP Store';
-
-$string['searchfilters'] = 'Zoekfilters';
-$string['searchfilters_help'] = 'U kunt het rapport filteren met behulp van twee criteria:<br><br><b>Activiteit:</b> Zoekt op de naam van de Moodle-activiteit of het aangepaste label dat aan de beloning is toegewezen.<br><b>Type:</b> Zoekt op het type beloning (bijv. Speciaal, Bonus, enz.).';
-$string['searchactivity'] = 'Zoeken (Activiteit)...';
-$string['searchtype'] = 'Zoeken (Type)...';

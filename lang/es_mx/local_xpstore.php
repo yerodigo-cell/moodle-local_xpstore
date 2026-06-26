@@ -1,27 +1,4 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * XP Store (local_xpstore)
- *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Acción';
@@ -136,6 +113,10 @@ $string['resethistory'] = 'Borrar historial de canjes';
 $string['saldo'] = 'Tu saldo actual';
 $string['savecolors'] = 'Guardar Colores';
 $string['saveicons'] = 'Guardar Íconos';
+$string['searchactivity'] = 'Buscar (Actividad)...';
+$string['searchfilters'] = 'Filtros de búsqueda';
+$string['searchfilters_help'] = 'Puedes filtrar el reporte utilizando dos criterios:<br><br><b>Actividad:</b> Busca por el nombre de la actividad de Moodle o por la etiqueta personalizada (label) asignada a la recompensa.<br><b>Tipo:</b> Busca por el tipo de recompensa (ej. Especial, Bonus, etc).';
+$string['searchtype'] = 'Buscar (Tipo)...';
 $string['secondarycolor'] = 'Color Secundario (Gradientes)';
 $string['show_menu_tooltip'] = 'Mostrar tienda en el menú del curso';
 $string['showinmenu'] = 'Mostrar en menú del curso';
@@ -165,8 +146,3 @@ $string['widgeterror'] = 'Recompensa no disponible.';
 $string['widgetunlocked'] = '¡Desbloqueado!';
 $string['widgetunlockeddesc'] = 'Ahora puedes usar tu recompensa.';
 $string['xpstore:manage'] = 'Administrar la XP Store';
-
-$string['searchfilters'] = 'Filtros de búsqueda';
-$string['searchfilters_help'] = 'Puedes filtrar el reporte utilizando dos criterios:<br><br><b>Actividad:</b> Busca por el nombre de la actividad de Moodle o por la etiqueta personalizada (label) asignada a la recompensa.<br><b>Tipo:</b> Busca por el tipo de recompensa (ej. Especial, Bonus, etc).';
-$string['searchactivity'] = 'Buscar (Actividad)...';
-$string['searchtype'] = 'Buscar (Tipo)...';

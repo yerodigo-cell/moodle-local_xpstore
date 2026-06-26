@@ -165,13 +165,18 @@ if ($logs) {
                 ? $mapcustomlabels[$tipocharupper][$log->itemid]
                 : '';
 
-            if ($search !== '' && 
+            if (
+                $search !== '' &&
                 core_text::strpos(core_text::strtolower($activityname), core_text::strtolower($search)) === false &&
-                core_text::strpos(core_text::strtolower($customlabel), core_text::strtolower($search)) === false) {
+                core_text::strpos(core_text::strtolower($customlabel), core_text::strtolower($search)) === false
+            ) {
                 continue;
             }
 
-            if ($searchlabel !== '' && core_text::strpos(core_text::strtolower($labeltipo), core_text::strtolower($searchlabel)) === false) {
+            if (
+                $searchlabel !== '' &&
+                core_text::strpos(core_text::strtolower($labeltipo), core_text::strtolower($searchlabel)) === false
+            ) {
                 continue;
             }
 

@@ -1,27 +1,4 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
-/**
- * XP Store (local_xpstore)
- *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = '操作';
@@ -136,6 +113,10 @@ $string['resethistory'] = '清除兑换历史';
 $string['saldo'] = '您当前的余额';
 $string['savecolors'] = '保存颜色';
 $string['saveicons'] = '保存图标';
+$string['searchactivity'] = '搜索（活动）...';
+$string['searchfilters'] = '搜索过滤器';
+$string['searchfilters_help'] = '您可以使用两个条件过滤报告：<br><br><b>活动：</b>按Moodle活动名称或分配给奖励的自定义标签进行搜索。<br><b>类型：</b>按奖励类型搜索（例如特别、奖励等）。';
+$string['searchtype'] = '搜索（类型）...';
 $string['secondarycolor'] = '副色调（渐变）';
 $string['show_menu_tooltip'] = '在课程菜单中显示商店';
 $string['showinmenu'] = '在课程菜单中显示';
@@ -165,8 +146,3 @@ $string['widgeterror'] = '奖励不可用。';
 $string['widgetunlocked'] = '已解锁！';
 $string['widgetunlockeddesc'] = '您现在可以使用您的奖励了。';
 $string['xpstore:manage'] = '管理 XP 商店';
-
-$string['searchfilters'] = '搜索过滤器';
-$string['searchfilters_help'] = '您可以使用两个条件过滤报告：<br><br><b>活动：</b>按Moodle活动名称或分配给奖励的自定义标签进行搜索。<br><b>类型：</b>按奖励类型搜索（例如特别、奖励等）。';
-$string['searchactivity'] = '搜索（活动）...';
-$string['searchtype'] = '搜索（类型）...';
