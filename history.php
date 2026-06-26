@@ -71,6 +71,29 @@ $templatedata = [
     'str_gotoactivity' => get_string('gotoactivity', 'local_xpstore'),
 ];
 
+// Read catalog to fetch custom labels and applied values (valornota)
+$configraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
+$itemsraw = array_filter(explode(',', $configraw));
+$mapcustomlabels = [];
+$mapvalores = [];
+
+foreach ($itemsraw as $item) {
+    $tipochar = strtoupper(substr($item, 0, 1));
+    $rest = substr($item, 1);
+    $parts = explode(':', $rest);
+    if (count($parts) >= 2) {
+        $cid = $parts[0] ?? '';
+        $customname = $parts[2] ?? '';
+        $valornota = $parts[3] ?? '0';
+        if ($customname !== '') {
+            $mapcustomlabels[$tipochar][$cid] = $customname;
+        }
+        if ($valornota !== '0') {
+            $mapvalores[$tipochar][$cid] = $valornota;
+        }
+    }
+}
+
 $sql = "SELECT g.*, cm.module, cm.instance
         FROM {local_xpstore_gastos} g
         JOIN {course_modules} cm ON g.itemid = cm.id
@@ -103,8 +126,24 @@ if ($logs) {
                 : (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
         }
 
+        $tipocharupper = strtoupper($tipostr);
+        $customlabel = isset($mapcustomlabels[$tipocharupper][$log->itemid])
+            ? $mapcustomlabels[$tipocharupper][$log->itemid]
+            : '';
+            
+        $valornota = isset($mapvalores[$tipocharupper][$log->itemid])
+            ? $mapvalores[$tipocharupper][$log->itemid]
+            : '0';
+
+        if ($tipocharupper === 'G' && $valornota !== '0') {
+            $valnum = floatval($valornota);
+            $suffix = ' (+' . $valnum . ' pts)';
+            $customlabel = $customlabel ? $customlabel . $suffix : $suffix;
+        }
+
         $templatedata['logs'][] = [
             'activityname' => htmlspecialchars($activityname),
+            'customlabel' => htmlspecialchars($customlabel),
             'tipostr' => $tipostr,
             'labeltipo' => $labeltipo,
             'amount' => $log->amount,

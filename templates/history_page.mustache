@@ -69,6 +69,11 @@
                     <tr>
                         <td class="td-first font-weight-bold" style="color: #444; white-space: nowrap;">
                             {{activityname}}
+                            {{#customlabel}}
+                            <div style="font-size: 0.75rem; color: #777; margin-top: 4px; font-weight: normal; white-space: normal;">
+                                <i class="fa fa-tag text-muted" style="margin-right: 3px;"></i>{{customlabel}}
+                            </div>
+                            {{/customlabel}}
                         </td>
                         <td>
                             <span class="badge-tipo bg-{{tipostr}}">

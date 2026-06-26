@@ -59,6 +59,7 @@ $configraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
 $itemsraw = array_filter(explode(',', $configraw));
 $mapcategorias = [];
 $mapcustomlabels = [];
+$mapvalores = [];
 
 foreach ($itemsraw as $item) {
     $tipochar = strtoupper(substr($item, 0, 1));
@@ -67,10 +68,14 @@ foreach ($itemsraw as $item) {
     if (count($parts) >= 2) {
         $cid = $parts[0] ?? '';
         $customname = $parts[2] ?? '';
+        $valornota = $parts[3] ?? '0';
         $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
         $mapcategorias[$tipochar][$cid] = $cat;
         if ($customname !== '') {
             $mapcustomlabels[$tipochar][$cid] = $customname;
+        }
+        if ($valornota !== '0') {
+            $mapvalores[$tipochar][$cid] = $valornota;
         }
     }
 }
@@ -164,6 +169,16 @@ if ($logs) {
             $customlabel = isset($mapcustomlabels[$tipocharupper][$log->itemid])
                 ? $mapcustomlabels[$tipocharupper][$log->itemid]
                 : '';
+
+            $valornota = isset($mapvalores[$tipocharupper][$log->itemid])
+                ? $mapvalores[$tipocharupper][$log->itemid]
+                : '0';
+
+            if ($tipocharupper === 'G' && $valornota !== '0') {
+                $valnum = floatval($valornota);
+                $suffix = ' (+' . $valnum . ' pts)';
+                $customlabel = $customlabel ? $customlabel . $suffix : $suffix;
+            }
 
             if (
                 $search !== '' &&
