@@ -165,3 +165,8 @@ $string['widgeterror'] = 'Nagrada ni na voljo.';
 $string['widgetunlocked'] = 'Odklenjeno!';
 $string['widgetunlockeddesc'] = 'Sedaj lahko uporabite svojo nagrado.';
 $string['xpstore:manage'] = 'Upravljaj XP Store';
+
+$string['searchfilters'] = 'Filtri iskanja';
+$string['searchfilters_help'] = 'Poročilo lahko filtrirate po dveh kriterijih:<br><br><b>Dejavnost:</b> Iskanje po imenu dejavnosti Moodle ali po meri določeni oznaki nagrade.<br><b>Vrsta:</b> Iskanje po vrsti nagrade (npr. Posebna, Bonus itd.).';
+$string['searchactivity'] = 'Išči (Dejavnost)...';
+$string['searchtype'] = 'Išči (Vrsta)...';

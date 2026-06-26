@@ -165,3 +165,8 @@ $string['widgeterror'] = 'Нагорода недоступна.';
 $string['widgetunlocked'] = 'Розблоковано!';
 $string['widgetunlockeddesc'] = 'Тепер ви можете використовувати свою нагороду.';
 $string['xpstore:manage'] = 'Керувати XP Store';
+
+$string['searchfilters'] = 'Фільтри пошуку';
+$string['searchfilters_help'] = 'Ви можете відфільтрувати звіт за двома критеріями:<br><br><b>Діяльність:</b> Пошук за назвою діяльності Moodle або спеціальною міткою, призначеною нагороді.<br><b>Тип:</b> Пошук за типом нагороди (наприклад, Спеціальна, Бонус тощо).';
+$string['searchactivity'] = 'Пошук (Діяльність)...';
+$string['searchtype'] = 'Пошук (Тип)...';

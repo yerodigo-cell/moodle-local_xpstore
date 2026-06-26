@@ -165,3 +165,8 @@ $string['widgeterror'] = 'Saria ez dago eskuragarri.';
 $string['widgetunlocked'] = 'Desblokeatuta!';
 $string['widgetunlockeddesc'] = 'Orain zure saria erabil dezakezu.';
 $string['xpstore:manage'] = 'Kudeatu XP Store';
+
+$string['searchfilters'] = 'Bilaketa-iragazkiak';
+$string['searchfilters_help'] = 'Txostena bi irizpideren arabera iragazi dezakezu:<br><br><b>Jarduera:</b> Moodleko jardueraren izenaren edo sariari esleitutako etiketa pertsonalizatuaren bidez bilatzen du.<br><b>Mota:</b> Sariaren motaren bidez bilatzen du (adibidez, Berezia, Bonusa, etab.).';
+$string['searchactivity'] = 'Bilatu (Jarduera)...';
+$string['searchtype'] = 'Bilatu (Mota)...';

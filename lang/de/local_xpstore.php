@@ -165,3 +165,8 @@ $string['widgeterror'] = 'Belohnung nicht verfügbar.';
 $string['widgetunlocked'] = 'Freigeschaltet!';
 $string['widgetunlockeddesc'] = 'Du kannst deine Belohnung nun nutzen.';
 $string['xpstore:manage'] = 'XP Store verwalten';
+
+$string['searchfilters'] = 'Suchfilter';
+$string['searchfilters_help'] = 'Sie können den Bericht nach zwei Kriterien filtern:<br><br><b>Aktivität:</b> Sucht nach dem Namen der Moodle-Aktivität oder der benutzerdefinierten Bezeichnung (Label), die der Belohnung zugewiesen wurde.<br><b>Typ:</b> Sucht nach dem Belohnungstyp (z.B. Spezial, Bonus, usw.).';
+$string['searchactivity'] = 'Suchen (Aktivität)...';
+$string['searchtype'] = 'Suchen (Typ)...';

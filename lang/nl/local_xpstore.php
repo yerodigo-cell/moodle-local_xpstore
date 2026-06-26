@@ -165,3 +165,8 @@ $string['widgeterror'] = 'Beloning niet beschikbaar.';
 $string['widgetunlocked'] = 'Ontgrendeld!';
 $string['widgetunlockeddesc'] = 'Je kunt nu je beloning gebruiken.';
 $string['xpstore:manage'] = 'Beheer de XP Store';
+
+$string['searchfilters'] = 'Zoekfilters';
+$string['searchfilters_help'] = 'U kunt het rapport filteren met behulp van twee criteria:<br><br><b>Activiteit:</b> Zoekt op de naam van de Moodle-activiteit of het aangepaste label dat aan de beloning is toegewezen.<br><b>Type:</b> Zoekt op het type beloning (bijv. Speciaal, Bonus, enz.).';
+$string['searchactivity'] = 'Zoeken (Activiteit)...';
+$string['searchtype'] = 'Zoeken (Type)...';

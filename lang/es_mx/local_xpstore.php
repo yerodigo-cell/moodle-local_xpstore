@@ -165,3 +165,8 @@ $string['widgeterror'] = 'Recompensa no disponible.';
 $string['widgetunlocked'] = '¡Desbloqueado!';
 $string['widgetunlockeddesc'] = 'Ahora puedes usar tu recompensa.';
 $string['xpstore:manage'] = 'Administrar la XP Store';
+
+$string['searchfilters'] = 'Filtros de búsqueda';
+$string['searchfilters_help'] = 'Puedes filtrar el reporte utilizando dos criterios:<br><br><b>Actividad:</b> Busca por el nombre de la actividad de Moodle o por la etiqueta personalizada (label) asignada a la recompensa.<br><b>Tipo:</b> Busca por el tipo de recompensa (ej. Especial, Bonus, etc).';
+$string['searchactivity'] = 'Buscar (Actividad)...';
+$string['searchtype'] = 'Buscar (Tipo)...';

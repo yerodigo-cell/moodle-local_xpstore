@@ -165,3 +165,8 @@ $string['widgeterror'] = 'Palkinto ei ole saatavilla.';
 $string['widgetunlocked'] = 'Avattu!';
 $string['widgetunlockeddesc'] = 'Voit nyt käyttää palkintoasi.';
 $string['xpstore:manage'] = 'Hallitse XP Storea';
+
+$string['searchfilters'] = 'Hakusuodattimet';
+$string['searchfilters_help'] = 'Voit suodattaa raportin kahdella kriteerillä:<br><br><b>Aktiviteetti:</b> Hakee Moodle-aktiviteetin nimen tai palkinnolle määritetyn mukautetun tunnisteen (label) perusteella.<br><b>Tyyppi:</b> Hakee palkinnon tyypin perusteella (esim. Erikois, Bonus jne.).';
+$string['searchactivity'] = 'Hae (Aktiviteetti)...';
+$string['searchtype'] = 'Hae (Tyyppi)...';

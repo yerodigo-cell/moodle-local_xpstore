@@ -30,6 +30,8 @@ require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
 $courseid = required_param('id', PARAM_INT);
+$search = optional_param('search', '', PARAM_TEXT);
+$searchlabel = optional_param('searchlabel', '', PARAM_TEXT);
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
@@ -56,6 +58,7 @@ if ($action === 'reset' && confirm_sesskey()) {
 $configraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
 $itemsraw = array_filter(explode(',', $configraw));
 $mapcategorias = [];
+$mapcustomlabels = [];
 
 foreach ($itemsraw as $item) {
     $tipochar = strtoupper(substr($item, 0, 1));
@@ -63,8 +66,12 @@ foreach ($itemsraw as $item) {
     $parts = explode(':', $rest);
     if (count($parts) >= 2) {
         $cid = $parts[0] ?? '';
+        $customname = $parts[2] ?? '';
         $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
         $mapcategorias[$tipochar][$cid] = $cat;
+        if ($customname !== '') {
+            $mapcustomlabels[$tipochar][$cid] = $customname;
+        }
     }
 }
 
@@ -74,6 +81,14 @@ $modinfo = get_fast_modinfo($courseid);
 echo $OUTPUT->header();
 
 $templatedata = [
+    'courseid' => $courseid,
+    'search' => $search,
+    'searchlabel' => $searchlabel,
+    'str_search' => get_string('search'),
+    'str_searchactivity' => get_string('searchactivity', 'local_xpstore'),
+    'str_searchtype' => get_string('searchtype', 'local_xpstore'),
+    'str_clear' => get_string('clear'),
+    'helpicon' => $OUTPUT->help_icon('searchfilters', 'local_xpstore'),
     'str_reporttitle' => get_string('reporttitle', 'local_xpstore'),
     'str_reportsubtitle' => get_string('reportsubtitle', 'local_xpstore'),
     'storeurl' => (new moodle_url('/local/xpstore/index.php', ['id' => $courseid]))->out(false),
@@ -146,6 +161,20 @@ if ($logs) {
                 ? $mapcategorias[$tipocharupper][$log->itemid]
                 : '-';
 
+            $customlabel = isset($mapcustomlabels[$tipocharupper][$log->itemid])
+                ? $mapcustomlabels[$tipocharupper][$log->itemid]
+                : '';
+
+            if ($search !== '' && 
+                core_text::strpos(core_text::strtolower($activityname), core_text::strtolower($search)) === false &&
+                core_text::strpos(core_text::strtolower($customlabel), core_text::strtolower($search)) === false) {
+                continue;
+            }
+
+            if ($searchlabel !== '' && core_text::strpos(core_text::strtolower($labeltipo), core_text::strtolower($searchlabel)) === false) {
+                continue;
+            }
+
             $cmurl = '';
             if ($tipostr === 'g') {
                 $cmurl = (new moodle_url(
@@ -169,6 +198,7 @@ if ($logs) {
 
             $userdata['logs'][] = [
                 'activityhtml' => $activityhtml,
+                'customlabel' => htmlspecialchars($customlabel),
                 'categoriatexto' => htmlspecialchars($categoriatexto),
                 'tipostr' => $tipostr,
                 'labeltipo' => $labeltipo,
@@ -177,7 +207,14 @@ if ($logs) {
             ];
         }
 
-        $templatedata['users'][] = $userdata;
+        if (count($userdata['logs']) > 0) {
+            $userdata['totalcanjes'] = count($userdata['logs']);
+            $templatedata['users'][] = $userdata;
+        }
+    }
+
+    if (empty($templatedata['users'])) {
+        $templatedata['has_users'] = false;
     }
 }
 

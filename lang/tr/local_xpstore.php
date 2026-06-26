@@ -165,3 +165,8 @@ $string['widgeterror'] = 'Ödül mevcut değil.';
 $string['widgetunlocked'] = 'Kilit Açıldı!';
 $string['widgetunlockeddesc'] = 'Artık ödülünüzü kullanabilirsiniz.';
 $string['xpstore:manage'] = 'XP Mağazasını Yönet';
+
+$string['searchfilters'] = 'Arama filtreleri';
+$string['searchfilters_help'] = 'Raporu iki kritere göre filtreleyebilirsiniz:<br><br><b>Etkinlik:</b> Moodle etkinlik adıyla veya ödüle atanan özel etiketle arar.<br><b>Tür:</b> Ödül türüne göre arar (örn. Özel, Bonus, vb.).';
+$string['searchactivity'] = 'Ara (Etkinlik)...';
+$string['searchtype'] = 'Ara (Tür)...';

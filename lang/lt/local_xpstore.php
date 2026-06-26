@@ -165,3 +165,8 @@ $string['widgeterror'] = 'Apdovanojimas nepasiekiamas.';
 $string['widgetunlocked'] = 'Atrakinta!';
 $string['widgetunlockeddesc'] = 'Dabar galite naudoti savo apdovanojimą.';
 $string['xpstore:manage'] = 'Tvarkyti XP Store';
+
+$string['searchfilters'] = 'Paieškos filtrai';
+$string['searchfilters_help'] = 'Ataskaitą galite filtruoti naudodami du kriterijus:<br><br><b>Veikla:</b> Ieško pagal Moodle veiklos pavadinimą arba pritaikytą etiketę, priskirtą atlygiui.<br><b>Tipas:</b> Ieško pagal atlygio tipą (pvz., Specialus, Premija ir kt.).';
+$string['searchactivity'] = 'Ieškoti (Veikla)...';
+$string['searchtype'] = 'Ieškoti (Tipas)...';

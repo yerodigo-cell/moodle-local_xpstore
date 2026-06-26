@@ -165,3 +165,8 @@ $string['widgeterror'] = '報酬は利用できません。';
 $string['widgetunlocked'] = 'ロック解除！';
 $string['widgetunlockeddesc'] = '報酬を使用できるようになりました。';
 $string['xpstore:manage'] = 'XP Storeを管理';
+
+$string['searchfilters'] = '検索フィルター';
+$string['searchfilters_help'] = 'レポートは2つの条件を使用してフィルタリングできます:<br><br><b>活動:</b> Moodleの活動名または報酬に割り当てられたカスタムラベルで検索します。<br><b>タイプ:</b> 報酬タイプで検索します（例：特別、ボーナスなど）。';
+$string['searchactivity'] = '検索（活動）...';
+$string['searchtype'] = '検索（タイプ）...';

@@ -165,3 +165,8 @@ $string['widgeterror'] = 'المكافأة غير متوفرة.';
 $string['widgetunlocked'] = 'تم الفتح!';
 $string['widgetunlockeddesc'] = 'يمكنك الآن استخدام مكافأتك.';
 $string['xpstore:manage'] = 'إدارة متجر XP';
+
+$string['searchfilters'] = 'مرشحات البحث';
+$string['searchfilters_help'] = 'يمكنك تصفية التقرير باستخدام معيارين:<br><br><b>النشاط:</b> يبحث عن طريق اسم نشاط Moodle أو التسمية المخصصة المخصصة للمكافأة.<br><b>النوع:</b> يبحث حسب نوع المكافأة (مثل خاص، مكافأة، إلخ).';
+$string['searchactivity'] = 'بحث (نشاط)...';
+$string['searchtype'] = 'بحث (نوع)...';

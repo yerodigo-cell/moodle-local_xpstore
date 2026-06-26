@@ -165,3 +165,8 @@ $string['widgeterror'] = '奖励不可用。';
 $string['widgetunlocked'] = '已解锁！';
 $string['widgetunlockeddesc'] = '您现在可以使用您的奖励了。';
 $string['xpstore:manage'] = '管理 XP 商店';
+
+$string['searchfilters'] = '搜索过滤器';
+$string['searchfilters_help'] = '您可以使用两个条件过滤报告：<br><br><b>活动：</b>按Moodle活动名称或分配给奖励的自定义标签进行搜索。<br><b>类型：</b>按奖励类型搜索（例如特别、奖励等）。';
+$string['searchactivity'] = '搜索（活动）...';
+$string['searchtype'] = '搜索（类型）...';

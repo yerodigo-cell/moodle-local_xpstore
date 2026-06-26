@@ -37,7 +37,7 @@
     }
 }}
 <div class="local_xpstore-container report-wrapper">
-    <div class="header-container">
+    <div class="header-container" style="flex-wrap: wrap;">
         <div class="header-title">
             <h2>{{str_reporttitle}}</h2>
             <p>{{str_reportsubtitle}}</p>
@@ -49,6 +49,23 @@
             <a href="{{reseturl}}" class="btn-reset" onclick="return confirm('{{str_confirmreset}}')">
                 <i class="fa fa-trash"></i> {{str_resetcycle}}
             </a>
+        </div>
+        <div style="width: 100%; margin-top: 15px;">
+            <form action="report.php" method="GET" class="form-inline" style="display: flex; gap: 10px; align-items: center;">
+                <input type="hidden" name="id" value="{{courseid}}">
+                <input type="text" name="search" class="form-control" placeholder="{{str_searchactivity}}" value="{{search}}" style="flex-grow: 1; max-width: 250px;">
+                <input type="text" name="searchlabel" class="form-control" placeholder="{{str_searchtype}}" value="{{searchlabel}}" style="flex-grow: 1; max-width: 250px;">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
+                <div style="margin-left: 5px;">{{{helpicon}}}</div>
+                {{#search}}
+                <a href="report.php?id={{courseid}}" class="btn btn-secondary"><i class="fa fa-times"></i></a>
+                {{/search}}
+                {{^search}}
+                {{#searchlabel}}
+                <a href="report.php?id={{courseid}}" class="btn btn-secondary"><i class="fa fa-times"></i></a>
+                {{/searchlabel}}
+                {{/search}}
+            </form>
         </div>
     </div>
 
@@ -90,6 +107,11 @@
                         <tr>
                             <td class="font-weight-bold" style="font-size: 0.9rem; color: #444;">
                                 {{{activityhtml}}}
+                                {{#customlabel}}
+                                <div style="font-size: 0.75rem; color: #777; margin-top: 4px; font-weight: normal;">
+                                    <i class="fa fa-tag text-muted" style="margin-right: 3px;"></i>{{customlabel}}
+                                </div>
+                                {{/customlabel}}
                             </td>
                             <td>
                                 <span style="background: #f0f0f0; color: #555; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; white-space: nowrap;">
