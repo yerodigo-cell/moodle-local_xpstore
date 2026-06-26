@@ -43,6 +43,11 @@
                 <i class="fa fa-history mr-2" style="color: #0056D2;"></i> 
                 {{str_history}}
             </h2>
+            {{#has_logs}}
+            <div style="margin-top: 5px; font-size: 0.95rem; font-weight: 600; color: #555;">
+                {{str_totalspent}}
+            </div>
+            {{/has_logs}}
         </div>
         
         {{#showbackbutton}}

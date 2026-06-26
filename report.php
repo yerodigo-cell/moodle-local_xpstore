@@ -135,12 +135,18 @@ if ($logs) {
         $totalcanjes = count($userlogs);
         $profileurl = (new moodle_url('/user/view.php', ['id' => $userid, 'course' => $courseid]))->out(false);
 
+        $totalgastado = 0;
+        foreach ($userlogs as $log) {
+            $totalgastado += $log->amount;
+        }
+
         $userdata = [
             'userid' => $userid,
             'userpichtml' => $userpichtml,
             'userfullname' => $userfullname,
             'useremail' => $realuser->email,
             'totalcanjes' => $totalcanjes,
+            'str_totalspent' => get_string('totalspent', 'local_xpstore', $totalgastado),
             'profileurl' => $profileurl,
             'logs' => [],
         ];

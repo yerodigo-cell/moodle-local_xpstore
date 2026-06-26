@@ -104,7 +104,10 @@ $logs = $DB->get_records_sql($sql, [$USER->id, $courseid]);
 
 if ($logs) {
     $templatedata['has_logs'] = true;
+    $totalgastado = 0;
+    
     foreach ($logs as $log) {
+        $totalgastado += $log->amount;
         $modname = $DB->get_field('modules', 'name', ['id' => $log->module]);
         $activityname = $DB->get_field($modname, 'name', ['id' => $log->instance]);
 
@@ -153,6 +156,7 @@ if ($logs) {
             'cmurl' => $cmurl,
         ];
     }
+    $templatedata['str_totalspent'] = get_string('totalspent', 'local_xpstore', $totalgastado);
 }
 
 echo $OUTPUT->render_from_template('local_xpstore/history_page', $templatedata);
