@@ -28,9 +28,6 @@ The store allows teachers to configure different types of benefits based on stan
 
 Before using the store, ensure the `Level Up XP` block is added to your course. Once the block is active, a direct link to the store will automatically appear in the main course navigation menu.
 
-Administrators or editing teachers can access the configuration panel directly from the store's interface or via the following URL:
-
-**Path:** `yoursite.com/local/xpstore/config.php?id=COURSE_ID`
 
 From this panel you can:
 
