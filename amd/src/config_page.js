@@ -87,7 +87,7 @@ define([], function() {
                     if (activitySelect.selectedIndex === -1) {
                         activitySelect.selectedIndex = 0;
                     }
-                }
+                };
 
                 typeSelect.addEventListener('change', filterActivities);
                 filterActivities();

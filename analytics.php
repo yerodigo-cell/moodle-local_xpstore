@@ -73,7 +73,7 @@ foreach ($itemsraw as $item) {
     }
 }
 
-// Global stats
+// Global stats.
 $totalpurchases = $DB->count_records_sql("
     SELECT COUNT(g.id)
     FROM {local_xpstore_gastos} g
@@ -92,12 +92,12 @@ $engagedstudents = $DB->count_records_sql("
     JOIN {course_modules} cm ON g.itemid = cm.id
     WHERE cm.course = ?", [$courseid]);
 
-// Course total students
+// Course total students.
 $coursecontext = context_course::instance($courseid);
-$totalstudents_in_course = count(get_enrolled_users($coursecontext, '', 0, 'u.id'));
-$engagementrate = $totalstudents_in_course > 0 ? round(($engagedstudents / $totalstudents_in_course) * 100) : 0;
+$totalstudentsincourse = count(get_enrolled_users($coursecontext, '', 0, 'u.id'));
+$engagementrate = $totalstudentsincourse > 0 ? round(($engagedstudents / $totalstudentsincourse) * 100) : 0;
 
-// Data for charts
+// Data for charts.
 $sql = "SELECT cm.id as itemid, g.itemtype, COUNT(g.id) as purchases, SUM(g.amount) as totalxp
         FROM {local_xpstore_gastos} g
         JOIN {course_modules} cm ON g.itemid = cm.id
@@ -106,13 +106,13 @@ $sql = "SELECT cm.id as itemid, g.itemtype, COUNT(g.id) as purchases, SUM(g.amou
         ORDER BY purchases DESC";
 $itemsdata = $DB->get_records_sql($sql, [$courseid]);
 
-$chartdata_labels = [];
-$chartdata_purchases = [];
-$chartdata_xp = [];
-$toprewards_purchases = [];
-$toprewards_xp = [];
+$chartdatalabels = [];
+$chartdatapurchases = [];
+$chartdataxp = [];
+$toprewardspurchases = [];
+$toprewardsxp = [];
 
-// Prepare data
+// Prepare data.
 if ($itemsdata) {
     foreach ($itemsdata as $item) {
         $cm = $DB->get_record('course_modules', ['id' => $item->itemid]);
@@ -130,26 +130,26 @@ if ($itemsdata) {
             : '';
 
         $displayname = $customlabel !== '' ? $customlabel : $activityname;
-        // Limit label length for charts
+        // Limit label length for charts.
         $shortname = core_text::substr($displayname, 0, 20) . (core_text::strlen($displayname) > 20 ? '...' : '');
 
-        $chartdata_labels[] = $shortname;
-        $chartdata_purchases[] = (int)$item->purchases;
-        $chartdata_xp[] = (int)$item->totalxp;
+        $chartdatalabels[] = $shortname;
+        $chartdatapurchases[] = (int)$item->purchases;
+        $chartdataxp[] = (int)$item->totalxp;
 
         $item->displayname = $displayname;
     }
 }
 
-// Prepare Moodle Charts
-$hasdata = count($chartdata_labels) > 0;
+// Prepare Moodle Charts.
+$hasdata = count($chartdatalabels) > 0;
 $chartpurchaseshtml = '';
 $chartxphtml = '';
 
 if ($hasdata) {
     // Top 5 or all if less.
-    $toplabels = array_slice($chartdata_labels, 0, 5);
-    $toppurchases = array_slice($chartdata_purchases, 0, 5);
+    $toplabels = array_slice($chartdatalabels, 0, 5);
+    $toppurchases = array_slice($chartdatapurchases, 0, 5);
 
     $chart1 = new \core\chart_bar();
     $series1 = new \core\chart_series(get_string('purchases', 'local_xpstore'), $toppurchases);

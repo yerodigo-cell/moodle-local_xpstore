@@ -71,7 +71,7 @@ $templatedata = [
     'str_gotoactivity' => get_string('gotoactivity', 'local_xpstore'),
 ];
 
-// Read catalog to fetch custom labels and applied values (valornota)
+// Read catalog to fetch custom labels and applied values (valornota).
 $configraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
 $itemsraw = array_filter(explode(',', $configraw));
 $mapcustomlabels = [];
@@ -105,7 +105,7 @@ $logs = $DB->get_records_sql($sql, [$USER->id, $courseid]);
 if ($logs) {
     $templatedata['has_logs'] = true;
     $totalgastado = 0;
-    
+
     foreach ($logs as $log) {
         $totalgastado += $log->amount;
         $modname = $DB->get_field('modules', 'name', ['id' => $log->module]);
@@ -133,7 +133,7 @@ if ($logs) {
         $customlabel = isset($mapcustomlabels[$tipocharupper][$log->itemid])
             ? $mapcustomlabels[$tipocharupper][$log->itemid]
             : '';
-            
+
         $valornota = isset($mapvalores[$tipocharupper][$log->itemid])
             ? $mapvalores[$tipocharupper][$log->itemid]
             : '0';
