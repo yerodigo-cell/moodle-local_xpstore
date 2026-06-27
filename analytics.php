@@ -75,19 +75,19 @@ foreach ($itemsraw as $item) {
 
 // Global stats
 $totalpurchases = $DB->count_records_sql("
-    SELECT COUNT(g.id) 
+    SELECT COUNT(g.id)
     FROM {local_xpstore_gastos} g
     JOIN {course_modules} cm ON g.itemid = cm.id
     WHERE cm.course = ?", [$courseid]);
 
 $totalxp = $DB->get_field_sql("
-    SELECT SUM(g.amount) 
+    SELECT SUM(g.amount)
     FROM {local_xpstore_gastos} g
     JOIN {course_modules} cm ON g.itemid = cm.id
     WHERE cm.course = ?", [$courseid]) ?: 0;
 
 $engagedstudents = $DB->count_records_sql("
-    SELECT COUNT(DISTINCT g.userid) 
+    SELECT COUNT(DISTINCT g.userid)
     FROM {local_xpstore_gastos} g
     JOIN {course_modules} cm ON g.itemid = cm.id
     WHERE cm.course = ?", [$courseid]);
@@ -136,51 +136,54 @@ if ($itemsdata) {
         $chartdata_labels[] = $shortname;
         $chartdata_purchases[] = (int)$item->purchases;
         $chartdata_xp[] = (int)$item->totalxp;
-        
+
         $item->displayname = $displayname;
     }
 }
 
 // Prepare Moodle Charts
-$has_data = count($chartdata_labels) > 0;
-$chart_purchases_html = '';
-$chart_xp_html = '';
+$hasdata = count($chartdata_labels) > 0;
+$chartpurchaseshtml = '';
+$chartxphtml = '';
 
-if ($has_data) {
-    // Top 5 or all if less
-    $top_labels = array_slice($chartdata_labels, 0, 5);
-    $top_purchases = array_slice($chartdata_purchases, 0, 5);
-    
+if ($hasdata) {
+    // Top 5 or all if less.
+    $toplabels = array_slice($chartdata_labels, 0, 5);
+    $toppurchases = array_slice($chartdata_purchases, 0, 5);
+
     $chart1 = new \core\chart_bar();
-    $series1 = new \core\chart_series(get_string('purchases', 'local_xpstore'), $top_purchases);
-    $series1->set_color('#0084ff'); // Vibrant blue to match the first card
+    $series1 = new \core\chart_series(get_string('purchases', 'local_xpstore'), $toppurchases);
+    $series1->set_color('#0084ff'); // Vibrant blue to match the first card.
     $chart1->add_series($series1);
-    $chart1->set_labels($top_labels);
-    $chart_purchases_html = $OUTPUT->render($chart1);
+    $chart1->set_labels($toplabels);
+    $chartpurchaseshtml = $OUTPUT->render($chart1);
 
-    // Sort by XP
-    $sorted_by_xp = $itemsdata;
-    usort($sorted_by_xp, function($a, $b) {
+    // Sort by XP.
+    $sortedbyxp = $itemsdata;
+    usort($sortedbyxp, function ($a, $b) {
         return $b->totalxp <=> $a->totalxp;
     });
-    
-    $top_xp_labels = [];
-    $top_xp_values = [];
+
+    $topxplabels = [];
+    $topxpvalues = [];
     $count = 0;
-    foreach($sorted_by_xp as $item) {
-        if ($count >= 5) break;
-        $top_xp_labels[] = core_text::substr($item->displayname, 0, 20) . (core_text::strlen($item->displayname) > 20 ? '...' : '');
-        $top_xp_values[] = (int)$item->totalxp;
+    foreach ($sortedbyxp as $item) {
+        if ($count >= 5) {
+            break;
+        }
+        $topxplabels[] = core_text::substr($item->displayname, 0, 20) . (core_text::strlen($item->displayname) > 20 ? '...' : '');
+        $topxpvalues[] = (int)$item->totalxp;
         $count++;
     }
 
     $chart2 = new \core\chart_bar();
-    $series2 = new \core\chart_series(get_string('points', 'local_xpstore'), $top_xp_values);
-    $series2->set_color('#ff6a00'); // Vibrant orange to match the second card
+    $series2 = new \core\chart_series(get_string('points', 'local_xpstore'), $topxpvalues);
+    $series2->set_color('#ff6a00'); // Vibrant orange to match the second card.
     $chart2->add_series($series2);
-    $chart2->set_labels($top_xp_labels);
-    // Set a different color for the second chart if possible, Moodle handles colors automatically based on theme, but we can rely on defaults.
-    $chart_xp_html = $OUTPUT->render($chart2);
+    $chart2->set_labels($topxplabels);
+    // Set a different color for the second chart if possible.
+    // Moodle handles colors automatically based on theme, but we can rely on defaults.
+    $chartxphtml = $OUTPUT->render($chart2);
 }
 
 echo $OUTPUT->header();
@@ -194,7 +197,7 @@ $navdata['reseturl'] = (new moodle_url($url, ['action' => 'reset', 'sesskey' => 
 
 $templatedata = array_merge([
     'courseid' => $courseid,
-    'has_data' => $has_data,
+    'has_data' => $hasdata,
     'str_analytics' => get_string('analytics', 'local_xpstore'),
     'str_analyticssubtitle' => get_string('analyticssubtitle', 'local_xpstore'),
     'str_toprewardsbypurchases' => get_string('toprewardsbypurchases', 'local_xpstore'),
@@ -209,8 +212,8 @@ $templatedata = array_merge([
     'totalxp' => number_format($totalxp),
     'engagedstudents' => $engagedstudents,
     'engagementrate' => $engagementrate,
-    'chart_purchases_html' => $chart_purchases_html,
-    'chart_xp_html' => $chart_xp_html,
+    'chart_purchases_html' => $chartpurchaseshtml,
+    'chart_xp_html' => $chartxphtml,
 ], $navdata);
 
 echo $OUTPUT->render_from_template('local_xpstore/analytics_page', $templatedata);

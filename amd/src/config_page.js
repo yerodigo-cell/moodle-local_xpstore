@@ -41,7 +41,7 @@ define([], function() {
                 /**
                  * Filter activities based on selected type
                  */
-                function filterActivities() {
+                var filterActivities = function() {
                     var selectedType = typeSelect.value;
                     var currentSelectedValue = activitySelect.value;
 
