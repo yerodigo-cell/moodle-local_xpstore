@@ -14,16 +14,14 @@ A gamification plugin for Moodle that transforms the learning experience by allo
 
 ---
 
-## How Rewards Work (Benefit Types)
-
+### How Rewards Work (Benefit Types)
 The store allows teachers to configure different types of benefits based on standard Moodle modules or specific gamification mechanics. When a student buys an item, the plugin processes the transaction based on its specific type:
-
-* **⚡ Extra Attempt:** Works with Quizzes. Students can spend XP to unlock an additional attempt for a specific quiz even if it's already closed.
-* **⏳ 24h Extension:** Works only with Assignments. Students can redeem their points to get extra time to submit a task.
-* **⭐ Bonus:** Adds extra points directly to **any grade item** within the Moodle gradebook. It is fully compatible with assignments, quizzes, forums, or any other gradable element. Perfect for "Extra Credit" or "Second Chance" mechanics.
-* **🔓 Special:** Unlocks hidden content or VIP groups. Upon purchase, the student is **automatically added** to a predefined Moodle group.
-  - ⚠ **Note:** The teacher must create the group in the course beforehand and configure the content's "Restrict access" settings to point to that specific group.
-  - ⚠️ **Crucial Requirement:** The label of this reward **must match exactly** the name of the group created by the teacher.
+* ⚡ **Extra Attempt:** Works with Quizzes. Students can spend XP to unlock an additional attempt for a specific quiz, even if it's already closed.
+* ⏳ **24h Extension:** Works only with Assignments. Students can redeem their points to get extra time to submit a task.
+* 💬 **Forum (Legacy):** Works with Forums. Allows students to spend XP to unlock and interact in a specific forum even after its strict cut-off date has passed.
+* ⭐ **Bonus:** Adds extra points directly to any grade item within the Moodle gradebook. It is fully compatible with assignments, quizzes, forums, or any other gradable element. Perfect for "Extra Credit" or "Second Chance" mechanics.
+* 🔓 **Special:** Unlocks exclusive content or access to VIP areas within the course. Upon purchase, the plugin automatically creates a dedicated Moodle group for the target activity and seamlessly assigns the student to it.
+  * _Setup Tip:_ The teacher only needs to set up the reward in the store. The plugin handles the group creation and student enrollment automatically under the hood!
 ---
 
 ## Store Configuration
