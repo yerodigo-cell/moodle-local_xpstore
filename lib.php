@@ -412,7 +412,11 @@ function local_xpstore_get_navigation_data($courseid, $activetab) {
         'str_audit' => get_string('audit', 'local_xpstore'),
         'str_analytics' => get_string('analytics', 'local_xpstore'),
         'str_products' => get_string('products', 'local_xpstore'),
+        
         'str_settings' => get_string('settings', 'local_xpstore'),
+        'str_preview' => get_string('preview', 'local_xpstore'),
+        'str_style' => get_string('style', 'local_xpstore'),
+
         'tab_store' => ($activetab === 'store'),
         'tab_redemptions' => ($activetab === 'redemptions'),
         'tab_analytics' => ($activetab === 'analytics'),

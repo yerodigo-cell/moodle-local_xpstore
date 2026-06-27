@@ -111,6 +111,7 @@ $chartdatapurchases = [];
 $chartdataxp = [];
 $toprewardspurchases = [];
 $toprewardsxp = [];
+$activitypurchases = [];
 
 // Prepare data.
 if ($itemsdata) {
@@ -134,8 +135,15 @@ if ($itemsdata) {
         $shortname = core_text::substr($displayname, 0, 20) . (core_text::strlen($displayname) > 20 ? '...' : '');
 
         $chartdatalabels[] = $shortname;
+
         $chartdatapurchases[] = (int)$item->purchases;
         $chartdataxp[] = (int)$item->totalxp;
+
+        if (!isset($activitypurchases[$activityname])) {
+            $activitypurchases[$activityname] = 0;
+        }
+        $activitypurchases[$activityname] += (int)$item->purchases;
+
 
         $item->displayname = $displayname;
     }
@@ -145,6 +153,7 @@ if ($itemsdata) {
 $hasdata = count($chartdatalabels) > 0;
 $chartpurchaseshtml = '';
 $chartxphtml = '';
+$chartactivitieshtml = '';
 
 if ($hasdata) {
     // Top 5 or all if less.
@@ -184,6 +193,27 @@ if ($hasdata) {
     // Set a different color for the second chart if possible.
     // Moodle handles colors automatically based on theme, but we can rely on defaults.
     $chartxphtml = $OUTPUT->render($chart2);
+
+    $chartactivitieshtml = '';
+    if (!empty($activitypurchases)) {
+        arsort($activitypurchases);
+        $topactivities = array_slice($activitypurchases, 0, 5, true);
+        
+        $activitylabels = [];
+        $activitydata = [];
+        foreach ($topactivities as $name => $purchases) {
+            $shortname = core_text::substr($name, 0, 20) . (core_text::strlen($name) > 20 ? '...' : '');
+            $activitylabels[] = $shortname;
+            $activitydata[] = $purchases;
+        }
+        
+        $chart3 = new \core\chart_pie();
+        $chart3->set_doughnut(true);
+        $series3 = new \core\chart_series(get_string('purchases', 'local_xpstore'), $activitydata);
+        $chart3->add_series($series3);
+        $chart3->set_labels($activitylabels);
+        $chartactivitieshtml = $OUTPUT->render($chart3);
+    }
 }
 
 echo $OUTPUT->header();
@@ -208,12 +238,25 @@ $templatedata = array_merge([
     'str_engagementrate' => get_string('engagementrate', 'local_xpstore'),
     'str_viewaudit' => get_string('viewaudit', 'local_xpstore'),
     'str_nopurchases' => get_string('nopurchases', 'local_xpstore'),
+
+    'str_topactivities' => get_string('topactivities', 'local_xpstore'),
     'totalpurchases' => $totalpurchases,
+
     'totalxp' => number_format($totalxp),
     'engagedstudents' => $engagedstudents,
     'engagementrate' => $engagementrate,
     'chart_purchases_html' => $chartpurchaseshtml,
+
     'chart_xp_html' => $chartxphtml,
+    
+    'chart_xp_html' => $chartxphtml,
+    'chart_activities_html' => $chartactivitieshtml,
+    
+    'has_activities_chart' => !empty($chartactivitieshtml),
+    'debug_info' => 'Count purchases: ' . count($activitypurchases) . ' | chart empty? ' . (empty($chartactivitieshtml) ? 'yes' : 'no') . ' | hasdata: ' . ($hasdata ? 'yes' : 'no'),
+
+
+
 ], $navdata);
 
 echo $OUTPUT->render_from_template('local_xpstore/analytics_page', $templatedata);

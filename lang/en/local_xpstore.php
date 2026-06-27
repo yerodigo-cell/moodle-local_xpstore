@@ -21,7 +21,6 @@
  * @copyright   2026 Yeison Díaz
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Action';
@@ -124,6 +123,7 @@ $string['norewardscreated'] = 'No rewards have been created yet.';
 $string['pluginname'] = 'XP Store';
 $string['points'] = 'Points';
 $string['predefinedpalettes'] = 'Predefined Palettes';
+$string['preview'] = 'Preview';
 $string['primarycolor'] = 'Primary Color';
 $string['productadded'] = 'Product added successfully';
 $string['productdeleted'] = 'Product deleted';
@@ -154,9 +154,11 @@ $string['specialcontent'] = 'Special';
 $string['storeempty_desc'] = 'No rewards have been configured yet.';
 $string['storeempty_title'] = 'Store is empty';
 $string['storetitle'] = 'XP Store';
+$string['style'] = 'Style';
 $string['success_unlock_gradebook'] = 'You got the reward <b>{$a->reward}</b> on the activity <b>{$a->activity}</b>!';
 $string['success_unlock_reward'] = 'You got the reward <b>{$a->reward}</b> on the activity <b>{$a->activity}</b>!';
 $string['tiendaxp'] = 'XP Store';
+$string['topactivities'] = 'Top Activities (by purchases)';
 $string['toprewardsbypurchases'] = 'Top Rewards (by purchases)';
 $string['toprewardsbyxp'] = 'Top Rewards (by XP spent)';
 $string['totalpurchases'] = 'Total Purchases';

@@ -5,8 +5,8 @@
 
     Example context (json):
     {
-        "str_tabproducts": "Products",
-        "str_tabsettings": "Settings",
+        "str_products": "Products",
+        "str_style": "Settings",
         "tab_products_active": true,
         "tab_settings_active": false,
         "baseurl": "http://example.com/local/xpstore"
@@ -52,7 +52,7 @@
     <ul class="nav nav-tabs" style="margin-bottom: -1px; border-bottom: none;">
         <li class="nav-item">
             <a href="{{storeurl}}" class="nav-link xpstore-nav-tab {{#tab_store}}active{{/tab_store}}">
-                Preview
+                {{str_preview}}
             </a>
         </li>
         <li class="nav-item">
@@ -72,7 +72,7 @@
         </li>
         <li class="nav-item">
             <a href="{{settingsurl}}" class="nav-link xpstore-nav-tab {{#tab_settings}}active{{/tab_settings}}">
-                Style
+                {{str_style}}
             </a>
         </li>
     </ul>

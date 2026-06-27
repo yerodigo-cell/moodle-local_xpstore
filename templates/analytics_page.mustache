@@ -63,19 +63,32 @@
         
     </div>
 
-    <!-- Charts -->
-    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+    <!-- Top Charts Row -->
+    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px;">
+        <!-- Left: Top Activities Chart -->
+        {{#has_activities_chart}}
+        <div style="flex: 1 1 0; min-width: 0; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+            <h3 style="font-size: 1.2rem; margin-top: 0; margin-bottom: 20px; color: #333; text-align: center;">{{str_topactivities}}</h3>
+            <div style="width: 100%; overflow-x: auto;">
+                {{{chart_activities_html}}}
+            </div>
+        </div>
+        {{/has_activities_chart}}
+
+        <!-- Right: Blue Chart -->
         <div style="flex: 1 1 0; min-width: 0; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
             <h3 style="font-size: 1.2rem; margin-top: 0; margin-bottom: 20px; color: #333; text-align: center;">{{str_toprewardsbypurchases}}</h3>
             <div style="width: 100%; overflow-x: auto;">
                 {{{chart_purchases_html}}}
             </div>
         </div>
-        <div style="flex: 1 1 0; min-width: 0; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
-            <h3 style="font-size: 1.2rem; margin-top: 0; margin-bottom: 20px; color: #333; text-align: center;">{{str_toprewardsbyxp}}</h3>
-            <div style="width: 100%; overflow-x: auto;">
-                {{{chart_xp_html}}}
-            </div>
+    </div>
+
+    <!-- Bottom Chart -->
+    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden;">
+        <h3 style="font-size: 1.2rem; margin-top: 0; margin-bottom: 20px; color: #333; text-align: center;">{{str_toprewardsbyxp}}</h3>
+        <div style="width: 100%; overflow-x: auto;">
+            {{{chart_xp_html}}}
         </div>
     </div>
     {{/has_data}}
