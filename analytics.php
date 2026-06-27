@@ -198,7 +198,7 @@ if ($hasdata) {
     if (!empty($activitypurchases)) {
         arsort($activitypurchases);
         $topactivities = array_slice($activitypurchases, 0, 5, true);
-        
+
         $activitylabels = [];
         $activitydata = [];
         foreach ($topactivities as $name => $purchases) {
@@ -206,7 +206,7 @@ if ($hasdata) {
             $activitylabels[] = $shortname;
             $activitydata[] = $purchases;
         }
-        
+
         $chart3 = new \core\chart_pie();
         $chart3->set_doughnut(true);
         $series3 = new \core\chart_series(get_string('purchases', 'local_xpstore'), $activitydata);
@@ -248,12 +248,13 @@ $templatedata = array_merge([
     'chart_purchases_html' => $chartpurchaseshtml,
 
     'chart_xp_html' => $chartxphtml,
-    
-    'chart_xp_html' => $chartxphtml,
+
     'chart_activities_html' => $chartactivitieshtml,
-    
+
     'has_activities_chart' => !empty($chartactivitieshtml),
-    'debug_info' => 'Count purchases: ' . count($activitypurchases) . ' | chart empty? ' . (empty($chartactivitieshtml) ? 'yes' : 'no') . ' | hasdata: ' . ($hasdata ? 'yes' : 'no'),
+    'debug_info' => 'Count purchases: ' . count($activitypurchases) .
+                    ' | chart empty? ' . (empty($chartactivitieshtml) ? 'yes' : 'no') .
+                    ' | hasdata: ' . ($hasdata ? 'yes' : 'no'),
 
 
 
