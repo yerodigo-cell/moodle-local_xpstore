@@ -49,7 +49,7 @@ $string['colcost'] = 'Cost';
 $string['collabel'] = 'Label';
 $string['color_cat_icon'] = 'Cat. Icons Color';
 $string['colorconfig'] = 'Visual Customization';
-$string['predefinedpalettes'] = 'Predefined Palettes';
+
 $string['colorsreset'] = 'Colors successfully reset to default.';
 $string['colorssaved'] = 'Colors updated successfully.';
 $string['coltype'] = 'Type';
@@ -123,6 +123,7 @@ $string['mockup_widget'] = 'Individual Widget';
 $string['nopurchases'] = 'No purchases or redemptions have been recorded in this course yet.';
 $string['norewardscreated'] = 'No rewards have been created yet.';
 $string['pluginname'] = 'XP Store';
+$string['predefinedpalettes'] = 'Predefined Palettes';
 $string['points'] = 'Points';
 $string['primarycolor'] = 'Primary Color';
 $string['privacy:metadata:local_xpstore_gastos'] = 'Stores information about user redemptions in the XP Store.';

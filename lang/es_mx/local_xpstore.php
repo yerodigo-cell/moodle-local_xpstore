@@ -49,7 +49,7 @@ $string['colcost'] = 'Costo';
 $string['collabel'] = 'Etiqueta';
 $string['color_cat_icon'] = 'Color de Íconos de Cat.';
 $string['colorconfig'] = 'Personalización Visual';
-$string['predefinedpalettes'] = 'Paletas predefinidas';
+
 $string['colorsreset'] = 'Colores restablecidos a los valores predeterminados correctamente.';
 $string['colorssaved'] = 'Colores actualizados correctamente.';
 $string['coltype'] = 'Tipo';
@@ -123,6 +123,7 @@ $string['mockup_widget'] = 'Individual Widget';
 $string['nopurchases'] = 'Aún no se han registrado compras o canjes en este curso.';
 $string['norewardscreated'] = 'Aún no se han creado recompensas.';
 $string['pluginname'] = 'XP Store';
+$string['predefinedpalettes'] = 'Paletas predefinidas';
 $string['points'] = 'Puntos';
 $string['primarycolor'] = 'Color Primario (Tarjetas e Íconos)';
 $string['privacy:metadata:local_xpstore_gastos'] = 'Almacena información sobre los canjes de los usuarios en la Tienda XP.';
