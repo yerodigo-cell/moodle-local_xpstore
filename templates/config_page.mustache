@@ -37,48 +37,10 @@
     }
 }}
 <div class="local_xpstore-container local_xpstore-config-wrapper config-wrapper">
-    <div class="header-container">
-        <div class="header-title">
-            <h2>
-                <i class="fa fa-cog mr-2 text-muted"></i> 
-                {{str_configtitle}}
-            </h2>
-        </div>
-        <div class="local_xpstore-config-actions">
-            <div class="local_xpstore-config-actions-inner">
-                <form method="POST" action="{{url}}" class="local_xpstore-config-actions-form">
-                    <input type="hidden" name="sesskey" value="{{sesskey}}">
-                    <input type="hidden" name="action" value="togglemenu">
-                    {{#menu_is_visible}}
-                        <button type="submit" class="btn btn-sm btn-success btn-toggle-menu" title="{{str_hide_menu_tooltip}}">
-                            <i class="fa fa-eye"></i> {{str_menuvisible}}
-                        </button>
-                    {{/menu_is_visible}}
-                    {{^menu_is_visible}}
-                        <button type="submit" class="btn btn-sm btn-secondary btn-toggle-menu" title="{{str_show_menu_tooltip}}">
-                            <i class="fa fa-eye-slash"></i> {{str_menuhidden}}
-                        </button>
-                    {{/menu_is_visible}}
-                </form>
-                {{{help_menuvisibility}}}
-            </div>
-            <a href="{{storeurl}}" class="btn-tienda m-0">
-                <i class="fa fa-arrow-left"></i> {{str_tiendaxp}}
-            </a>
-        </div>
-    </div>
+    {{> local_xpstore/navigation_tabs }}
 
-    <ul class="nav nav-tabs mb-4 xpstore-tabs" id="xpstoreConfigTabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <a class="nav-link {{#tab_products_active}}active{{/tab_products_active}}" id="products-tab" data-toggle="tab" data-bs-toggle="tab" href="#products" role="tab" aria-controls="products" aria-selected="{{#tab_products_active}}true{{/tab_products_active}}{{^tab_products_active}}false{{/tab_products_active}}">{{str_tabproducts}}</a>
-        </li>
-        <li class="nav-item" role="presentation">
-            <a class="nav-link {{#tab_settings_active}}active{{/tab_settings_active}}" id="settings-tab" data-toggle="tab" data-bs-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="{{#tab_settings_active}}true{{/tab_settings_active}}{{^tab_settings_active}}false{{/tab_settings_active}}">{{str_tabsettings}}</a>
-        </li>
-    </ul>
 
-    <div class="tab-content" id="xpstoreConfigTabsContent">
-        <div class="tab-pane fade {{#tab_products_active}}show active{{/tab_products_active}}" id="products" role="tabpanel" aria-labelledby="products-tab">
+    {{#tab_products}}
 
             <div class="form-box {{#isediting}}editing{{/isediting}}">
         <h5 class="mb-3 font-weight-bold d-flex align-items-center">
@@ -162,21 +124,30 @@
         </form>
     </div>
 
-    <div class="d-flex justify-content-between align-items-end mb-2 mt-4 catalog-header-mobile">
-        <h5 class="m-0 font-weight-bold text-muted catalog-header-title">
+    <div class="form-box mb-4">
+        <div class="d-flex justify-content-between align-items-end mb-3 catalog-header-mobile">
+        <h5 class="m-0 font-weight-bold">
             {{str_currentcatalog}}
         </h5>
         {{#has_items}}
-            <a href="{{deleteallurl}}" class="btn btn-sm btn-outline-danger btn-delete-all" onclick="return confirm('{{str_confirmdeleteall}}')">
-                <i class="fa fa-trash"></i> {{str_deleteall}}
-            </a>
+            <div class="d-flex gap-2 align-items-center">
+                <button type="button" class="btn btn-sm btn-outline-danger mr-2" id="btn-delete-selected" style="display: none;" onclick="if(confirm('{{str_confirmdelete}}')) { document.getElementById('bulk-delete-form').submit(); }">
+                    <i class="fa fa-trash"></i> {{str_delete}}
+                </button>
+            </div>
         {{/has_items}}
     </div>
 
+    <form method="POST" action="{{url}}" id="bulk-delete-form">
+        <input type="hidden" name="sesskey" value="{{sesskey}}">
+        <input type="hidden" name="action" value="bulkdelete">
     <div class="table-responsive-wrapper mb-4">
         <table class="table-products">
             <thead>
                 <tr class="table-products-row">
+                    <th class="small px-3" style="width: 40px; text-align: center;">
+                        <input type="checkbox" id="select-all-products" style="cursor: pointer;">
+                    </th>
                     <th class="small px-3">{{str_coltype}}</th>
                     <th class="small">{{str_colcategory}}</th>
                     <th class="small">{{str_colactivity}}</th>
@@ -188,10 +159,13 @@
             </thead>
             <tbody>
                 {{^has_items}}
-                    <tr><td colspan='7' class='text-center text-muted py-4'>{{str_norewardscreated}}</td></tr>
+                    <tr><td colspan='8' class='text-center text-muted py-4'>{{str_norewardscreated}}</td></tr>
                 {{/has_items}}
                 {{#catalog_items}}
                     <tr>
+                        <td class="px-3 text-center">
+                            <input type="checkbox" name="bulkdeleteitems[]" value="{{rawitem}}" class="product-checkbox" style="cursor: pointer;">
+                        </td>
                         <td class="px-3">
                             <span class="badge-tipo bg-{{tipolower}}">{{labeltipo}}</span>
                         </td>
@@ -230,9 +204,39 @@
             </tbody>
         </table>
     </div>
+    </form>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var selectAll = document.getElementById('select-all-products');
+        var checkboxes = document.querySelectorAll('.product-checkbox');
+        var btnDeleteSelected = document.getElementById('btn-delete-selected');
+
+        function updateDeleteBtn() {
+            var anyChecked = Array.from(checkboxes).some(function(cb) { return cb.checked; });
+            if(btnDeleteSelected) btnDeleteSelected.style.display = anyChecked ? 'inline-block' : 'none';
+        }
+
+        if(selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(function(cb) { cb.checked = selectAll.checked; });
+                updateDeleteBtn();
+            });
+        }
+
+        checkboxes.forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                var allChecked = Array.from(checkboxes).every(function(c) { return c.checked; });
+                if(selectAll) selectAll.checked = allChecked;
+                updateDeleteBtn();
+            });
+        });
+    });
+    </script>
+    </div>
         <div class="widget-generator mt-4 mb-4" style="background: #e0f7fa; border-radius: 12px; padding: 20px;">
             <h5 class="mb-3 font-weight-bold">
-                <i class="fa fa-share-alt mr-2 icon-widget-title" style="color: #00838f;"></i> {{str_widget_panel_title}}
+                {{str_widget_panel_title}}
             </h5>
             <p class="small text-muted mb-3">
                 {{str_widget_panel_desc}}
@@ -254,10 +258,9 @@
             </div>
         </div>
 
-    </div>
+    {{/tab_products}}
     
-        
-        <div class="tab-pane fade {{#tab_settings_active}}show active{{/tab_settings_active}}" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+    {{#tab_settings}}
             <form method="POST" action="{{url}}" class="xpstore-settings-form">
                 <input type="hidden" name="sesskey" value="{{sesskey}}">
                 <input type="hidden" name="action" value="savesettings">
@@ -265,7 +268,6 @@
     {{#has_categories}}
         <div class="form-box form-box-category mb-4">
             <h5 class="mb-3 font-weight-bold">
-                <i class="fa fa-star mr-2 icon-category-title"></i> 
                 {{str_categoryicons}}
             </h5>
             
@@ -302,12 +304,35 @@
 
     <div class="form-box mt-4 form-box-colors">
         <h5 class="mb-3 font-weight-bold">
-            <i class="fa fa-paint-brush mr-2" style="color: {{cpactual}};"></i> 
             {{str_colorconfig}}
         </h5>
 
+        <div class="row align-items-end mb-4">
+
+            <div class="col-6 col-md-3 col-lg-2 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_primarycolor}}</label>
+                <input type="color" name="color_primary" class="form-control color-picker-input" value="{{cpactual}}">
+            </div>
+
+            <div class="col-6 col-md-3 col-lg-2 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_secondarycolor}}</label>
+                <input type="color" name="color_secondary" class="form-control color-picker-input" value="{{cbactual}}">
+            </div>
+
+            <div class="col-6 col-md-3 col-lg-2 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_color_cat_icon}}</label>
+                <input type="color" name="color_cat_icon" class="form-control color-picker-input" value="{{ccactual}}">
+            </div>
+
+            <div class="col-6 col-md-3 col-lg-2 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_iconcolor}}</label>
+                <input type="color" name="color_icon" class="form-control color-picker-input" value="{{ciactual}}">
+            </div>
+
+        </div>
+
         <div class="local_xpstore-container local_xpstore-embedded-container mb-4" id="xpstore_live_preview" style="--cp: {{cpactual}}; --cb: {{cbactual}}; --ci: {{ciactual}}; --cc: {{ccactual}}; --gradient: linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%);">
-            <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: flex-start; padding: 25px; background: #f8f9fa; border-radius: 12px; border: 2px dashed #ddd;">
+            <div style="display: flex; flex-wrap: wrap; gap: 30px; align-items: flex-start; justify-content: center; padding: 25px; background: #f8f9fa; border-radius: 12px;">
                 
                 <div style="flex: 1; min-width: 250px;">
                     <p class="small text-muted mb-3 font-weight-bold text-uppercase" style="letter-spacing: 0.5px;"><i class="fa fa-image"></i> {{#str}} mockup_storebanner, local_xpstore {{/str}}</p>
@@ -318,22 +343,24 @@
                         </h6>
                         <div class="xp-balance"><span class="xp-balance-value">1200</span> XP</div>
                         <div class="mt-3">
-                            <a href="#" class="btn btn-outline-light rounded-pill px-3 py-1" style="font-size: 0.85rem; pointer-events: none;">
+                            <a href="#" class="btn btn-outline-light px-3 py-1" style="font-size: 0.85rem; pointer-events: none; border-radius: 8px;">
                                 {{#str}} history, local_xpstore {{/str}}
                             </a>
                         </div>
                     </div>
                     
                     <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px;">
-                        <h4 class="m-0 font-weight-bold" style="color: #333; font-size: 1.6rem; text-align: center; letter-spacing: -0.5px;">
-                            <i class="fa fa-star mr-2" style="color: var(--cc);" id="preview_header_icon"></i> {{#str}} category, local_xpstore {{/str}}
+                        <h4 class="m-0 font-weight-bold" style="font-size: 1.6rem; text-align: center; letter-spacing: -0.5px;">
+                            <span class="animated-cat-title">
+                                <i class="fa fa-star mr-2" id="preview_header_icon"></i> {{#str}} category, local_xpstore {{/str}}
+                            </span>
                         </h4>
                     </div>
                 </div>
 
                 <div style="width: 220px;">
                     <p class="small text-muted mb-3 font-weight-bold text-uppercase" style="letter-spacing: 0.5px;"><i class="fa fa-th-large"></i> {{#str}} mockup_storecard, local_xpstore {{/str}}</p>
-                    <div class="p-card" style="margin: 0; pointer-events: none; height: 100%;">
+                    <div class="p-card" style="margin: 0; height: 100%;">
                         <div class="glass-shine"></div>
                         <div>
                             <div style="font-size: 20px; color: var(--ci); margin-bottom: 8px;">
@@ -361,7 +388,7 @@
 
                 <div style="width: 220px;">
                     <p class="small text-muted mb-3 font-weight-bold text-uppercase" style="letter-spacing: 0.5px;"><i class="fa fa-puzzle-piece"></i> {{#str}} mockup_widget, local_xpstore {{/str}}</p>
-                    <div class="widget-card" style="width: 100%; margin: 0; pointer-events: none;">
+                    <div class="widget-card" style="width: 100%; margin: 0;">
                         <div class="glass-shine"></div>
                         <div class="mini-wallet">
                             {{#str}} balance, local_xpstore {{/str}}:&nbsp;<span class="xp-balance-value">1200</span> XP
@@ -394,42 +421,21 @@
             </div>
         </div>
         
-        <div class="row align-items-end">
-
-            <div class="col-6 col-md-3 col-lg-2 mb-3">
-                <label class="small font-weight-bold mb-1 form-label-block">{{str_primarycolor}}</label>
-                <input type="color" name="color_primary" class="form-control color-picker-input" value="{{cpactual}}">
-            </div>
-
-            <div class="col-6 col-md-3 col-lg-2 mb-3">
-                <label class="small font-weight-bold mb-1 form-label-block">{{str_secondarycolor}}</label>
-                <input type="color" name="color_secondary" class="form-control color-picker-input" value="{{cbactual}}">
-            </div>
-
-            <div class="col-6 col-md-3 col-lg-2 mb-3">
-                <label class="small font-weight-bold mb-1 form-label-block">{{str_iconcolor}}</label>
-                <input type="color" name="color_icon" class="form-control color-picker-input" value="{{ciactual}}">
-            </div>
-            
-            <div class="col-6 col-md-3 col-lg-2 mb-3">
-                <label class="small font-weight-bold mb-1 form-label-block">{{str_color_cat_icon}}</label>
-                <input type="color" name="color_cat_icon" class="form-control color-picker-input" value="{{ccactual}}">
-            </div>
-
-            <div class="col-12 col-md-12 col-lg-4 mb-3 d-flex gap-2 justify-content-end">
-                <a href="{{resetcolorsurl}}" class="btn btn-outline-secondary px-3 py-2 font-weight-bold w-50 btn-reset-colors" onclick="return confirm('{{str_confirmresetcolors}}')">
+        <div class="row">
+            <div class="col-12 d-flex gap-2 justify-content-end">
+                <a href="{{resetcolorsurl}}" class="btn btn-outline-secondary px-4 py-2 font-weight-bold btn-reset-colors" onclick="return confirm('{{str_confirmresetcolors}}')">
                     <i class="fa fa-undo"></i> {{str_resetcolors}}
                 </a>
-                <button type="submit" class="btn px-3 py-2 font-weight-bold w-50 btn-save-colors text-white" style="background: {{cpactual}};">
+                <button type="submit" class="btn px-4 py-2 font-weight-bold btn-save-colors text-white" style="background: #184cac;">
                     {{str_savechanges}}
                 </button>
             </div>
         </div>
+
     </div>
 
     </form>
-        </div>
-    </div>
+    {{/tab_settings}}
 
 </div>
 

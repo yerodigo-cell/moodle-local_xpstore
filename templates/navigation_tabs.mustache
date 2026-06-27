@@ -1,0 +1,72 @@
+{{!
+    @template local_xpstore/navigation_tabs
+}}
+{{#isteacher}}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2 style="font-weight: 800; margin: 0; background: linear-gradient(135deg, #0056d2 0%, #00c9a7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">
+        <i class="fa fa-star" style="margin-right: 8px;"></i> XP Store
+    </h2>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        {{#show_reset_btn}}
+        <a href="{{reseturl}}" class="btn-reset" onclick="return confirm('{{str_confirmreset}}')" style="margin: 0; padding: 8px 16px;">
+            <i class="fa fa-trash"></i> {{str_resetcycle}}
+        </a>
+        {{/show_reset_btn}}
+
+        {{#show_toggle_menu_btn}}
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <form method="POST" action="{{togglemenuurl}}" style="margin: 0;">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="action" value="togglemenu">
+                {{#menu_is_visible}}
+                    <button type="submit" class="btn btn-success" style="padding: 8px 20px; border-radius: 8px; font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2); border: none;" title="{{str_hide_menu_tooltip}}">
+                        <i class="fa fa-eye" style="font-size: 1.1rem;"></i> {{str_menuvisible}}
+                    </button>
+                {{/menu_is_visible}}
+                {{^menu_is_visible}}
+                    <button type="submit" class="btn btn-secondary" style="padding: 8px 20px; border-radius: 8px; font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(108, 117, 125, 0.2); border: none;" title="{{str_show_menu_tooltip}}">
+                        <i class="fa fa-eye-slash" style="font-size: 1.1rem;"></i> {{str_menuhidden}}
+                    </button>
+                {{/menu_is_visible}}
+            </form>
+            <div style="font-size: 1.2rem; color: #17a2b8;">
+                {{{help_menuvisibility}}}
+            </div>
+        </div>
+        {{/show_toggle_menu_btn}}
+    </div>
+</div>
+
+<div style="border-bottom: 1px solid #dee2e6; margin-bottom: 15px;">
+    <ul class="nav nav-tabs" style="margin-bottom: -1px; border-bottom: none;">
+        <li class="nav-item">
+            <a href="{{storeurl}}" class="nav-link xpstore-nav-tab {{#tab_store}}active{{/tab_store}}">
+                Preview
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{reporturl}}" class="nav-link xpstore-nav-tab {{#tab_redemptions}}active{{/tab_redemptions}}">
+                {{str_audit}}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{analyticsurl}}" class="nav-link xpstore-nav-tab {{#tab_analytics}}active{{/tab_analytics}}">
+                {{str_analytics}}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{productsurl}}" class="nav-link xpstore-nav-tab {{#tab_products}}active{{/tab_products}}">
+                {{str_products}}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{settingsurl}}" class="nav-link xpstore-nav-tab {{#tab_settings}}active{{/tab_settings}}">
+                Style
+            </a>
+        </li>
+    </ul>
+</div>
+
+
+
+{{/isteacher}}

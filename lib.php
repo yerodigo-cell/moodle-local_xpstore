@@ -68,19 +68,6 @@ function local_xpstore_extend_navigation_course(navigation_node $parentnode, $co
         new pix_icon('i/store', '')
     );
     $parentnode->add_node($shopnode);
-
-    // Audit button exclusively for teachers.
-    if (has_capability('moodle/course:update', $context)) {
-        $reporturl = new moodle_url('/local/xpstore/report.php', ['id' => $course->id]);
-        $parentnode->add_node(navigation_node::create(
-            get_string('audit', 'local_xpstore'),
-            $reporturl,
-            navigation_node::TYPE_SETTING,
-            null,
-            'tiendareport',
-            new pix_icon('i/report', '')
-        ));
-    }
 }
 
 /**
@@ -405,4 +392,31 @@ function local_xpstore_apply_special_restriction($cmid, $groupid, $courseid) {
         $DB->set_field('course_modules', 'availability', $availability, ['id' => $cmid]);
         rebuild_course_cache($courseid, true);
     }
+}
+
+/**
+ * Helper to get the navigation tabs data.
+ *
+ * @param int $courseid
+ * @param string $activetab The currently active tab (store, redemptions, analytics, products, settings)
+ * @return array
+ */
+function local_xpstore_get_navigation_data($courseid, $activetab) {
+    return [
+        'storeurl' => (new moodle_url('/local/xpstore/index.php', ['id' => $courseid]))->out(false),
+        'reporturl' => (new moodle_url('/local/xpstore/report.php', ['id' => $courseid]))->out(false),
+        'analyticsurl' => (new moodle_url('/local/xpstore/analytics.php', ['id' => $courseid]))->out(false),
+        'productsurl' => (new moodle_url('/local/xpstore/config.php', ['id' => $courseid, 'tab' => 'products']))->out(false),
+        'settingsurl' => (new moodle_url('/local/xpstore/config.php', ['id' => $courseid, 'tab' => 'settings']))->out(false),
+        'str_store' => get_string('tiendaxp', 'local_xpstore'),
+        'str_audit' => get_string('audit', 'local_xpstore'),
+        'str_analytics' => get_string('analytics', 'local_xpstore'),
+        'str_products' => get_string('products', 'local_xpstore'),
+        'str_settings' => get_string('settings', 'local_xpstore'),
+        'tab_store' => ($activetab === 'store'),
+        'tab_redemptions' => ($activetab === 'redemptions'),
+        'tab_analytics' => ($activetab === 'analytics'),
+        'tab_products' => ($activetab === 'products'),
+        'tab_settings' => ($activetab === 'settings'),
+    ];
 }

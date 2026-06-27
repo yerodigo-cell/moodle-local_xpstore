@@ -25,75 +25,73 @@ define([], function() {
         init: function() {
             var typeSelect = document.getElementById('type_select');
             var activitySelect = document.getElementById('activity_select');
-            if (!typeSelect || !activitySelect) {
-                return;
-            }
+            if (typeSelect && activitySelect) {
+                var allOptions = Array.from(activitySelect.querySelectorAll('option:not([disabled])'));
 
-            var allOptions = Array.from(activitySelect.querySelectorAll('option:not([disabled])'));
-
-            // Fallback original options for older browsers that don't support hiding options well
-            var backupOptions = allOptions.map(function(opt) {
-                return {
-                    value: opt.value,
-                    text: opt.text,
-                    modname: opt.getAttribute('data-modname'),
-                    selected: opt.selected
-                };
-            });
-
-            /**
-             * Filter activities based on selected type
-             */
-            function filterActivities() {
-                var selectedType = typeSelect.value;
-                var currentSelectedValue = activitySelect.value;
-
-                // Clear all options except the first disabled one
-                while (activitySelect.options.length > 1) {
-                    activitySelect.remove(1);
-                }
-
-                backupOptions.forEach(function(optData) {
-                    var show = false;
-                    if (selectedType === 'Q') {
-                        show = (optData.modname === 'quiz');
-                    } else if (selectedType === 'A') {
-                        show = (optData.modname === 'assign');
-                    } else if (selectedType === 'F') {
-                        show = (optData.modname === 'forum');
-                    } else if (selectedType === 'G') {
-                        var gradables = ['quiz', 'assign', 'forum', 'workshop', 'scorm', 'lesson', 'h5pactivity'];
-                        show = gradables.indexOf(optData.modname) !== -1;
-                    } else {
-                        show = true;
-                    }
-
-                    if (show) {
-                        var newOption = document.createElement('option');
-                        newOption.value = optData.value;
-                        newOption.text = optData.text;
-                        newOption.setAttribute('data-modname', optData.modname);
-                        if (optData.value === currentSelectedValue) {
-                            newOption.selected = true;
-                        }
-                        activitySelect.appendChild(newOption);
-                    }
+                // Fallback original options for older browsers that don't support hiding options well
+                var backupOptions = allOptions.map(function(opt) {
+                    return {
+                        value: opt.value,
+                        text: opt.text,
+                        modname: opt.getAttribute('data-modname'),
+                        selected: opt.selected
+                    };
                 });
 
-                // Handle Bonus field visibility
-                var bonusContainer = document.getElementById('bonus_container');
-                if (bonusContainer) {
-                    bonusContainer.style.display = (selectedType === 'G') ? '' : 'none';
+                /**
+                 * Filter activities based on selected type
+                 */
+                function filterActivities() {
+                    var selectedType = typeSelect.value;
+                    var currentSelectedValue = activitySelect.value;
+
+                    // Clear all options except the first disabled one
+                    while (activitySelect.options.length > 1) {
+                        activitySelect.remove(1);
+                    }
+
+                    backupOptions.forEach(function(optData) {
+                        var show = false;
+                        if (selectedType === 'Q') {
+                            show = (optData.modname === 'quiz');
+                        } else if (selectedType === 'A') {
+                            show = (optData.modname === 'assign');
+                        } else if (selectedType === 'F') {
+                            show = (optData.modname === 'forum');
+                        } else if (selectedType === 'G') {
+                            var gradables = ['quiz', 'assign', 'forum', 'workshop', 'scorm', 'lesson', 'h5pactivity'];
+                            show = gradables.indexOf(optData.modname) !== -1;
+                        } else {
+                            show = true;
+                        }
+
+                        if (show) {
+                            var newOption = document.createElement('option');
+                            newOption.value = optData.value;
+                            newOption.text = optData.text;
+                            newOption.setAttribute('data-modname', optData.modname);
+                            if (optData.value === currentSelectedValue) {
+                                newOption.selected = true;
+                            }
+                            activitySelect.appendChild(newOption);
+                        }
+                    });
+
+                    // Handle Bonus field visibility
+                    var bonusContainer = document.getElementById('bonus_container');
+                    if (bonusContainer) {
+                        bonusContainer.style.display = (selectedType === 'G') ? '' : 'none';
+                    }
+
+                    // Reset selection if it disappeared
+                    if (activitySelect.selectedIndex === -1) {
+                        activitySelect.selectedIndex = 0;
+                    }
                 }
 
-                // Reset selection if it disappeared
-                if (activitySelect.selectedIndex === -1) {
-                    activitySelect.selectedIndex = 0;
-                }
+                typeSelect.addEventListener('change', filterActivities);
+                filterActivities();
             }
-
-            typeSelect.addEventListener('change', filterActivities);
-            filterActivities();
 
             // Live Preview Logic
             var livePreview = document.getElementById('xpstore_live_preview');

@@ -74,12 +74,12 @@ body.pagelayout-embedded,
 .local_xpstore-container .btn-history-widget {
     background: var(--gradient);
     background-size: 200% 200%;
-    animation: gradientFlow 5s ease infinite;
+    animation: cascadeEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) both, gradientFlow 5s ease infinite;
     background-repeat: no-repeat;
     color: white;
     text-decoration: none;
     padding: 12px 28px;
-    border-radius: 50px;
+    border-radius: 8px;
     font-size: 1.05rem;
     font-weight: 700;
     display: inline-flex;
@@ -103,9 +103,6 @@ body.pagelayout-embedded,
 
 /* Config Page */
 .local_xpstore-container.config-wrapper {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
 }
 
 .local_xpstore-container .header-container {
@@ -126,7 +123,7 @@ body.pagelayout-embedded,
     border: 1px solid #ccc;
     color: #555;
     padding: 8px 20px;
-    border-radius: 50px;
+    border-radius: 8px;
     font-weight: bold;
     text-decoration: none;
     transition: 0.2s;
@@ -152,7 +149,7 @@ body.pagelayout-embedded,
 }
 
 .local_xpstore-container .btn-ucm-add {
-    background: linear-gradient(135deg, #0056d2 0%, #00c9a7 100%);
+    background: #184cac;
     color: white;
     border: none;
     font-weight: bold;
@@ -180,24 +177,35 @@ body.pagelayout-embedded,
 
 .local_xpstore-container .table-products {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 10px;
+    border-collapse: collapse;
     min-width: 900px;
 }
 
 .local_xpstore-container .table-products tr {
     background: #fff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
-    transition: 0.2s;
+    border-bottom: 1px solid #eaeaea !important;
+    transition: background 0.2s;
 }
 
 .local_xpstore-container .table-products tr:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+    background: #fcfcfc;
+}
+
+.local_xpstore-container .table-products th {
+    background: #f8f9fa;
+    color: #6c757d;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 12px 15px;
+    border: none !important;
+    border-bottom: 2px solid #eaeaea !important;
 }
 
 .local_xpstore-container .table-products td {
     vertical-align: middle;
+    padding: 15px;
+    border: none !important;
 }
 
 .local_xpstore-container .badge-type {
@@ -310,8 +318,8 @@ body.pagelayout-embedded,
     100% { background-position: 0% 50%, 0% 0%; }
 }
 
-/* Animated gradient fill for category icons */
-.local_xpstore-container h4 i.fa.mr-2 {
+/* Animated gradient fill for category titles */
+.local_xpstore-container h4 .animated-cat-title {
     background-image: 
         linear-gradient(
             115deg,
@@ -353,7 +361,7 @@ body.pagelayout-embedded,
     background: rgba(255, 255, 255, 0.2);
     color: white;
     padding: 6px 15px;
-    border-radius: 50px;
+    border-radius: 8px;
     text-decoration: none;
     font-size: 0.8rem;
     font-weight: bold;
@@ -369,8 +377,8 @@ body.pagelayout-embedded,
 }
 
 .local_xpstore-container .product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 210px));
+    display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 12px;
 }
@@ -391,6 +399,8 @@ body.pagelayout-embedded,
     height: auto;
     position: relative;
     overflow: hidden;
+    width: 210px;
+    max-width: 100%;
 }
 
 /* Config Page Inline Styles Replacements */
@@ -408,7 +418,7 @@ body.pagelayout-embedded,
     margin: 0;
 }
 .local_xpstore-container .btn-toggle-menu {
-    border-radius: 50px;
+    border-radius: 8px;
     font-weight: bold;
     padding: 8px 20px;
 }
@@ -917,51 +927,41 @@ body.pagelayout-embedded,
 
 /* History Page */
 .local_xpstore-container.history-wrapper {
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
 }
 
 .local_xpstore-container .table-history {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 10px;
+    border-collapse: collapse;
     min-width: 750px;
 }
 
 .local_xpstore-container .table-history thead th {
-    border: none;
-    color: #888;
-    font-size: 0.8rem;
+    background: #f8f9fa;
+    color: #6c757d;
+    font-size: 0.75rem;
+    font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
-    padding: 10px 20px;
+    padding: 12px 15px;
+    border: none !important;
+    border-bottom: 2px solid #eaeaea !important;
     white-space: nowrap;
 }
 
 .local_xpstore-container .table-history tbody tr {
-    background: #f8f9fa;
-    transition: 0.3s;
+    background: #fff;
+    border-bottom: 1px solid #eaeaea !important;
+    transition: background 0.3s;
 }
 
 .local_xpstore-container .table-history tbody tr:hover {
-    background: #f1f1f1;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    background: #fcfcfc;
 }
 
 .local_xpstore-container .table-history td {
-    padding: 15px 20px;
-    border: none;
+    padding: 15px;
+    border: none !important;
     vertical-align: middle;
-}
-
-.local_xpstore-container .td-first {
-    border-radius: 12px 0 0 12px;
-}
-.local_xpstore-container .td-last {
-    border-radius: 0 12px 12px 0;
 }
 
 .local_xpstore-container .btn-action-history {
@@ -1001,9 +1001,6 @@ body.pagelayout-embedded,
 
 /* Report Page */
 .local_xpstore-container.report-wrapper {
-    background: #f4f6f9;
-    padding: 30px;
-    border-radius: 20px;
 }
 
 .local_xpstore-container .header-title p {
@@ -1016,7 +1013,7 @@ body.pagelayout-embedded,
     background: #c93a3a;
     color: white;
     padding: 8px 20px;
-    border-radius: 50px;
+    border-radius: 8px;
     font-weight: bold;
     text-decoration: none;
     border: none;
@@ -1081,11 +1078,23 @@ body.pagelayout-embedded,
     text-overflow: ellipsis;
 }
 
+.local_xpstore-container .u-badges {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.local_xpstore-container .badge-total.badge-spent {
+    background-color: #FF9800;
+    color: white;
+    box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+}
+
 .local_xpstore-container .badge-total {
     background: #7d2ae8;
     color: white;
     padding: 5px 15px;
-    border-radius: 20px;
+    border-radius: 8px;
     font-weight: bold;
     font-size: 0.85rem;
     margin-right: 15px;
@@ -1118,19 +1127,32 @@ body.pagelayout-embedded,
     border-collapse: collapse;
 }
 
+.local_xpstore-container .table-logs tr {
+    background: #fff;
+    border-bottom: 1px solid #eaeaea !important;
+    transition: background 0.3s;
+}
+
+.local_xpstore-container .table-logs tr:hover {
+    background: #fcfcfc;
+}
+
 .local_xpstore-container .table-logs th {
-    text-align: left;
-    padding: 10px;
-    color: #aaa;
+    background: #f8f9fa;
+    color: #6c757d;
     font-size: 0.75rem;
+    font-weight: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
-    border-bottom: 2px solid #f0f0f0;
+    padding: 12px 15px;
+    border: none !important;
+    border-bottom: 2px solid #eaeaea !important;
+    white-space: nowrap;
 }
 
 .local_xpstore-container .table-logs td {
-    padding: 15px 10px;
-    border-bottom: 1px solid #f5f5f5;
+    padding: 15px;
+    border: none !important;
     vertical-align: middle;
 }
 
@@ -1140,6 +1162,17 @@ body.pagelayout-embedded,
     }
     .local_xpstore-container .card-header-user {
         padding: 15px;
+        flex-wrap: wrap;
+    }
+    .local_xpstore-container .u-info {
+        flex-basis: calc(100% - 80px);
+    }
+    .local_xpstore-container .u-badges {
+        order: 4;
+        width: 100%;
+        margin-top: 12px;
+        padding-left: 50px;
+        flex-wrap: wrap;
     }
     .local_xpstore-container .u-avatar-container img.userpicture {
         width: 40px;
@@ -1183,7 +1216,7 @@ body.pagelayout-embedded,
     background: white;
     color: var(--cp);
     padding: 5px 12px;
-    border-radius: 50px;
+    border-radius: 8px;
     font-size: 0.75rem;
     font-weight: bold;
     text-decoration: none !important;
@@ -1223,9 +1256,6 @@ body.pagelayout-embedded,
 /* Admin Config Page Styles */
 .local_xpstore-config-wrapper {
     font-family: "Montserrat", sans-serif;
-    background: white;
-    padding: 30px;
-    border-radius: 20px;
 }
 
 .local_xpstore-config-wrapper .header-container {
@@ -1246,7 +1276,7 @@ body.pagelayout-embedded,
     border: 1px solid #ccc;
     color: #555;
     padding: 8px 20px;
-    border-radius: 50px;
+    border-radius: 8px;
     font-weight: bold;
     text-decoration: none !important;
     transition: 0.2s;
@@ -1273,7 +1303,7 @@ body.pagelayout-embedded,
 }
 
 .local_xpstore-config-wrapper .btn-ucm-add {
-    background: linear-gradient(135deg, #0056d2 0%, #00c9a7 100%);
+    background: #184cac;
     color: white;
     border: none;
     font-weight: bold;
@@ -1301,24 +1331,35 @@ body.pagelayout-embedded,
 
 .local_xpstore-config-wrapper .table-products {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 10px;
+    border-collapse: collapse;
     min-width: 900px;
 }
 
 .local_xpstore-config-wrapper .table-products tr {
     background: #fff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
-    transition: 0.2s;
+    border-bottom: 1px solid #eaeaea !important;
+    transition: background 0.2s;
 }
 
 .local_xpstore-config-wrapper .table-products tr:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+    background: #fcfcfc;
+}
+
+.local_xpstore-config-wrapper .table-products th {
+    background: #f8f9fa;
+    color: #6c757d;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 12px 15px;
+    border: none !important;
+    border-bottom: 2px solid #eaeaea !important;
 }
 
 .local_xpstore-config-wrapper .table-products td {
     vertical-align: middle;
+    padding: 15px;
+    border: none !important;
 }
 
 .badge-tipo {
@@ -1561,4 +1602,38 @@ body.pagelayout-embedded,
 .xpstore-tabs .nav-link:hover:not(.active) {
     background-color: #f8f9fa;
     border-color: #000;
+}
+
+/* Navigation Tabs Styling */
+.local_xpstore-container .xpstore-nav-tab {
+    font-weight: 700;
+    color: #184cac !important;
+    padding: 12px 24px;
+    font-size: 1.05rem;
+    text-decoration: none !important;
+}
+
+/* Input Placeholder Styling */
+.local_xpstore-container input::placeholder {
+    font-weight: 400 !important;
+    color: #a0a0a0 !important;
+}
+.local_xpstore-container input::-webkit-input-placeholder {
+    font-weight: 400 !important;
+    color: #a0a0a0 !important;
+}
+.local_xpstore-container input::-moz-placeholder {
+    font-weight: 400 !important;
+    color: #a0a0a0 !important;
+}
+.local_xpstore-container input:-ms-input-placeholder {
+    font-weight: 400 !important;
+    color: #a0a0a0 !important;
+}
+
+@media (max-width: 767px) {
+    /* When tabs stack or collapse on mobile, ensure active tab text is white for contrast against blue background */
+    .local_xpstore-container .nav-tabs .xpstore-nav-tab.active {
+        color: #ffffff !important;
+    }
 }

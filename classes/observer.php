@@ -93,6 +93,7 @@ class observer {
                 'color_icon',
                 'color_cat_icon',
                 'cat_icons',
+                'show_menu',
             ];
             foreach ($keys as $key) {
                 $oldval = get_config('local_xpstore', $key . '_course_' . $oldcourseid);

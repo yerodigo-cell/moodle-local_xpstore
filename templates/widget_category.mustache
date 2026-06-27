@@ -70,8 +70,10 @@
 
     {{^isempty}}
         {{#categoriastienda}}
-            <h4 class="mt-4 mb-4 font-weight-bold" style="color: #333; font-size: 1.6rem; text-align: center; letter-spacing: -0.5px;">
-                <i class="fa fa-{{caticon}} mr-2" style="color: var(--cc);"></i> {{nombreseccion}}
+            <h4 class="mt-4 mb-4 font-weight-bold" style="font-size: 1.6rem; text-align: center; letter-spacing: -0.5px;">
+                <span class="animated-cat-title">
+                    <i class="fa fa-{{caticon}} mr-2"></i> {{nombreseccion}}
+                </span>
             </h4>
 
             <div class="product-grid" style="margin-bottom: 50px;">

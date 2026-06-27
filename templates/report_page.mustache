@@ -37,18 +37,13 @@
     }
 }}
 <div class="local_xpstore-container report-wrapper">
-    <div class="header-container" style="flex-wrap: wrap;">
+    {{> local_xpstore/navigation_tabs }}
+
+    <div class="form-box mb-4">
+    <div class="header-container" style="flex-wrap: wrap; margin-top: 0;">
         <div class="header-title">
-            <h2>{{str_reporttitle}}</h2>
-            <p>{{str_reportsubtitle}}</p>
-        </div>
-        <div>
-            <a href="{{storeurl}}" class="btn-tienda">
-                <i class="fa fa-arrow-left"></i> {{str_tiendaxp}}
-            </a>
-            <a href="{{reseturl}}" class="btn-reset" onclick="return confirm('{{str_confirmreset}}')">
-                <i class="fa fa-trash"></i> {{str_resetcycle}}
-            </a>
+            <h5 class="mb-1 font-weight-bold">{{str_reporttitle}}</h5>
+            <p style="color: #777; font-weight: 600; font-size: 0.95rem;">{{str_reportsubtitle}}</p>
         </div>
         <div style="width: 100%; margin-top: 15px;">
             <form action="report.php" method="GET" class="form-inline" style="display: flex; gap: 10px; align-items: center;">
@@ -68,7 +63,6 @@
             </form>
         </div>
     </div>
-
     {{#has_users}}
         {{#users}}
         <div class="user-card">
@@ -84,11 +78,11 @@
                     </div>
                     <div class="u-email">{{useremail}}</div>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center;">
+                <div class="u-badges">
                     <div class="badge-total">
                         {{totalcanjes}} {{str_redemptions}}
                     </div>
-                    <div class="badge-total" style="background-color: #FF9800; color: white; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);">
+                    <div class="badge-total badge-spent">
                         <i class="fa fa-star" style="margin-right: 4px;"></i> {{str_totalspent}}
                     </div>
                 </div>
@@ -148,4 +142,5 @@
             {{str_nopurchases}}
         </div>
     {{/has_users}}
+    </div>
 </div>

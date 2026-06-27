@@ -85,7 +85,14 @@ $modinfo = get_fast_modinfo($courseid);
 
 echo $OUTPUT->header();
 
-$templatedata = [
+$navdata = local_xpstore_get_navigation_data($courseid, 'redemptions');
+$navdata['isteacher'] = true;
+$navdata['show_reset_btn'] = true;
+$navdata['str_confirmreset'] = get_string('confirmreset', 'local_xpstore');
+$navdata['str_resetcycle'] = get_string('resetcycle', 'local_xpstore');
+$navdata['reseturl'] = (new moodle_url($url, ['action' => 'reset', 'sesskey' => sesskey()]))->out(false);
+
+$templatedata = array_merge([
     'courseid' => $courseid,
     'search' => $search,
     'searchlabel' => $searchlabel,
@@ -96,11 +103,13 @@ $templatedata = [
     'helpicon' => $OUTPUT->help_icon('searchfilters', 'local_xpstore'),
     'str_reporttitle' => get_string('reporttitle', 'local_xpstore'),
     'str_reportsubtitle' => get_string('reportsubtitle', 'local_xpstore'),
+    'str_audit' => get_string('audit', 'local_xpstore'),
+    'str_analytics' => get_string('analytics', 'local_xpstore'),
     'storeurl' => (new moodle_url('/local/xpstore/index.php', ['id' => $courseid]))->out(false),
+    'reporturl' => (new moodle_url('/local/xpstore/report.php', ['id' => $courseid]))->out(false),
+    'analyticsurl' => (new moodle_url('/local/xpstore/analytics.php', ['id' => $courseid]))->out(false),
+    'str_viewanalytics' => get_string('viewanalytics', 'local_xpstore'),
     'str_tiendaxp' => get_string('tiendaxp', 'local_xpstore'),
-    'reseturl' => (new moodle_url($url, ['action' => 'reset', 'sesskey' => sesskey()]))->out(false),
-    'str_confirmreset' => get_string('confirmreset', 'local_xpstore'),
-    'str_resetcycle' => get_string('resetcycle', 'local_xpstore'),
     'str_activity' => get_string('activity', 'local_xpstore'),
     'str_colcategory' => get_string('colcategory', 'local_xpstore'),
     'str_type' => get_string('type', 'local_xpstore'),
@@ -110,7 +119,7 @@ $templatedata = [
     'str_redemptions' => get_string('redemptions', 'local_xpstore'),
     'has_users' => false,
     'users' => [],
-];
+], $navdata);
 
 $sql = "SELECT g.*, u.firstname, u.lastname, u.picture, u.imagealt, u.email
         FROM {local_xpstore_gastos} g

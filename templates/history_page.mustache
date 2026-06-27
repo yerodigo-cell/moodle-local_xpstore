@@ -40,12 +40,11 @@
     <div class="header-container">
         <div class="header-title">
             <h2>
-                <i class="fa fa-history mr-2" style="color: #0056D2;"></i> 
                 {{str_history}}
             </h2>
             {{#has_logs}}
             <div style="margin-top: 8px;">
-                <span style="background-color: #FF9800; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);">
+                <span style="background-color: #FF9800; color: white; padding: 4px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);">
                     <i class="fa fa-star" style="margin-right: 4px;"></i> {{str_totalspent}}
                 </span>
             </div>
@@ -53,8 +52,8 @@
         </div>
         
         {{#showbackbutton}}
-            <a href="{{storeurl}}" class="btn-tienda">
-                <i class="fa fa-arrow-left"></i> {{str_tiendaxp}}
+            <a href="#" onclick="history.back(); return false;" class="btn-tienda">
+                <i class="fa fa-arrow-left"></i> {{#str}} back {{/str}}
             </a>
         {{/showbackbutton}}
     </div>

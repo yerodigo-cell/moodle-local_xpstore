@@ -46,20 +46,7 @@ $tab = optional_param('tab', '', PARAM_TEXT);
 
 $catalogkey = 'catalog_course_' . $courseid;
 
-if ($action === 'togglemenu' && confirm_sesskey()) {
-    $currentmenu = get_config('local_xpstore', 'show_menu_course_' . $courseid);
-    if ($currentmenu === false) {
-        $currentmenu = '0';
-    }
-    $newmenu = ($currentmenu === '0') ? '1' : '0';
-    set_config('show_menu_course_' . $courseid, $newmenu, 'local_xpstore');
-    redirect(new moodle_url($url, ['tab' => 'settings']));
-}
 
-$menuvisible = get_config('local_xpstore', 'show_menu_course_' . $courseid);
-if ($menuvisible === false) {
-    $menuvisible = '0';
-}
 
 if ($action === 'add' && confirm_sesskey()) {
     $tipo = required_param('tipo', PARAM_ALPHA);
@@ -155,6 +142,24 @@ if ($action === 'delete' && confirm_sesskey()) {
 
     set_config($catalogkey, implode(',', $newitems), 'local_xpstore');
     redirect($url, get_string('productdeleted', 'local_xpstore'));
+}
+
+if ($action === 'bulkdelete' && confirm_sesskey()) {
+    $itemstodelete = optional_param_array('bulkdeleteitems', [], PARAM_TEXT);
+    if (!empty($itemstodelete)) {
+        $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
+        $items = explode(',', $currentconfig);
+        $newitems = [];
+        foreach ($items as $i) {
+            if (!in_array(trim($i), $itemstodelete)) {
+                $newitems[] = $i;
+            }
+        }
+        set_config($catalogkey, implode(',', $newitems), 'local_xpstore');
+        redirect($url, get_string('productdeleted', 'local_xpstore'));
+    } else {
+        redirect($url);
+    }
 }
 
 if ($action === 'deleteall' && confirm_sesskey()) {
@@ -382,6 +387,7 @@ if (!empty($configraw)) {
                 'is_grade_boost' => ($tipo == 'G'),
                 'val' => $val,
                 'iframecode' => $iframecode,
+                'rawitem' => $item,
                 'editurl' => (new moodle_url($url, ['action' => 'load_edit', 'item' => $item]))->out(false),
                 'deleteurl' => (new moodle_url($url, ['action' => 'delete', 'sesskey' => sesskey(), 'item' => $item]))->out(false),
             ];
@@ -401,9 +407,10 @@ $iframehistory = '<iframe src="' . $urlhistoryw . '" width="100%" height="150" '
 
 $activetab = ($tab === 'settings' || in_array($action, ['savesettings', 'resetcolors', 'togglemenu'])) ? 'settings' : 'products';
 
-$templatedata = [
-    'tab_products_active' => ($activetab === 'products'),
-    'tab_settings_active' => ($activetab === 'settings'),
+$navdata = local_xpstore_get_navigation_data($courseid, $activetab);
+$navdata['isteacher'] = true;
+
+$templatedata = array_merge([
     'str_configtitle' => get_string('configtitle', 'local_xpstore'),
     'url' => $url->out(false),
     'sesskey' => sesskey(),
@@ -413,11 +420,7 @@ $templatedata = [
     'str_menuvisible' => get_string('menuvisible', 'local_xpstore'),
     'str_menuhidden' => get_string('menuhidden', 'local_xpstore'),
     'help_menuvisibility' => $OUTPUT->help_icon('menuvisibility', 'local_xpstore'),
-    'storeurl' => (new moodle_url('/local/xpstore/index.php', ['id' => $courseid]))->out(false),
     'str_tiendaxp' => get_string('tiendaxp', 'local_xpstore'),
-
-    'str_tabproducts' => get_string('str_tabproducts', 'local_xpstore'),
-    'str_tabsettings' => get_string('str_tabsettings', 'local_xpstore'),
     'isediting' => $isediting,
     'str_edit' => get_string('edit', 'local_xpstore'),
     'str_addproduct' => get_string('addproduct', 'local_xpstore'),
@@ -507,7 +510,7 @@ $templatedata = [
     'str_copysinglecard' => get_string('copysinglecard', 'local_xpstore'),
     'str_delete' => get_string('delete', 'local_xpstore'),
     'str_confirmdelete' => get_string('confirmdelete', 'local_xpstore'),
-];
+], $navdata);
 
 $PAGE->requires->js_call_amd('local_xpstore/copywidget', 'init', [
     get_string('copyalert', 'local_xpstore'),

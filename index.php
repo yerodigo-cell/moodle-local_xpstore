@@ -47,12 +47,28 @@ $historyurl = new moodle_url('/local/xpstore/history.php', ['id' => $courseid]);
 $configurl = new moodle_url('/local/xpstore/config.php', ['id' => $courseid]);
 $reporturl = new moodle_url('/local/xpstore/report.php', ['id' => $courseid]);
 
+$action = optional_param('action', '', PARAM_ALPHA);
+
+if ($action === 'togglemenu' && confirm_sesskey()) {
+    $currentmenu = get_config('local_xpstore', 'show_menu_course_' . $courseid);
+    if ($currentmenu === false) {
+        $currentmenu = '0';
+    }
+    $newmenu = ($currentmenu === '0') ? '1' : '0';
+    set_config('show_menu_course_' . $courseid, $newmenu, 'local_xpstore');
+    redirect($url);
+}
+
+$menuvisible = get_config('local_xpstore', 'show_menu_course_' . $courseid);
+if ($menuvisible === false) {
+    $menuvisible = '0';
+}
+
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('incourse');
 $PAGE->set_title(get_string('storetitle', 'local_xpstore') . ' - ' . $course->shortname);
 
-$action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'comprar' && confirm_sesskey()) {
     $cmid = required_param('cmid', PARAM_INT);
     $tipo = required_param('tipo', PARAM_ALPHA);
@@ -249,7 +265,19 @@ if ($status === 'success') {
     \core\notification::add(get_string('insuficiente', 'local_xpstore'), \core\output\notification::NOTIFY_ERROR);
 }
 
-$templatedata = [
+$navdata = local_xpstore_get_navigation_data($courseid, 'store');
+$navdata['isteacher'] = $isteacher;
+$navdata['show_toggle_menu_btn'] = true;
+$navdata['menu_is_visible'] = ($menuvisible === '1');
+$navdata['str_hide_menu_tooltip'] = get_string('hide_menu_tooltip', 'local_xpstore');
+$navdata['str_show_menu_tooltip'] = get_string('show_menu_tooltip', 'local_xpstore');
+$navdata['str_menuvisible'] = get_string('menuvisible', 'local_xpstore');
+$navdata['str_menuhidden'] = get_string('menuhidden', 'local_xpstore');
+$navdata['help_menuvisibility'] = $OUTPUT->help_icon('menuvisibility', 'local_xpstore');
+$navdata['togglemenuurl'] = (new moodle_url('/local/xpstore/index.php', ['id' => $courseid]))->out(false);
+$navdata['sesskey'] = sesskey();
+
+$templatedata = array_merge([
     'cpstore' => $cpstore,
     'cbstore' => $cbstore,
     'cistore' => $cistore,
@@ -269,10 +297,6 @@ $templatedata = [
     'saldo' => $saldo,
     'historyurl' => $historyurl->out(false),
     'str_history' => get_string('history', 'local_xpstore'),
-    'isteacher' => $isteacher,
-    'reporturl' => $reporturl->out(false),
-    'configurl' => $configurl->out(false),
-    'str_audit' => get_string('audit', 'local_xpstore'),
     'str_configure' => get_string('configure', 'local_xpstore'),
     'isempty' => empty($formattedcategories),
     'str_storeempty_title' => get_string('storeempty_title', 'local_xpstore'),
@@ -280,7 +304,7 @@ $templatedata = [
     'categoriastienda' => $formattedcategories,
     'gradebookurl' => (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false),
     'str_gotogradebook' => get_string('gotogradebook', 'local_xpstore'),
-];
+], $navdata);
 
 echo $OUTPUT->header();
 echo $OUTPUT->render_from_template('local_xpstore/store_catalog', $templatedata);
