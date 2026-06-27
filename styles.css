@@ -84,6 +84,9 @@ body.pagelayout-embedded,
     font-weight: 700;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
     gap: 10px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
@@ -509,11 +512,13 @@ body.pagelayout-embedded,
 .local_xpstore-container .btn-reset-colors {
     border-radius: 10px;
     background: white;
+    white-space: nowrap;
 }
 .local_xpstore-container .btn-save-colors {
     color: white;
     border-radius: 10px;
     margin-left: 10px;
+    white-space: nowrap;
 }
 
 .local_xpstore-container .p-card:hover {

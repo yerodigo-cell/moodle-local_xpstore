@@ -49,6 +49,7 @@ $string['colcost'] = 'Costo';
 $string['collabel'] = 'Etiqueta';
 $string['color_cat_icon'] = 'Color de Íconos de Cat.';
 $string['colorconfig'] = 'Personalización Visual';
+$string['predefinedpalettes'] = 'Paletas predefinidas';
 $string['colorsreset'] = 'Colores restablecidos a los valores predeterminados correctamente.';
 $string['colorssaved'] = 'Colores actualizados correctamente.';
 $string['coltype'] = 'Tipo';

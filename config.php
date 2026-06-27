@@ -459,6 +459,7 @@ $templatedata = array_merge([
     'str_add' => get_string('add', 'local_xpstore'),
 
     'str_colorconfig' => get_string('colorconfig', 'local_xpstore'),
+    'str_predefinedpalettes' => get_string('predefinedpalettes', 'local_xpstore'),
     'cpactual' => $cpactual,
     'cbactual' => $cbactual,
     'ciactual' => $ciactual,
