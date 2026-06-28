@@ -149,6 +149,8 @@ if ($logs) {
             $totalgastado += $log->amount;
         }
 
+        $saldo_disponible = local_xpstore_get_balance($userid, $courseid);
+
         $userdata = [
             'userid' => $userid,
             'userpichtml' => $userpichtml,
@@ -156,6 +158,7 @@ if ($logs) {
             'useremail' => $realuser->email,
             'totalcanjes' => $totalcanjes,
             'str_totalspent' => get_string('totalspent', 'local_xpstore', $totalgastado),
+            'str_remainingbalance' => get_string('remainingbalance', 'local_xpstore', $saldo_disponible),
             'profileurl' => $profileurl,
             'logs' => [],
         ];

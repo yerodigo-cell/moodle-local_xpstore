@@ -44,8 +44,11 @@
             </h2>
             {{#has_logs}}
             <div style="margin-top: 8px;">
-                <span style="background-color: #FF9800; color: white; padding: 4px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);">
+                <span style="display: inline-block; background-color: #FF9800; color: white; padding: 4px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);">
                     <i class="fa fa-star" style="margin-right: 4px;"></i> {{str_totalspent}}
+                </span>
+                <span style="display: inline-block; background-color: #E8F5E9; color: #2E7D32; padding: 4px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2); margin-left: 8px;">
+                    <i class="fa fa-money" style="margin-right: 4px;"></i> {{str_remainingbalance}}
                 </span>
             </div>
             {{/has_logs}}
