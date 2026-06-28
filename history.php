@@ -157,8 +157,8 @@ if ($logs) {
         ];
     }
     $templatedata['str_totalspent'] = get_string('totalspent', 'local_xpstore', $totalgastado);
-    $saldo_disponible = local_xpstore_get_balance($USER->id, $courseid);
-    $templatedata['str_remainingbalance'] = get_string('remainingbalance', 'local_xpstore', $saldo_disponible);
+    $saldodisponible = local_xpstore_get_balance($USER->id, $courseid);
+    $templatedata['str_remainingbalance'] = get_string('remainingbalance', 'local_xpstore', $saldodisponible);
 }
 
 echo $OUTPUT->render_from_template('local_xpstore/history_page', $templatedata);
