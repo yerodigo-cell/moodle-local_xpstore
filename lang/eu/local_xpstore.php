@@ -184,3 +184,11 @@ $string['widget_panel_title'] = 'Widget-ak (txertatu denda edo kategoriak)';
 $string['widgeterror'] = 'Saria ez dago eskuragarri.';
 $string['widgetunlocked'] = 'Desblokeatuta!';
 $string['widgetunlockeddesc'] = 'Orain zure saria erabil dezakezu.';
+
+$string['requirement'] = 'Eskakizuna';
+$string['chooserequirement'] = 'Aukeratu eskakizuna';
+$string['requires'] = 'osatuta egon behar da';
+
+$string['requirement_help'] = 'Aukeratu ikasleak saria trukatu aurretik osatu behar duen jarduera bat. Saria blokeatuta egongo da jarduerak osatzeko baldintzak bete arte.';
+
+$string['requires_short'] = 'Eskatzen du';

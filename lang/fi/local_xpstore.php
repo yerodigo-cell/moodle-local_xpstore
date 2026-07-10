@@ -184,3 +184,11 @@ $string['widget_panel_title'] = 'Widgetit (upota kauppa tai kategoriat)';
 $string['widgeterror'] = 'Palkinto ei ole saatavilla.';
 $string['widgetunlocked'] = 'Avattu!';
 $string['widgetunlockeddesc'] = 'Voit nyt käyttää palkintoasi.';
+
+$string['requirement'] = 'Vaatimus';
+$string['chooserequirement'] = 'Valitse vaatimus';
+$string['requires'] = 'täytyy olla suoritettu';
+
+$string['requirement_help'] = 'Valitse aktiviteetti, joka opiskelijan on suoritettava ennen kuin hän voi lunastaa tämän palkinnon. Palkinto on lukittu, kunnes aktiviteetti täyttää suoritusvaatimukset.';
+
+$string['requires_short'] = 'Vaatii';

@@ -184,3 +184,11 @@ $string['widget_panel_title'] = 'Widget\'lar (mağaza veya kategori ekle)';
 $string['widgeterror'] = 'Ödül mevcut değil.';
 $string['widgetunlocked'] = 'Kilit Açıldı!';
 $string['widgetunlockeddesc'] = 'Artık ödülünüzü kullanabilirsiniz.';
+
+$string['requirement'] = 'Gereksinim';
+$string['chooserequirement'] = 'Gereksinim seç';
+$string['requires'] = 'tamamlanmış olmalıdır';
+
+$string['requirement_help'] = 'Öğrencinin bu ödülü alabilmesi için önce tamamlaması gereken bir etkinlik seçin. Etkinlik tamamlama koşullarını karşılayana kadar ödül kilitli kalacaktır.';
+
+$string['requires_short'] = 'Gerektirir';

@@ -146,7 +146,7 @@
                                     {{/limitealcanzado}}
                                     {{^limitealcanzado}}
                                         <button type="{{#disabled}}button{{/disabled}}{{^disabled}}submit{{/disabled}}" class="btn-buy {{#disabled}}btn-buy-disabled{{/disabled}}" {{#disabled}}onclick="var c = this.closest('.p-card') || this.closest('.widget-card'); c.classList.remove('shake-error'); void c.offsetWidth; c.classList.add('shake-error');"{{/disabled}}>
-                                            {{btntext}}
+                                            {{#locked_by_req}}<i class="fa fa-lock mr-1"></i>{{/locked_by_req}} {{btntext}}
                                         </button>
                                     {{/limitealcanzado}}
                                 </form>

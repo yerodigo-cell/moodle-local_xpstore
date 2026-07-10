@@ -94,6 +94,8 @@
                 <input type="number" name="limite" min="0" class="form-control form-control-sm" placeholder="{{str_limitzero}}" value="{{elimite}}">
             </div>
 
+
+
             <div class="col-12 col-md-6 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-category">{{str_category}}</label>
                 <input type="text" name="categoria" class="form-control form-control-sm" value="{{ecat}}">
@@ -110,6 +112,18 @@
             <div id="bonus_container" class="col-12 col-md-6 mb-3" style="display: none;">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_gradepoints}}</label>
                 <input type="number" step="0.1" name="valor_nota" class="form-control form-control-sm" value="{{evalor}}">
+            </div>
+
+            <div class="col-12 col-md-6 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-flex">
+                    {{str_requirement}}
+                    {{{help_requirement}}}
+                </label>
+                <select name="requisito" class="form-control form-control-sm">
+                    {{#requirement_options}}
+                        <option value="{{id}}" {{#selected}}selected{{/selected}}>{{{name}}}</option>
+                    {{/requirement_options}}
+                </select>
             </div>
 
             <div class="col-12 d-flex justify-content-end mt-2">
@@ -145,6 +159,7 @@
         <table class="table-products">
             <thead>
                 <tr class="table-products-row">
+                    <th style="width: 30px;"></th>
                     <th class="small px-3" style="width: 40px; text-align: center;">
                         <input type="checkbox" id="select-all-products" style="cursor: pointer;">
                     </th>
@@ -159,15 +174,23 @@
             </thead>
             <tbody>
                 {{^has_items}}
-                    <tr><td colspan='8' class='text-center text-muted py-4'>{{str_norewardscreated}}</td></tr>
+                    <tr><td colspan='9' class='text-center text-muted py-4'>{{str_norewardscreated}}</td></tr>
                 {{/has_items}}
                 {{#catalog_items}}
-                    <tr>
+                    <tr data-rawitem="{{rawitem}}" class="sortable-row">
+                        <td class="text-center text-muted" style="cursor: grab;">
+                            <i class="fa fa-bars drag-handle"></i>
+                        </td>
                         <td class="px-3 text-center">
                             <input type="checkbox" name="bulkdeleteitems[]" value="{{rawitem}}" class="product-checkbox" style="cursor: pointer;">
                         </td>
                         <td class="px-3">
                             <span class="badge-tipo bg-{{tipolower}}">{{labeltipo}}</span>
+                            {{#has_req}}
+                                <div class="mt-1 small font-weight-bold" style="color: #d32f2f; font-size: 11px; white-space: nowrap;">
+                                    <i class="fa fa-lock mr-1"></i> {{str_requires_short}}: {{req_name}}
+                                </div>
+                            {{/has_req}}
                         </td>
                         <td>
                             <span class="badge-category">
@@ -206,8 +229,46 @@
     </div>
     </form>
 
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        var tbody = document.querySelector('.table-products tbody');
+        if (tbody) {
+            Sortable.create(tbody, {
+                handle: '.drag-handle',
+                animation: 150,
+                onEnd: function (evt) {
+                    var rows = tbody.querySelectorAll('tr.sortable-row');
+                    var rawItems = [];
+                    rows.forEach(function(row) {
+                        if (row.dataset.rawitem) {
+                            rawItems.push(row.dataset.rawitem);
+                        }
+                    });
+
+                    var formData = new FormData();
+                    formData.append('sesskey', '{{sesskey}}');
+                    formData.append('action', 'reorder');
+                    rawItems.forEach(function(item) {
+                        formData.append('rawitems[]', item);
+                    });
+
+                    fetch('{{url}}', {
+                        method: 'POST',
+                        body: formData
+                    }).then(function(response) {
+                        return response.json();
+                    }).then(function(data) {
+                        if (data.success) {
+                            evt.item.style.transition = 'background-color 0.5s';
+                            evt.item.style.backgroundColor = '#e8f5e9';
+                            setTimeout(function(){ evt.item.style.backgroundColor = ''; }, 1000);
+                        }
+                    });
+                }
+            });
+        }
+
         var selectAll = document.getElementById('select-all-products');
         var checkboxes = document.querySelectorAll('.product-checkbox');
         var btnDeleteSelected = document.getElementById('btn-delete-selected');

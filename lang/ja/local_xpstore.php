@@ -184,3 +184,11 @@ $string['widget_panel_title'] = 'ウィジェット (ストアまたはカテゴ
 $string['widgeterror'] = '報酬は利用できません。';
 $string['widgetunlocked'] = 'ロック解除！';
 $string['widgetunlockeddesc'] = '報酬を使用できるようになりました。';
+
+$string['requirement'] = '要件';
+$string['chooserequirement'] = '要件を選択';
+$string['requires'] = 'を完了する必要があります';
+
+$string['requirement_help'] = 'この報酬を交換する前に学生が完了しなければならない活動を選択します。活動が完了条件を満たすまで、報酬はロックされます。';
+
+$string['requires_short'] = '必要';

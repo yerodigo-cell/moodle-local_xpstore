@@ -184,3 +184,11 @@ $string['widget_panel_title'] = 'Pripomočki (vdelava trgovine ali kategorij)';
 $string['widgeterror'] = 'Nagrada ni na voljo.';
 $string['widgetunlocked'] = 'Odklenjeno!';
 $string['widgetunlockeddesc'] = 'Sedaj lahko uporabite svojo nagrado.';
+
+$string['requirement'] = 'Zahteva';
+$string['chooserequirement'] = 'Izberite zahtevo';
+$string['requires'] = 'mora biti dokončana';
+
+$string['requirement_help'] = 'Izberite dejavnost, ki jo mora študent dokončati, preden lahko unovči to nagrado. Nagrada bo zaklenjena, dokler dejavnost ne izpolni pogojev za dokončanje.';
+
+$string['requires_short'] = 'Zahteva';

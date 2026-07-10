@@ -28,10 +28,21 @@ define([], function() {
                     var userid = this.getAttribute('data-userid');
                     var logsDiv = document.getElementById('logs-' + userid);
                     var iconDiv = document.getElementById('icon-' + userid);
-                    if (logsDiv.classList.contains('expanded')) {
-                        logsDiv.classList.remove('expanded');
-                        iconDiv.className = 'fa fa-chevron-down text-muted';
-                    } else {
+                    
+                    var isExpanded = logsDiv.classList.contains('expanded');
+                    
+                    // Collapse all currently expanded logs
+                    document.querySelectorAll('.card-body-logs.expanded').forEach(function(expandedDiv) {
+                        expandedDiv.classList.remove('expanded');
+                        var expandedId = expandedDiv.id.replace('logs-', '');
+                        var expandedIcon = document.getElementById('icon-' + expandedId);
+                        if (expandedIcon) {
+                            expandedIcon.className = 'fa fa-chevron-down text-muted';
+                        }
+                    });
+
+                    // Expand the clicked one if it wasn't already expanded
+                    if (!isExpanded) {
                         logsDiv.classList.add('expanded');
                         iconDiv.className = 'fa fa-chevron-up text-muted';
                     }

@@ -45,21 +45,32 @@
             <h5 class="mb-1 font-weight-bold">{{str_reporttitle}}</h5>
             <p style="color: #777; font-weight: 600; font-size: 0.95rem;">{{str_reportsubtitle}}</p>
         </div>
-        <div style="width: 100%; margin-top: 15px;">
-            <form action="report.php" method="GET" class="form-inline" style="display: flex; gap: 10px; align-items: center;">
+        <div style="width: 100%; margin-top: 15px; background: #fff; padding: 12px 15px; border-radius: 10px; border: 1px solid #eaeaea; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+            <form action="report.php" method="GET" style="display: flex; gap: 10px; align-items: center; margin: 0; flex-wrap: wrap;">
                 <input type="hidden" name="id" value="{{courseid}}">
-                <input type="text" name="search" class="form-control" placeholder="{{str_searchactivity}}" value="{{search}}" style="flex-grow: 1; max-width: 250px;">
-                <input type="text" name="searchlabel" class="form-control" placeholder="{{str_searchtype}}" value="{{searchlabel}}" style="flex-grow: 1; max-width: 250px;">
-                <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
+                
+                <div style="display: flex; align-items: center; gap: 10px; flex-grow: 1; border: 1px solid #dcdcdc; border-radius: 8px; padding: 0 12px; background: #fafafa; transition: border-color 0.2s;">
+                    <i class="fa fa-user text-muted" style="font-size: 0.9rem;"></i>
+                    <input type="text" name="searchuser" class="form-control border-0 shadow-none" placeholder="{{str_searchuser}}" value="{{searchuser}}" style="background: transparent; box-shadow: none; flex-grow: 1; min-width: 150px; height: 42px; outline: none; padding-left: 5px;">
+                    <div style="width: 1px; height: 24px; background: #dcdcdc;"></div>
+                    <i class="fa fa-tag text-muted" style="font-size: 0.9rem;"></i>
+                    <input type="text" name="search" class="form-control border-0 shadow-none" placeholder="{{str_searchactivity}}" value="{{search}}" style="background: transparent; box-shadow: none; flex-grow: 1; min-width: 150px; height: 42px; outline: none; padding-left: 5px;">
+                    <div style="width: 1px; height: 24px; background: #dcdcdc;"></div>
+                    <i class="fa fa-search text-muted" style="font-size: 0.9rem; margin-left: 5px;"></i>
+                    <input type="text" name="searchlabel" class="form-control border-0 shadow-none" placeholder="{{str_searchtype}}" value="{{searchlabel}}" style="background: transparent; box-shadow: none; flex-grow: 1; min-width: 150px; height: 42px; outline: none; padding-left: 5px;">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="border-radius: 8px; font-weight: 600; padding: 0 24px; height: 44px; display: flex; align-items: center; gap: 8px;">
+                    {{str_search}}
+                </button>
+                
+                {{#has_search}}
+                <a href="report.php?id={{courseid}}" class="btn btn-light text-muted" title="{{str_clear}}" style="height: 44px; display: flex; align-items: center; justify-content: center; width: 44px; border-radius: 8px; border: 1px solid #dcdcdc; background: #fff;">
+                    <i class="fa fa-times"></i>
+                </a>
+                {{/has_search}}
+                
                 <div style="margin-left: 5px;">{{{helpicon}}}</div>
-                {{#search}}
-                <a href="report.php?id={{courseid}}" class="btn btn-secondary"><i class="fa fa-times"></i></a>
-                {{/search}}
-                {{^search}}
-                {{#searchlabel}}
-                <a href="report.php?id={{courseid}}" class="btn btn-secondary"><i class="fa fa-times"></i></a>
-                {{/searchlabel}}
-                {{/search}}
             </form>
         </div>
     </div>
@@ -78,17 +89,22 @@
                     </div>
                     <div class="u-email">{{useremail}}</div>
                 </div>
-                <div class="u-badges">
-                    <div class="badge-total">
-                        {{totalcanjes}} {{str_redemptions}}
+                <div class="u-stats" style="display: flex; gap: 24px; align-items: center; margin-left: auto; margin-right: 20px;">
+                    <div class="stat-item" style="font-size: 0.95rem; font-weight: 700; color: #444;">
+                        {{totalcanjes}} <span style="font-weight: 600; color: #888; font-size: 0.85rem;">{{str_redemptions}}</span>
                     </div>
-                    <div class="badge-total badge-spent">
-                        <i class="fa fa-star" style="margin-right: 4px;"></i> {{str_totalspent}}
+                    <div style="width: 1px; height: 20px; background: #eaeaea;"></div>
+                    <div class="stat-item" style="font-size: 0.95rem; font-weight: 700; color: #f57c00;">
+                        <i class="fa fa-star" style="font-size: 0.8rem; margin-right: 3px;"></i>{{str_totalspent}}
                     </div>
-                    <div class="badge-total" style="background-color: #E8F5E9; color: #2E7D32;">
-                        <i class="fa fa-money" style="margin-right: 4px;"></i> {{str_remainingbalance}}
+                    <div style="width: 1px; height: 20px; background: #eaeaea;"></div>
+                    <div class="stat-item" style="font-size: 0.95rem; font-weight: 700; color: #2E7D32;">
+                        <i class="fa fa-money" style="font-size: 0.8rem; margin-right: 3px;"></i>{{str_remainingbalance}}
                     </div>
                 </div>
+                <a href="{{userreseturl}}" class="btn-reset-user" onclick="event.stopPropagation(); return confirm('{{str_confirmresetuser}}');" style="color: #adb5bd; border: none; background: transparent; font-size: 1.1rem; padding: 6px 10px; border-radius: 6px; transition: all 0.2s; cursor: pointer; z-index: 2;" title="{{str_resetuser}}" onmouseover="this.style.color='#dc3545'; this.style.backgroundColor='#fff5f5';" onmouseout="this.style.color='#adb5bd'; this.style.backgroundColor='transparent';">
+                    <i class="fa fa-trash"></i>
+                </a>
                 <i class="fa fa-chevron-down text-muted" id="icon-{{userid}}" style="margin-left: 10px;"></i>
             </div>
             

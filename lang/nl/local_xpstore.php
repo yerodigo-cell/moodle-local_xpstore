@@ -184,3 +184,11 @@ $string['widget_panel_title'] = 'Widgets (winkel of categorieën insluiten)';
 $string['widgeterror'] = 'Beloning niet beschikbaar.';
 $string['widgetunlocked'] = 'Ontgrendeld!';
 $string['widgetunlockeddesc'] = 'Je kunt nu je beloning gebruiken.';
+
+$string['requirement'] = 'Vereiste';
+$string['chooserequirement'] = 'Kies vereiste';
+$string['requires'] = 'moet voltooid zijn';
+
+$string['requirement_help'] = 'Selecteer een activiteit die de student moet voltooien voordat hij deze beloning kan inwisselen. De beloning blijft vergrendeld totdat de activiteit aan de voltooiingsvoorwaarden voldoet.';
+
+$string['requires_short'] = 'Vereist';

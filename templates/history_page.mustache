@@ -43,13 +43,14 @@
                 {{str_history}}
             </h2>
             {{#has_logs}}
-            <div style="margin-top: 8px;">
-                <span style="display: inline-block; background-color: #FF9800; color: white; padding: 4px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);">
-                    <i class="fa fa-star" style="margin-right: 4px;"></i> {{str_totalspent}}
-                </span>
-                <span style="display: inline-block; background-color: #E8F5E9; color: #2E7D32; padding: 4px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: bold; box-shadow: 0 2px 4px rgba(46, 125, 50, 0.2); margin-left: 8px;">
-                    <i class="fa fa-money" style="margin-right: 4px;"></i> {{str_remainingbalance}}
-                </span>
+            <div style="margin-top: 15px; display: flex; gap: 24px; align-items: center;">
+                <div class="stat-item" style="font-size: 1.05rem; font-weight: 700; color: #f57c00;">
+                    <i class="fa fa-star" style="font-size: 0.9rem; margin-right: 4px;"></i>{{str_totalspent}}
+                </div>
+                <div style="width: 1px; height: 20px; background: #eaeaea;"></div>
+                <div class="stat-item" style="font-size: 1.05rem; font-weight: 700; color: #2E7D32;">
+                    <i class="fa fa-money" style="font-size: 0.9rem; margin-right: 4px;"></i>{{str_remainingbalance}}
+                </div>
             </div>
             {{/has_logs}}
         </div>
@@ -89,8 +90,8 @@
                                 {{labeltipo}}
                             </span>
                         </td>
-                        <td class="text-center font-weight-bold text-primary" style="white-space: nowrap;">
-                            {{amount}} XP
+                        <td class="text-center font-weight-bold" style="white-space: nowrap; color: #444;">
+                            {{amount}} <span style="font-size: 0.75rem; color: #888;">XP</span>
                         </td>
                         <td class="small text-muted" style="white-space: nowrap;">
                             {{date}}

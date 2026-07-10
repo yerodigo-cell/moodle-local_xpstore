@@ -223,20 +223,24 @@ body.pagelayout-embedded,
 }
 
 .local_xpstore-container .bg-q {
-    background: #17a2b8;
+    background: #e0f2f1;
+    color: #00897b;
 }
 .local_xpstore-container .bg-a {
-    background: #007bff;
+    background: #e3f2fd;
+    color: #1e88e5;
 }
 .local_xpstore-container .bg-g {
-    background: #ffc107;
-    color: #000;
+    background: #fff8e1;
+    color: #f57f17;
 }
 .local_xpstore-container .bg-s {
-    background: #00c4cc;
+    background: #e0f7fa;
+    color: #00acc1;
 }
 .local_xpstore-container .bg-f {
-    background: #6c757d;
+    background: #f1f3f5;
+    color: #495057;
 }
 
 .local_xpstore-container .form-control-sm {
@@ -1379,17 +1383,20 @@ body.pagelayout-embedded,
 }
 
 .bg-q {
-    background: #17a2b8;
+    background: #e0f2f1;
+    color: #00897b;
 }
 .bg-a {
-    background: #007bff;
+    background: #e3f2fd;
+    color: #1e88e5;
 }
 .bg-g {
-    background: #ffc107;
-    color: #000;
+    background: #fff8e1;
+    color: #f57f17;
 }
 .bg-s {
-    background: #00c4cc;
+    background: #e0f7fa;
+    color: #00acc1;
 }
 
 .local_xpstore-config-wrapper .widget-generator {

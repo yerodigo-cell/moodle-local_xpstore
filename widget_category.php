@@ -60,12 +60,14 @@ if ($action === 'comprar' && confirm_sesskey()) {
     $productosraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
     $items = array_filter(explode(',', $productosraw));
     $limitecompra = 0;
+    $requisito = 0;
 
     foreach ($items as $it) {
         $ptipo = substr($it, 0, 1);
         $pparts = explode(':', substr($it, 1));
         if ($ptipo === $tipo && (int)$pparts[0] === $cmid) {
             $limitecompra = (int)($pparts[5] ?? 0);
+            $requisito = (int)($pparts[6] ?? 0);
             break;
         }
     }
@@ -79,8 +81,21 @@ if ($action === 'comprar' && confirm_sesskey()) {
         }
     }
 
+    $requisito_cumplido = true;
+    if ($requisito > 0) {
+        require_once($CFG->libdir.'/completionlib.php');
+        $completion = new completion_info($course);
+        $req_cminfo = get_fast_modinfo($courseid)->get_cm($requisito);
+        if ($req_cminfo) {
+            $completiondata = $completion->get_data($req_cminfo, false, $USER->id);
+            $requisito_cumplido = ($completiondata->completionstate == COMPLETION_COMPLETE || $completiondata->completionstate == COMPLETION_COMPLETE_PASS);
+        }
+    }
+
     if ($limitealcanzado) {
         redirect(new moodle_url($url, ['status' => 'limit']));
+    } else if (!$requisito_cumplido) {
+        redirect(new moodle_url($url, ['status' => 'req_failed']));
     } else {
         if (local_xpstore_purchase($USER->id, $tipo, $cmid, $costo, $courseid)) {
             local_xpstore_deliver_product($USER->id, $cmid, $tipo, $courseid);
@@ -122,6 +137,7 @@ foreach ($todoslosproductos as $item) {
         $boost = $parts[3] ?? '0';
         $nombrecat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
         $limite = (int)($parts[5] ?? 0);
+        $requisito = (int)($parts[6] ?? 0);
 
         if ($catreq === '' || strtolower($nombrecat) === strtolower($catreq)) {
             $modinfo = get_fast_modinfo($courseid);
@@ -153,8 +169,29 @@ foreach ($todoslosproductos as $item) {
                     (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
                 $gradebookurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
 
-                $disabled = ($saldo < $costo);
-                $btntext = $disabled ? get_string('insuficiente', 'local_xpstore') : get_string('canjear', 'local_xpstore');
+                $requisito_cumplido = true;
+                $req_name = '';
+                if ($requisito > 0) {
+                    require_once($CFG->libdir.'/completionlib.php');
+                    $completion = new completion_info($course);
+                    if (isset($cms[$requisito])) {
+                        $req_cminfo = $cms[$requisito];
+                        $req_name = $req_cminfo->name;
+                        $completiondata = $completion->get_data($req_cminfo, false, $USER->id);
+                        $requisito_cumplido = ($completiondata->completionstate == COMPLETION_COMPLETE || $completiondata->completionstate == COMPLETION_COMPLETE_PASS);
+                    }
+                }
+
+                $disabled = ($saldo < $costo) || (!$requisito_cumplido);
+                $btntext = get_string('canjear', 'local_xpstore');
+                if ($disabled) {
+                    if (!$requisito_cumplido) {
+                        $str_req = get_string_manager()->string_exists('requires', 'local_xpstore') ? get_string('requires', 'local_xpstore') : 'Requiere';
+                        $btntext = $req_name . ' ' . $str_req;
+                    } else {
+                        $btntext = get_string('insuficiente', 'local_xpstore');
+                    }
+                }
 
                 $storecategories[$nombrecat][] = [
                     'tipo' => $tipochar,
@@ -170,6 +207,8 @@ foreach ($todoslosproductos as $item) {
                     'has_limit' => ($limite > 0),
                     'comprasactuales' => $comprasactuales,
                     'limitealcanzado' => $limitealcanzado,
+                    'locked_by_req' => !$requisito_cumplido,
+                    'req_name' => $req_name,
                     'bought_this' => $boughtthis,
                     'gotogradebook' => $gotogradebook,
                     'cmurl' => $cmurl,

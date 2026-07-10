@@ -32,6 +32,7 @@ require_once(__DIR__ . '/lib.php');
 $courseid = required_param('id', PARAM_INT);
 $search = optional_param('search', '', PARAM_TEXT);
 $searchlabel = optional_param('searchlabel', '', PARAM_TEXT);
+$searchuser = optional_param('searchuser', '', PARAM_TEXT);
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
@@ -52,6 +53,15 @@ if ($action === 'reset' && confirm_sesskey()) {
                  WHERE cm.course = ?";
     $DB->execute($resetsql, [$courseid]);
     redirect($url, get_string('productdeleted', 'local_xpstore'));
+}
+
+if ($action === 'resetuser' && confirm_sesskey()) {
+    $userid = required_param('userid', PARAM_INT);
+    $resetsql = "DELETE g FROM {local_xpstore_gastos} g
+                 JOIN {course_modules} cm ON g.itemid = cm.id
+                 WHERE cm.course = ? AND g.userid = ?";
+    $DB->execute($resetsql, [$courseid, $userid]);
+    redirect($url, get_string('userreset', 'local_xpstore'));
 }
 
 // Pre-load store categories to assign them to records.
@@ -96,9 +106,12 @@ $templatedata = array_merge([
     'courseid' => $courseid,
     'search' => $search,
     'searchlabel' => $searchlabel,
+    'searchuser' => $searchuser,
+    'has_search' => ($search !== '' || $searchlabel !== '' || $searchuser !== ''),
     'str_search' => get_string('search'),
     'str_searchactivity' => get_string('searchactivity', 'local_xpstore'),
     'str_searchtype' => get_string('searchtype', 'local_xpstore'),
+    'str_searchuser' => get_string('searchuser', 'local_xpstore'),
     'str_clear' => get_string('clear'),
     'helpicon' => $OUTPUT->help_icon('searchfilters', 'local_xpstore'),
     'str_reporttitle' => get_string('reporttitle', 'local_xpstore'),
@@ -117,6 +130,8 @@ $templatedata = array_merge([
     'str_date' => get_string('date', 'local_xpstore'),
     'str_nopurchases' => get_string('nopurchases', 'local_xpstore'),
     'str_redemptions' => get_string('redemptions', 'local_xpstore'),
+    'str_confirmresetuser' => get_string('confirmresetuser', 'local_xpstore'),
+    'str_resetuser' => get_string('resetuser', 'local_xpstore'),
     'has_users' => false,
     'users' => [],
 ], $navdata);
@@ -139,8 +154,16 @@ if ($logs) {
 
     foreach ($grouped as $userid => $userlogs) {
         $realuser = core_user::get_user($userid);
-        $userpichtml = $OUTPUT->user_picture($realuser, ['size' => 50, 'link' => false]);
         $userfullname = $realuser->firstname . ' ' . $realuser->lastname;
+        
+        if (
+            $searchuser !== '' &&
+            core_text::strpos(core_text::strtolower($userfullname), core_text::strtolower($searchuser)) === false
+        ) {
+            continue;
+        }
+
+        $userpichtml = $OUTPUT->user_picture($realuser, ['size' => 50, 'link' => false]);
         $totalcanjes = count($userlogs);
         $profileurl = (new moodle_url('/user/view.php', ['id' => $userid, 'course' => $courseid]))->out(false);
 
@@ -160,6 +183,7 @@ if ($logs) {
             'str_totalspent' => get_string('totalspent', 'local_xpstore', $totalgastado),
             'str_remainingbalance' => get_string('remainingbalance', 'local_xpstore', $saldodisponible),
             'profileurl' => $profileurl,
+            'userreseturl' => (new moodle_url($url, ['action' => 'resetuser', 'userid' => $userid, 'sesskey' => sesskey()]))->out(false),
             'logs' => [],
         ];
 

@@ -184,3 +184,11 @@ $string['widget_panel_title'] = 'Виджеты (встроить магазин
 $string['widgeterror'] = 'Награда недоступна.';
 $string['widgetunlocked'] = 'Разблокировано!';
 $string['widgetunlockeddesc'] = 'Теперь вы можете использовать вашу награду.';
+
+$string['requirement'] = 'Требование';
+$string['chooserequirement'] = 'Выберите требование';
+$string['requires'] = 'должно быть выполнено';
+
+$string['requirement_help'] = 'Выберите элемент курса, который студент должен выполнить, прежде чем он сможет получить эту награду. Награда будет заблокирована до тех пор, пока элемент не будет выполнен.';
+
+$string['requires_short'] = 'Требуется';

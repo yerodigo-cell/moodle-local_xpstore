@@ -184,3 +184,11 @@ $string['widget_panel_title'] = 'Valdikliai (įterpti parduotuvę ar kategorijas
 $string['widgeterror'] = 'Apdovanojimas nepasiekiamas.';
 $string['widgetunlocked'] = 'Atrakinta!';
 $string['widgetunlockeddesc'] = 'Dabar galite naudoti savo apdovanojimą.';
+
+$string['requirement'] = 'Reikalavimas';
+$string['chooserequirement'] = 'Pasirinkite reikalavimą';
+$string['requires'] = 'turi būti baigta';
+
+$string['requirement_help'] = 'Pasirinkite veiklą, kurią studentas turi užbaigti prieš atsiimdamas šį atlygį. Atlygis bus užrakintas, kol veikla atitiks užbaigimo sąlygas.';
+
+$string['requires_short'] = 'Reikalauja';

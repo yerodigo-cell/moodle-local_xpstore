@@ -184,3 +184,11 @@ $string['widget_panel_title'] = 'Widget (incorpora il negozio o le categorie)';
 $string['widgeterror'] = 'Ricompensa non disponibile.';
 $string['widgetunlocked'] = 'Sbloccato!';
 $string['widgetunlockeddesc'] = 'Ora puoi utilizzare la tua ricompensa.';
+
+$string['requirement'] = 'Requisito';
+$string['chooserequirement'] = 'Scegli il requisito';
+$string['requires'] = 'deve essere completata';
+
+$string['requirement_help'] = 'Seleziona un'attività che lo studente deve completare prima di poter riscattare questa ricompensa. La ricompensa sarà bloccata fino al soddisfacimento delle condizioni di completamento dell'attività.';
+
+$string['requires_short'] = 'Richiede';

@@ -184,3 +184,11 @@ $string['widget_panel_title'] = '小工具（嵌入商店或类别）';
 $string['widgeterror'] = '奖励不可用。';
 $string['widgetunlocked'] = '已解锁！';
 $string['widgetunlockeddesc'] = '您现在可以使用您的奖励了。';
+
+$string['requirement'] = '要求';
+$string['chooserequirement'] = '选择要求';
+$string['requires'] = '必须完成';
+
+$string['requirement_help'] = '选择学生在兑换此奖励之前必须完成的活动。在活动满足完成条件之前，奖励将被锁定。';
+
+$string['requires_short'] = '需要';

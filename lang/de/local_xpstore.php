@@ -184,3 +184,11 @@ $string['widget_panel_title'] = 'Widgets (Shop oder Kategorien einbetten)';
 $string['widgeterror'] = 'Belohnung nicht verfügbar.';
 $string['widgetunlocked'] = 'Freigeschaltet!';
 $string['widgetunlockeddesc'] = 'Du kannst deine Belohnung nun nutzen.';
+
+$string['requirement'] = 'Voraussetzung';
+$string['chooserequirement'] = 'Voraussetzung wählen';
+$string['requires'] = 'muss abgeschlossen sein';
+
+$string['requirement_help'] = 'Wählen Sie eine Aktivität aus, die der Schüler abschließen muss, bevor er diese Belohnung einlösen kann. Die Belohnung ist gesperrt, bis die Aktivität ihre Abschlussbedingungen erfüllt.';
+
+$string['requires_short'] = 'Erfordert';

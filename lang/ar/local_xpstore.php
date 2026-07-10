@@ -184,3 +184,11 @@ $string['widget_panel_title'] = 'أدوات (تضمين المتجر أو الف
 $string['widgeterror'] = 'المكافأة غير متوفرة.';
 $string['widgetunlocked'] = 'تم الفتح!';
 $string['widgetunlockeddesc'] = 'يمكنك الآن استخدام مكافأتك.';
+
+$string['requirement'] = 'المتطلب';
+$string['chooserequirement'] = 'اختر المتطلب';
+$string['requires'] = 'يجب أن يكتمل';
+
+$string['requirement_help'] = 'حدد نشاطًا يجب على الطالب إكماله قبل أن يتمكن من استرداد هذه المكافأة. سيتم قفل المكافأة حتى يفي النشاط بشروط الإكمال.';
+
+$string['requires_short'] = 'يتطلب';

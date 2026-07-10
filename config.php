@@ -56,11 +56,12 @@ if ($action === 'add' && confirm_sesskey()) {
     $valornota = optional_param('valor_nota', '0', PARAM_FLOAT);
     $categoria = optional_param('categoria', '', PARAM_TEXT);
     $limite = optional_param('limite', 0, PARAM_INT);
+    $requisito = optional_param('requisito', 0, PARAM_INT);
 
     $categorialimpia = str_replace(':', '-', trim($categoria));
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
 
-    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:{$limite}";
+    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:{$limite}:{$requisito}";
     $updated = $currentconfig ? $currentconfig . ',' . $newitem : $newitem;
     set_config($catalogkey, $updated, 'local_xpstore');
 
@@ -92,9 +93,10 @@ if ($action === 'edit_save' && confirm_sesskey()) {
     $valornota = optional_param('valor_nota', '0', PARAM_FLOAT);
     $categoria = optional_param('categoria', '', PARAM_TEXT);
     $limite = optional_param('limite', 0, PARAM_INT);
+    $requisito = optional_param('requisito', 0, PARAM_INT);
 
     $categorialimpia = str_replace(':', '-', trim($categoria));
-    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:{$limite}";
+    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:{$limite}:{$requisito}";
 
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
     $items = explode(',', $currentconfig);
@@ -167,6 +169,15 @@ if ($action === 'deleteall' && confirm_sesskey()) {
     redirect($url, get_string('deletedall', 'local_xpstore'));
 }
 
+if ($action === 'reorder' && confirm_sesskey()) {
+    $rawitems = optional_param_array('rawitems', [], PARAM_TEXT);
+    if (!empty($rawitems)) {
+        set_config($catalogkey, implode(',', $rawitems), 'local_xpstore');
+    }
+    echo json_encode(['success' => true]);
+    die();
+}
+
 if ($action === 'resetcolors' && confirm_sesskey()) {
     unset_config('color_primary_course_' . $courseid, 'local_xpstore');
     unset_config('color_secondary_course_' . $courseid, 'local_xpstore');
@@ -218,6 +229,7 @@ $ecat = '';
 $enombre = '';
 $evalor = '0';
 $elimite = '0';
+$erequisito = 0;
 $olditemval = '';
 
 if ($action === 'load_edit') {
@@ -234,6 +246,7 @@ if ($action === 'load_edit') {
         $evalor = $parts[3];
         $ecat = $parts[4] ?? '';
         $elimite = $parts[5] ?? '0';
+        $erequisito = (int)($parts[6] ?? 0);
         $olditemval = $itemtoedit;
         $isediting = true;
     }
@@ -256,6 +269,9 @@ foreach ($availabletypes as $val => $label) {
 }
 
 $activityoptions = [];
+$requirementoptions = [
+    ['id' => 0, 'name' => get_string('none'), 'selected' => ($erequisito == 0)]
+];
 $modinfo = get_fast_modinfo($courseid);
 foreach ($modinfo->get_cms() as $cm) {
     if ($cm->has_view() && !in_array($cm->modname, ['label', 'resource', 'contentview'])) {
@@ -264,6 +280,11 @@ foreach ($modinfo->get_cms() as $cm) {
             'modname' => $cm->modname,
             'name' => "[" . strtoupper($cm->modname) . "] " . $cm->get_formatted_name(),
             'selected' => ($cm->id == $ecmid),
+        ];
+        $requirementoptions[] = [
+            'id' => $cm->id,
+            'name' => "[" . strtoupper($cm->modname) . "] " . $cm->get_formatted_name(),
+            'selected' => ($cm->id == $erequisito),
         ];
     }
 }
@@ -358,6 +379,7 @@ if (!empty($configraw)) {
             $val = $parts[3] ?? '0';
             $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
             $limiteactual = isset($parts[5]) ? (int)$parts[5] : 0;
+            $requisito = isset($parts[6]) ? (int)$parts[6] : 0;
 
             $modinfo = get_fast_modinfo($courseid);
             $cms = $modinfo->get_cms();
@@ -367,6 +389,11 @@ if (!empty($configraw)) {
             $cm = $cms[$cid];
             $realname = $cm->name;
             $labeltipo = get_string('type_' . strtolower($tipo), 'local_xpstore');
+
+            $reqname = '';
+            if ($requisito > 0 && isset($cms[$requisito])) {
+                $reqname = $cms[$requisito]->name;
+            }
 
             global $CFG;
             $widgeturl = $CFG->wwwroot . "/local/xpstore/widget.php?id={$courseid}&tipo={$tipo}&cmid={$cid}";
@@ -386,6 +413,8 @@ if (!empty($configraw)) {
                 'displayname' => $name ?: $realname,
                 'is_grade_boost' => ($tipo == 'G'),
                 'val' => $val,
+                'has_req' => ($requisito > 0),
+                'req_name' => $reqname,
                 'iframecode' => $iframecode,
                 'rawitem' => $item,
                 'editurl' => (new moodle_url($url, ['action' => 'load_edit', 'item' => $item]))->out(false),
@@ -437,6 +466,14 @@ $templatedata = array_merge([
     'str_chooseactivity' => get_string('chooseactivity', 'local_xpstore'),
     'activity_options' => $activityoptions,
     'ecmid' => $ecmid,
+
+    'str_requirement' => get_string_manager()->string_exists('requirement', 'local_xpstore') ? get_string('requirement', 'local_xpstore') : 'Requisito',
+    'str_chooserequirement' => get_string_manager()->string_exists('chooserequirement', 'local_xpstore') ? get_string('chooserequirement', 'local_xpstore') : 'Elige un requisito',
+    'str_requires' => get_string_manager()->string_exists('requires', 'local_xpstore') ? get_string('requires', 'local_xpstore') : 'Requiere',
+    'str_requires_short' => get_string_manager()->string_exists('requires_short', 'local_xpstore') ? get_string('requires_short', 'local_xpstore') : 'Requiere',
+    'help_requirement' => $OUTPUT->help_icon('requirement', 'local_xpstore'),
+    'requirement_options' => $requirementoptions,
+    'erequisito' => $erequisito,
 
     'str_cost' => get_string('cost', 'local_xpstore'),
     'ecosto' => $ecosto,
