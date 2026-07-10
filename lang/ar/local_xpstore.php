@@ -40,6 +40,7 @@ $string['category_placeholder'] = 'مثال: VIP...';
 $string['category_short'] = 'فئة:';
 $string['categoryicons'] = 'أيقونات الفئة';
 $string['chooseactivity'] = 'اختر النشاط';
+$string['chooserequirement'] = 'اختر المتطلب';
 $string['choosetype'] = 'اختر النوع';
 $string['colaction'] = 'إجراء';
 $string['colactivity'] = 'النشاط المرتبط';
@@ -135,6 +136,10 @@ $string['redemptions_count'] = 'عمليات الاسترداد:';
 $string['remainingbalance'] = 'الرصيد: {$a} XP';
 $string['reportsubtitle'] = 'تتبع فردي لفوائد XP';
 $string['reporttitle'] = 'تقرير الاسترداد';
+$string['requirement'] = 'المتطلب';
+$string['requirement_help'] = 'حدد نشاطًا يجب على الطالب إكماله قبل أن يتمكن من استرداد هذه المكافأة. سيتم قفل المكافأة حتى يفي النشاط بشروط الإكمال.';
+$string['requires'] = 'يجب أن يكتمل';
+$string['requires_short'] = 'يتطلب';
 $string['resetcolors'] = 'إعادة الضبط إلى الافتراضي';
 $string['resetcycle'] = 'إعادة تعيين الدورة';
 $string['resethistory'] = 'مسح سجل الاسترداد';
@@ -184,11 +189,3 @@ $string['widget_panel_title'] = 'أدوات (تضمين المتجر أو الف
 $string['widgeterror'] = 'المكافأة غير متوفرة.';
 $string['widgetunlocked'] = 'تم الفتح!';
 $string['widgetunlockeddesc'] = 'يمكنك الآن استخدام مكافأتك.';
-
-$string['requirement'] = 'المتطلب';
-$string['chooserequirement'] = 'اختر المتطلب';
-$string['requires'] = 'يجب أن يكتمل';
-
-$string['requirement_help'] = 'حدد نشاطًا يجب على الطالب إكماله قبل أن يتمكن من استرداد هذه المكافأة. سيتم قفل المكافأة حتى يفي النشاط بشروط الإكمال.';
-
-$string['requires_short'] = 'يتطلب';

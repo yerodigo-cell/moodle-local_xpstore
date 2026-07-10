@@ -40,6 +40,7 @@ $string['category_placeholder'] = 'Например: VIP...';
 $string['category_short'] = 'Кат:';
 $string['categoryicons'] = 'Иконки категорий';
 $string['chooseactivity'] = 'Выберите элемент курса';
+$string['chooserequirement'] = 'Выберите требование';
 $string['choosetype'] = 'Выберите тип';
 $string['colaction'] = 'Действие';
 $string['colactivity'] = 'Связанный элемент';
@@ -135,6 +136,10 @@ $string['redemptions_count'] = 'Обмены:';
 $string['remainingbalance'] = 'Баланс: {$a} XP';
 $string['reportsubtitle'] = 'Индивидуальное отслеживание преимуществ XP';
 $string['reporttitle'] = 'Отчет об обменах';
+$string['requirement'] = 'Требование';
+$string['requirement_help'] = 'Выберите элемент курса, который студент должен выполнить, прежде чем он сможет получить эту награду. Награда будет заблокирована до тех пор, пока элемент не будет выполнен.';
+$string['requires'] = 'должно быть выполнено';
+$string['requires_short'] = 'Требуется';
 $string['resetcolors'] = 'Сброс по умолчанию';
 $string['resetcycle'] = 'Сбросить цикл';
 $string['resethistory'] = 'Очистить историю обменов';
@@ -184,11 +189,3 @@ $string['widget_panel_title'] = 'Виджеты (встроить магазин
 $string['widgeterror'] = 'Награда недоступна.';
 $string['widgetunlocked'] = 'Разблокировано!';
 $string['widgetunlockeddesc'] = 'Теперь вы можете использовать вашу награду.';
-
-$string['requirement'] = 'Требование';
-$string['chooserequirement'] = 'Выберите требование';
-$string['requires'] = 'должно быть выполнено';
-
-$string['requirement_help'] = 'Выберите элемент курса, который студент должен выполнить, прежде чем он сможет получить эту награду. Награда будет заблокирована до тех пор, пока элемент не будет выполнен.';
-
-$string['requires_short'] = 'Требуется';

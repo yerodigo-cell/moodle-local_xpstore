@@ -40,6 +40,7 @@ $string['category_placeholder'] = 'Adib: VIP...';
 $string['category_short'] = 'Kat:';
 $string['categoryicons'] = 'Kategoriaren ikonoak';
 $string['chooseactivity'] = 'Aukeratu jarduera';
+$string['chooserequirement'] = 'Aukeratu eskakizuna';
 $string['choosetype'] = 'Aukeratu Mota';
 $string['colaction'] = 'Ekintza';
 $string['colactivity'] = 'Lotutako Jarduera';
@@ -135,6 +136,10 @@ $string['redemptions_count'] = 'Trukeak:';
 $string['remainingbalance'] = 'Saldoa: {$a} XP';
 $string['reportsubtitle'] = 'XP onuren jarraipen indibiduala';
 $string['reporttitle'] = 'Trukaketen Txostena';
+$string['requirement'] = 'Eskakizuna';
+$string['requirement_help'] = 'Aukeratu ikasleak saria trukatu aurretik osatu behar duen jarduera bat. Saria blokeatuta egongo da jarduerak osatzeko baldintzak bete arte.';
+$string['requires'] = 'osatuta egon behar da';
+$string['requires_short'] = 'Eskatzen du';
 $string['resetcolors'] = 'Lehenetsira berrezarri';
 $string['resetcycle'] = 'Berrezarri zikloa';
 $string['resethistory'] = 'Garbitu trukaketen historia';
@@ -184,11 +189,3 @@ $string['widget_panel_title'] = 'Widget-ak (txertatu denda edo kategoriak)';
 $string['widgeterror'] = 'Saria ez dago eskuragarri.';
 $string['widgetunlocked'] = 'Desblokeatuta!';
 $string['widgetunlockeddesc'] = 'Orain zure saria erabil dezakezu.';
-
-$string['requirement'] = 'Eskakizuna';
-$string['chooserequirement'] = 'Aukeratu eskakizuna';
-$string['requires'] = 'osatuta egon behar da';
-
-$string['requirement_help'] = 'Aukeratu ikasleak saria trukatu aurretik osatu behar duen jarduera bat. Saria blokeatuta egongo da jarduerak osatzeko baldintzak bete arte.';
-
-$string['requires_short'] = 'Eskatzen du';

@@ -40,6 +40,7 @@ $string['category_placeholder'] = '例：VIP...';
 $string['category_short'] = 'カテゴリ:';
 $string['categoryicons'] = 'カテゴリアイコン';
 $string['chooseactivity'] = '活動を選択';
+$string['chooserequirement'] = '要件を選択';
 $string['choosetype'] = 'タイプを選択';
 $string['colaction'] = 'アクション';
 $string['colactivity'] = 'リンクされた活動';
@@ -135,6 +136,10 @@ $string['redemptions_count'] = '引き換え：';
 $string['remainingbalance'] = '残高: {$a} XP';
 $string['reportsubtitle'] = 'XPの特典の個別追跡';
 $string['reporttitle'] = '引き換えレポート';
+$string['requirement'] = '要件';
+$string['requirement_help'] = 'この報酬を交換する前に学生が完了しなければならない活動を選択します。活動が完了条件を満たすまで、報酬はロックされます。';
+$string['requires'] = 'を完了する必要があります';
+$string['requires_short'] = '必要';
 $string['resetcolors'] = 'デフォルトにリセット';
 $string['resetcycle'] = 'サイクルをリセット';
 $string['resethistory'] = '引き換え履歴をクリア';
@@ -184,11 +189,3 @@ $string['widget_panel_title'] = 'ウィジェット (ストアまたはカテゴ
 $string['widgeterror'] = '報酬は利用できません。';
 $string['widgetunlocked'] = 'ロック解除！';
 $string['widgetunlockeddesc'] = '報酬を使用できるようになりました。';
-
-$string['requirement'] = '要件';
-$string['chooserequirement'] = '要件を選択';
-$string['requires'] = 'を完了する必要があります';
-
-$string['requirement_help'] = 'この報酬を交換する前に学生が完了しなければならない活動を選択します。活動が完了条件を満たすまで、報酬はロックされます。';
-
-$string['requires_short'] = '必要';

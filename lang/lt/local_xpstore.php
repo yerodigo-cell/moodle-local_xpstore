@@ -40,6 +40,7 @@ $string['category_placeholder'] = 'Pvz: VIP...';
 $string['category_short'] = 'Kat:';
 $string['categoryicons'] = 'Kategorijų piktogramos';
 $string['chooseactivity'] = 'Pasirinkite veiklą';
+$string['chooserequirement'] = 'Pasirinkite reikalavimą';
 $string['choosetype'] = 'Pasirinkite tipą';
 $string['colaction'] = 'Veiksmas';
 $string['colactivity'] = 'Susijusi veikla';
@@ -135,6 +136,10 @@ $string['redemptions_count'] = 'Iškeitimai:';
 $string['remainingbalance'] = 'Likutis: {$a} XP';
 $string['reportsubtitle'] = 'Individualus XP privalumų stebėjimas';
 $string['reporttitle'] = 'Iškeitimų ataskaita';
+$string['requirement'] = 'Reikalavimas';
+$string['requirement_help'] = 'Pasirinkite veiklą, kurią studentas turi užbaigti prieš atsiimdamas šį atlygį. Atlygis bus užrakintas, kol veikla atitiks užbaigimo sąlygas.';
+$string['requires'] = 'turi būti baigta';
+$string['requires_short'] = 'Reikalauja';
 $string['resetcolors'] = 'Atstatyti į numatytuosius';
 $string['resetcycle'] = 'Atstatyti ciklą';
 $string['resethistory'] = 'Išvalyti iškeitimų istoriją';
@@ -184,11 +189,3 @@ $string['widget_panel_title'] = 'Valdikliai (įterpti parduotuvę ar kategorijas
 $string['widgeterror'] = 'Apdovanojimas nepasiekiamas.';
 $string['widgetunlocked'] = 'Atrakinta!';
 $string['widgetunlockeddesc'] = 'Dabar galite naudoti savo apdovanojimą.';
-
-$string['requirement'] = 'Reikalavimas';
-$string['chooserequirement'] = 'Pasirinkite reikalavimą';
-$string['requires'] = 'turi būti baigta';
-
-$string['requirement_help'] = 'Pasirinkite veiklą, kurią studentas turi užbaigti prieš atsiimdamas šį atlygį. Atlygis bus užrakintas, kol veikla atitiks užbaigimo sąlygas.';
-
-$string['requires_short'] = 'Reikalauja';

@@ -155,7 +155,7 @@ if ($logs) {
     foreach ($grouped as $userid => $userlogs) {
         $realuser = core_user::get_user($userid);
         $userfullname = $realuser->firstname . ' ' . $realuser->lastname;
-        
+
         if (
             $searchuser !== '' &&
             core_text::strpos(core_text::strtolower($userfullname), core_text::strtolower($searchuser)) === false

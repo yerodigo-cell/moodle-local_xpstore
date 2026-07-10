@@ -40,6 +40,7 @@ $string['category_placeholder'] = 'Npr: VIP...';
 $string['category_short'] = 'Kat:';
 $string['categoryicons'] = 'Ikone kategorij';
 $string['chooseactivity'] = 'Izberi dejavnost';
+$string['chooserequirement'] = 'Izberite zahtevo';
 $string['choosetype'] = 'Izberi vrsto';
 $string['colaction'] = 'Dejanje';
 $string['colactivity'] = 'Povezana dejavnost';
@@ -135,6 +136,10 @@ $string['redemptions_count'] = 'Unovčitve:';
 $string['remainingbalance'] = 'Stanje: {$a} XP';
 $string['reportsubtitle'] = 'Posamično spremljanje prednosti XP';
 $string['reporttitle'] = 'Poročilo o unovčitvah';
+$string['requirement'] = 'Zahteva';
+$string['requirement_help'] = 'Izberite dejavnost, ki jo mora študent dokončati, preden lahko unovči to nagrado. Nagrada bo zaklenjena, dokler dejavnost ne izpolni pogojev za dokončanje.';
+$string['requires'] = 'mora biti dokončana';
+$string['requires_short'] = 'Zahteva';
 $string['resetcolors'] = 'Ponastavi na privzeto';
 $string['resetcycle'] = 'Ponastavi cikel';
 $string['resethistory'] = 'Počisti zgodovino unovčitev';
@@ -184,11 +189,3 @@ $string['widget_panel_title'] = 'Pripomočki (vdelava trgovine ali kategorij)';
 $string['widgeterror'] = 'Nagrada ni na voljo.';
 $string['widgetunlocked'] = 'Odklenjeno!';
 $string['widgetunlockeddesc'] = 'Sedaj lahko uporabite svojo nagrado.';
-
-$string['requirement'] = 'Zahteva';
-$string['chooserequirement'] = 'Izberite zahtevo';
-$string['requires'] = 'mora biti dokončana';
-
-$string['requirement_help'] = 'Izberite dejavnost, ki jo mora študent dokončati, preden lahko unovči to nagrado. Nagrada bo zaklenjena, dokler dejavnost ne izpolni pogojev za dokončanje.';
-
-$string['requires_short'] = 'Zahteva';

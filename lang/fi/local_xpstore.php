@@ -40,6 +40,7 @@ $string['category_placeholder'] = 'Esim: VIP...';
 $string['category_short'] = 'Kat:';
 $string['categoryicons'] = 'Kategoriaikonit';
 $string['chooseactivity'] = 'Valitse aktiviteetti';
+$string['chooserequirement'] = 'Valitse vaatimus';
 $string['choosetype'] = 'Valitse tyyppi';
 $string['colaction'] = 'Toiminto';
 $string['colactivity'] = 'Linkitetty aktiviteetti';
@@ -135,6 +136,10 @@ $string['redemptions_count'] = 'Lunastukset:';
 $string['remainingbalance'] = 'Saldo: {$a} XP';
 $string['reportsubtitle'] = 'XP-etujen yksilöllinen seuranta';
 $string['reporttitle'] = 'Lunastusraportti';
+$string['requirement'] = 'Vaatimus';
+$string['requirement_help'] = 'Valitse aktiviteetti, joka opiskelijan on suoritettava ennen kuin hän voi lunastaa tämän palkinnon. Palkinto on lukittu, kunnes aktiviteetti täyttää suoritusvaatimukset.';
+$string['requires'] = 'täytyy olla suoritettu';
+$string['requires_short'] = 'Vaatii';
 $string['resetcolors'] = 'Palauta oletukset';
 $string['resetcycle'] = 'Nollaa sykli';
 $string['resethistory'] = 'Tyhjennä lunastushistoria';
@@ -184,11 +189,3 @@ $string['widget_panel_title'] = 'Widgetit (upota kauppa tai kategoriat)';
 $string['widgeterror'] = 'Palkinto ei ole saatavilla.';
 $string['widgetunlocked'] = 'Avattu!';
 $string['widgetunlockeddesc'] = 'Voit nyt käyttää palkintoasi.';
-
-$string['requirement'] = 'Vaatimus';
-$string['chooserequirement'] = 'Valitse vaatimus';
-$string['requires'] = 'täytyy olla suoritettu';
-
-$string['requirement_help'] = 'Valitse aktiviteetti, joka opiskelijan on suoritettava ennen kuin hän voi lunastaa tämän palkinnon. Palkinto on lukittu, kunnes aktiviteetti täyttää suoritusvaatimukset.';
-
-$string['requires_short'] = 'Vaatii';

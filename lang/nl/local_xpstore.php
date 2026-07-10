@@ -40,6 +40,7 @@ $string['category_placeholder'] = 'Bijv: VIP...';
 $string['category_short'] = 'Cat:';
 $string['categoryicons'] = 'Categorie-iconen';
 $string['chooseactivity'] = 'Selecteer Activiteit';
+$string['chooserequirement'] = 'Kies vereiste';
 $string['choosetype'] = 'Selecteer Type';
 $string['colaction'] = 'Actie';
 $string['colactivity'] = 'Gekoppelde Activiteit';
@@ -135,6 +136,10 @@ $string['redemptions_count'] = 'Inwisselingen:';
 $string['remainingbalance'] = 'Saldo: {$a} XP';
 $string['reportsubtitle'] = 'Individuele opvolging van XP voordelen';
 $string['reporttitle'] = 'Inwisselingsrapport';
+$string['requirement'] = 'Vereiste';
+$string['requirement_help'] = 'Selecteer een activiteit die de student moet voltooien voordat hij deze beloning kan inwisselen. De beloning blijft vergrendeld totdat de activiteit aan de voltooiingsvoorwaarden voldoet.';
+$string['requires'] = 'moet voltooid zijn';
+$string['requires_short'] = 'Vereist';
 $string['resetcolors'] = 'Terugzetten naar standaard';
 $string['resetcycle'] = 'Cyclus resetten';
 $string['resethistory'] = 'Inwisselgeschiedenis wissen';
@@ -184,11 +189,3 @@ $string['widget_panel_title'] = 'Widgets (winkel of categorieën insluiten)';
 $string['widgeterror'] = 'Beloning niet beschikbaar.';
 $string['widgetunlocked'] = 'Ontgrendeld!';
 $string['widgetunlockeddesc'] = 'Je kunt nu je beloning gebruiken.';
-
-$string['requirement'] = 'Vereiste';
-$string['chooserequirement'] = 'Kies vereiste';
-$string['requires'] = 'moet voltooid zijn';
-
-$string['requirement_help'] = 'Selecteer een activiteit die de student moet voltooien voordat hij deze beloning kan inwisselen. De beloning blijft vergrendeld totdat de activiteit aan de voltooiingsvoorwaarden voldoet.';
-
-$string['requires_short'] = 'Vereist';

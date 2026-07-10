@@ -40,6 +40,7 @@ $string['category_placeholder'] = 'Örn: VIP...';
 $string['category_short'] = 'Kat:';
 $string['categoryicons'] = 'Kategori İkonları';
 $string['chooseactivity'] = 'Etkinlik Seç';
+$string['chooserequirement'] = 'Gereksinim seç';
 $string['choosetype'] = 'Tür Seç';
 $string['colaction'] = 'İşlem';
 $string['colactivity'] = 'Bağlı Etkinlik';
@@ -135,6 +136,10 @@ $string['redemptions_count'] = 'Kullanımlar:';
 $string['remainingbalance'] = 'Bakiye: {$a} XP';
 $string['reportsubtitle'] = 'XP avantajlarının bireysel takibi';
 $string['reporttitle'] = 'Kullanım Raporu';
+$string['requirement'] = 'Gereksinim';
+$string['requirement_help'] = 'Öğrencinin bu ödülü alabilmesi için önce tamamlaması gereken bir etkinlik seçin. Etkinlik tamamlama koşullarını karşılayana kadar ödül kilitli kalacaktır.';
+$string['requires'] = 'tamamlanmış olmalıdır';
+$string['requires_short'] = 'Gerektirir';
 $string['resetcolors'] = 'Varsayılana sıfırla';
 $string['resetcycle'] = 'Döngüyü sıfırla';
 $string['resethistory'] = 'Kullanım geçmişini temizle';
@@ -184,11 +189,3 @@ $string['widget_panel_title'] = 'Widget\'lar (mağaza veya kategori ekle)';
 $string['widgeterror'] = 'Ödül mevcut değil.';
 $string['widgetunlocked'] = 'Kilit Açıldı!';
 $string['widgetunlockeddesc'] = 'Artık ödülünüzü kullanabilirsiniz.';
-
-$string['requirement'] = 'Gereksinim';
-$string['chooserequirement'] = 'Gereksinim seç';
-$string['requires'] = 'tamamlanmış olmalıdır';
-
-$string['requirement_help'] = 'Öğrencinin bu ödülü alabilmesi için önce tamamlaması gereken bir etkinlik seçin. Etkinlik tamamlama koşullarını karşılayana kadar ödül kilitli kalacaktır.';
-
-$string['requires_short'] = 'Gerektirir';

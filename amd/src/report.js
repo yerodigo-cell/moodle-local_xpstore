@@ -28,9 +28,9 @@ define([], function() {
                     var userid = this.getAttribute('data-userid');
                     var logsDiv = document.getElementById('logs-' + userid);
                     var iconDiv = document.getElementById('icon-' + userid);
-                    
+
                     var isExpanded = logsDiv.classList.contains('expanded');
-                    
+
                     // Collapse all currently expanded logs
                     document.querySelectorAll('.card-body-logs.expanded').forEach(function(expandedDiv) {
                         expandedDiv.classList.remove('expanded');

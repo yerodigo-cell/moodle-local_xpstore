@@ -40,6 +40,7 @@ $string['category_placeholder'] = 'Es: VIP...';
 $string['category_short'] = 'Cat:';
 $string['categoryicons'] = 'Icone di categoria';
 $string['chooseactivity'] = 'Seleziona Attività';
+$string['chooserequirement'] = 'Scegli il requisito';
 $string['choosetype'] = 'Seleziona Tipo';
 $string['colaction'] = 'Azione';
 $string['colactivity'] = 'Attività Collegata';
@@ -135,6 +136,10 @@ $string['redemptions_count'] = 'Riscatti:';
 $string['remainingbalance'] = 'Saldo: {$a} XP';
 $string['reportsubtitle'] = 'Monitoraggio individuale dei vantaggi XP';
 $string['reporttitle'] = 'Rapporto dei Riscatti';
+$string['requirement'] = 'Requisito';
+$string['requirement_help'] = 'Seleziona un\'attività che lo studente deve completare prima di poter riscattare questa ricompensa. La ricompensa sarà bloccata fino al soddisfacimento delle condizioni di completamento dell\'attività.';
+$string['requires'] = 'deve essere completata';
+$string['requires_short'] = 'Richiede';
 $string['resetcolors'] = 'Ripristina predefiniti';
 $string['resetcycle'] = 'Ripristina Ciclo';
 $string['resethistory'] = 'Cancella cronologia riscatti';
@@ -184,11 +189,3 @@ $string['widget_panel_title'] = 'Widget (incorpora il negozio o le categorie)';
 $string['widgeterror'] = 'Ricompensa non disponibile.';
 $string['widgetunlocked'] = 'Sbloccato!';
 $string['widgetunlockeddesc'] = 'Ora puoi utilizzare la tua ricompensa.';
-
-$string['requirement'] = 'Requisito';
-$string['chooserequirement'] = 'Scegli il requisito';
-$string['requires'] = 'deve essere completata';
-
-$string['requirement_help'] = 'Seleziona un'attività che lo studente deve completare prima di poter riscattare questa ricompensa. La ricompensa sarà bloccata fino al soddisfacimento delle condizioni di completamento dell'attività.';
-
-$string['requires_short'] = 'Richiede';

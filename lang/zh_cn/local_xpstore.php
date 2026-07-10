@@ -40,6 +40,7 @@ $string['category_placeholder'] = '例：VIP...';
 $string['category_short'] = '分类:';
 $string['categoryicons'] = '类别图标';
 $string['chooseactivity'] = '选择活动';
+$string['chooserequirement'] = '选择要求';
 $string['choosetype'] = '选择类型';
 $string['colaction'] = '操作';
 $string['colactivity'] = '关联活动';
@@ -135,6 +136,10 @@ $string['redemptions_count'] = '兑换次数：';
 $string['remainingbalance'] = '余额: {$a} XP';
 $string['reportsubtitle'] = 'XP 奖励的个人追踪';
 $string['reporttitle'] = '兑换报告';
+$string['requirement'] = '要求';
+$string['requirement_help'] = '选择学生在兑换此奖励之前必须完成的活动。在活动满足完成条件之前，奖励将被锁定。';
+$string['requires'] = '必须完成';
+$string['requires_short'] = '需要';
 $string['resetcolors'] = '重置为默认值';
 $string['resetcycle'] = '重置周期';
 $string['resethistory'] = '清除兑换历史';
@@ -184,11 +189,3 @@ $string['widget_panel_title'] = '小工具（嵌入商店或类别）';
 $string['widgeterror'] = '奖励不可用。';
 $string['widgetunlocked'] = '已解锁！';
 $string['widgetunlockeddesc'] = '您现在可以使用您的奖励了。';
-
-$string['requirement'] = '要求';
-$string['chooserequirement'] = '选择要求';
-$string['requires'] = '必须完成';
-
-$string['requirement_help'] = '选择学生在兑换此奖励之前必须完成的活动。在活动满足完成条件之前，奖励将被锁定。';
-
-$string['requires_short'] = '需要';

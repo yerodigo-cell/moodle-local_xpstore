@@ -40,6 +40,7 @@ $string['category_placeholder'] = 'Ex : VIP...';
 $string['category_short'] = 'Cat :';
 $string['categoryicons'] = 'Icônes de catégorie';
 $string['chooseactivity'] = 'Sélectionner l\'activité';
+$string['chooserequirement'] = 'Choisir une exigence';
 $string['choosetype'] = 'Sélectionner le type';
 $string['colaction'] = 'Action';
 $string['colactivity'] = 'Activité liée';
@@ -135,6 +136,10 @@ $string['redemptions_count'] = 'Échanges :';
 $string['remainingbalance'] = 'Solde : {$a} XP';
 $string['reportsubtitle'] = 'Suivi individuel des avantages XP';
 $string['reporttitle'] = 'Rapport d\'échange';
+$string['requirement'] = 'Exigence';
+$string['requirement_help'] = 'Sélectionnez une activité que l\'étudiant doit terminer avant de pouvoir réclamer cette récompense. La récompense sera verrouillée jusqu\'à ce que l\'activité remplisse ses conditions d\'achèvement.';
+$string['requires'] = 'Complétez d\'abord';
+$string['requires_short'] = 'Nécessite';
 $string['resetcolors'] = 'Réinitialiser par défaut';
 $string['resetcycle'] = 'Réinitialiser le cycle';
 $string['resethistory'] = 'Effacer l\'historique d\'échange';
@@ -184,11 +189,3 @@ $string['widget_panel_title'] = 'Widgets (intégrer la boutique ou catégories)'
 $string['widgeterror'] = 'Récompense non disponible.';
 $string['widgetunlocked'] = 'Débloqué !';
 $string['widgetunlockeddesc'] = 'Vous pouvez maintenant utiliser votre récompense.';
-
-$string['requirement'] = 'Exigence';
-$string['chooserequirement'] = 'Choisir une exigence';
-$string['requires'] = 'Complétez d'abord';
-
-$string['requirement_help'] = 'Sélectionnez une activité que l'étudiant doit terminer avant de pouvoir réclamer cette récompense. La récompense sera verrouillée jusqu'à ce que l'activité remplisse ses conditions d'achèvement.';
-
-$string['requires_short'] = 'Nécessite';
