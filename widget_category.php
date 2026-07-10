@@ -189,7 +189,8 @@ foreach ($todoslosproductos as $item) {
                 if ($disabled) {
                     if (!$requisitocumplido) {
                         $sm = get_string_manager();
-                        $strreq = $sm->string_exists('requires', 'local_xpstore') ? get_string('requires', 'local_xpstore') : 'Requiere';
+                        $strreq = $sm->string_exists('requires', 'local_xpstore') ?
+                            get_string('requires', 'local_xpstore') : 'Requiere';
                         $btntext = $reqname . ' ' . $strreq;
                     } else {
                         $btntext = get_string('insuficiente', 'local_xpstore');

@@ -467,13 +467,13 @@ $templatedata = array_merge([
     'activity_options' => $activityoptions,
     'ecmid' => $ecmid,
 
-    'str_requirement' => get_string_manager()->string_exists('requirement', 'local_xpstore') ? 
+    'str_requirement' => get_string_manager()->string_exists('requirement', 'local_xpstore') ?
         get_string('requirement', 'local_xpstore') : 'Requisito',
-    'str_chooserequirement' => get_string_manager()->string_exists('chooserequirement', 'local_xpstore') ? 
+    'str_chooserequirement' => get_string_manager()->string_exists('chooserequirement', 'local_xpstore') ?
         get_string('chooserequirement', 'local_xpstore') : 'Elige un requisito',
-    'str_requires' => get_string_manager()->string_exists('requires', 'local_xpstore') ? 
+    'str_requires' => get_string_manager()->string_exists('requires', 'local_xpstore') ?
         get_string('requires', 'local_xpstore') : 'Requiere',
-    'str_requires_short' => get_string_manager()->string_exists('requires_short', 'local_xpstore') ? 
+    'str_requires_short' => get_string_manager()->string_exists('requires_short', 'local_xpstore') ?
         get_string('requires_short', 'local_xpstore') : 'Requiere',
     'help_requirement' => $OUTPUT->help_icon('requirement', 'local_xpstore'),
     'requirement_options' => $requirementoptions,
