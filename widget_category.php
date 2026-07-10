@@ -81,20 +81,20 @@ if ($action === 'comprar' && confirm_sesskey()) {
         }
     }
 
-    $requisito_cumplido = true;
+    $requisitocumplido = true;
     if ($requisito > 0) {
         require_once($CFG->libdir.'/completionlib.php');
         $completion = new completion_info($course);
-        $req_cminfo = get_fast_modinfo($courseid)->get_cm($requisito);
-        if ($req_cminfo) {
-            $completiondata = $completion->get_data($req_cminfo, false, $USER->id);
-            $requisito_cumplido = ($completiondata->completionstate == COMPLETION_COMPLETE || $completiondata->completionstate == COMPLETION_COMPLETE_PASS);
+        $reqcminfo = get_fast_modinfo($courseid)->get_cm($requisito);
+        if ($reqcminfo) {
+            $completiondata = $completion->get_data($reqcminfo, false, $USER->id);
+            $requisitocumplido = ($completiondata->completionstate == COMPLETION_COMPLETE || $completiondata->completionstate == COMPLETION_COMPLETE_PASS);
         }
     }
 
     if ($limitealcanzado) {
         redirect(new moodle_url($url, ['status' => 'limit']));
-    } else if (!$requisito_cumplido) {
+    } else if (!$requisitocumplido) {
         redirect(new moodle_url($url, ['status' => 'req_failed']));
     } else {
         if (local_xpstore_purchase($USER->id, $tipo, $cmid, $costo, $courseid)) {
@@ -169,25 +169,25 @@ foreach ($todoslosproductos as $item) {
                     (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
                 $gradebookurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
 
-                $requisito_cumplido = true;
-                $req_name = '';
+                $requisitocumplido = true;
+                $reqname = '';
                 if ($requisito > 0) {
                     require_once($CFG->libdir.'/completionlib.php');
                     $completion = new completion_info($course);
                     if (isset($cms[$requisito])) {
-                        $req_cminfo = $cms[$requisito];
-                        $req_name = $req_cminfo->name;
-                        $completiondata = $completion->get_data($req_cminfo, false, $USER->id);
-                        $requisito_cumplido = ($completiondata->completionstate == COMPLETION_COMPLETE || $completiondata->completionstate == COMPLETION_COMPLETE_PASS);
+                        $reqcminfo = $cms[$requisito];
+                        $reqname = $reqcminfo->name;
+                        $completiondata = $completion->get_data($reqcminfo, false, $USER->id);
+                        $requisitocumplido = ($completiondata->completionstate == COMPLETION_COMPLETE || $completiondata->completionstate == COMPLETION_COMPLETE_PASS);
                     }
                 }
 
-                $disabled = ($saldo < $costo) || (!$requisito_cumplido);
+                $disabled = ($saldo < $costo) || (!$requisitocumplido);
                 $btntext = get_string('canjear', 'local_xpstore');
                 if ($disabled) {
-                    if (!$requisito_cumplido) {
-                        $str_req = get_string_manager()->string_exists('requires', 'local_xpstore') ? get_string('requires', 'local_xpstore') : 'Requiere';
-                        $btntext = $req_name . ' ' . $str_req;
+                    if (!$requisitocumplido) {
+                        $strreq = get_string_manager()->string_exists('requires', 'local_xpstore') ? get_string('requires', 'local_xpstore') : 'Requiere';
+                        $btntext = $reqname . ' ' . $strreq;
                     } else {
                         $btntext = get_string('insuficiente', 'local_xpstore');
                     }
@@ -207,8 +207,8 @@ foreach ($todoslosproductos as $item) {
                     'has_limit' => ($limite > 0),
                     'comprasactuales' => $comprasactuales,
                     'limitealcanzado' => $limitealcanzado,
-                    'locked_by_req' => !$requisito_cumplido,
-                    'req_name' => $req_name,
+                    'locked_by_req' => !$requisitocumplido,
+                    'req_name' => $reqname,
                     'bought_this' => $boughtthis,
                     'gotogradebook' => $gotogradebook,
                     'cmurl' => $cmurl,

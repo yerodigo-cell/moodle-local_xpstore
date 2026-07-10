@@ -96,16 +96,16 @@ $comprasparams = [
 $comprasactuales = $DB->count_records('local_xpstore_gastos', $comprasparams);
 $limitealcanzado = ($producto['limite'] > 0 && $comprasactuales >= $producto['limite']);
 
-$requisito_cumplido = true;
-$req_name = '';
+$requisitocumplido = true;
+$reqname = '';
 if ($producto['requisito'] > 0) {
     require_once($CFG->libdir.'/completionlib.php');
     $completion = new completion_info($course);
-    $req_cminfo = get_fast_modinfo($courseid)->get_cm($producto['requisito']);
-    if ($req_cminfo) {
-        $req_name = $req_cminfo->name;
-        $completiondata = $completion->get_data($req_cminfo, false, $USER->id);
-        $requisito_cumplido = ($completiondata->completionstate == COMPLETION_COMPLETE || $completiondata->completionstate == COMPLETION_COMPLETE_PASS);
+    $reqcminfo = get_fast_modinfo($courseid)->get_cm($producto['requisito']);
+    if ($reqcminfo) {
+        $reqname = $reqcminfo->name;
+        $completiondata = $completion->get_data($reqcminfo, false, $USER->id);
+        $requisitocumplido = ($completiondata->completionstate == COMPLETION_COMPLETE || $completiondata->completionstate == COMPLETION_COMPLETE_PASS);
     }
 }
 
@@ -113,7 +113,7 @@ $action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'comprar' && confirm_sesskey()) {
     if ($limitealcanzado) {
         redirect(new moodle_url($url));
-    } else if (!$requisito_cumplido) {
+    } else if (!$requisitocumplido) {
         redirect(new moodle_url($url, ['status' => 'error']));
     } else {
         if (local_xpstore_purchase($USER->id, $tiporeq, $cmidreq, $producto['costo'], $courseid)) {
@@ -187,13 +187,13 @@ if ($statussuccess) {
     $strsuccessunlock = addslashes($strsuccessunlock);
 }
 
-$disabled = ($saldo < $producto['costo']) || (!$requisito_cumplido);
+$disabled = ($saldo < $producto['costo']) || (!$requisitocumplido);
 
 $btntext = get_string('canjear', 'local_xpstore');
 if ($disabled) {
-    if (!$requisito_cumplido) {
-        $str_req = get_string_manager()->string_exists('requires', 'local_xpstore') ? get_string('requires', 'local_xpstore') : 'Requiere';
-        $btntext = $req_name . ' ' . $str_req;
+    if (!$requisitocumplido) {
+        $strreq = get_string_manager()->string_exists('requires', 'local_xpstore') ? get_string('requires', 'local_xpstore') : 'Requiere';
+        $btntext = $reqname . ' ' . $strreq;
     } else {
         $btntext = get_string('insuficiente', 'local_xpstore');
     }
@@ -219,8 +219,8 @@ $templatedata = [
     'actionurl' => $url->out(false),
     'sesskey' => sesskey(),
     'limitealcanzado' => $limitealcanzado,
-    'locked_by_req' => !$requisito_cumplido,
-    'req_name' => $req_name,
+    'locked_by_req' => !$requisitocumplido,
+    'req_name' => $reqname,
     'disabled' => $disabled,
     'btntext' => $btntext,
     'str_balance' => get_string('balance', 'local_xpstore'),
