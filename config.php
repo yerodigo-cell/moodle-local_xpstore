@@ -270,7 +270,7 @@ foreach ($availabletypes as $val => $label) {
 
 $activityoptions = [];
 $requirementoptions = [
-    ['id' => 0, 'name' => get_string('none'), 'selected' => ($erequisito == 0)]
+    ['id' => 0, 'name' => get_string('none'), 'selected' => ($erequisito == 0)],
 ];
 $modinfo = get_fast_modinfo($courseid);
 foreach ($modinfo->get_cms() as $cm) {
@@ -467,10 +467,14 @@ $templatedata = array_merge([
     'activity_options' => $activityoptions,
     'ecmid' => $ecmid,
 
-    'str_requirement' => get_string_manager()->string_exists('requirement', 'local_xpstore') ? get_string('requirement', 'local_xpstore') : 'Requisito',
-    'str_chooserequirement' => get_string_manager()->string_exists('chooserequirement', 'local_xpstore') ? get_string('chooserequirement', 'local_xpstore') : 'Elige un requisito',
-    'str_requires' => get_string_manager()->string_exists('requires', 'local_xpstore') ? get_string('requires', 'local_xpstore') : 'Requiere',
-    'str_requires_short' => get_string_manager()->string_exists('requires_short', 'local_xpstore') ? get_string('requires_short', 'local_xpstore') : 'Requiere',
+    'str_requirement' => get_string_manager()->string_exists('requirement', 'local_xpstore') ? 
+        get_string('requirement', 'local_xpstore') : 'Requisito',
+    'str_chooserequirement' => get_string_manager()->string_exists('chooserequirement', 'local_xpstore') ? 
+        get_string('chooserequirement', 'local_xpstore') : 'Elige un requisito',
+    'str_requires' => get_string_manager()->string_exists('requires', 'local_xpstore') ? 
+        get_string('requires', 'local_xpstore') : 'Requiere',
+    'str_requires_short' => get_string_manager()->string_exists('requires_short', 'local_xpstore') ? 
+        get_string('requires_short', 'local_xpstore') : 'Requiere',
     'help_requirement' => $OUTPUT->help_icon('requirement', 'local_xpstore'),
     'requirement_options' => $requirementoptions,
     'erequisito' => $erequisito,

@@ -99,13 +99,14 @@ $limitealcanzado = ($producto['limite'] > 0 && $comprasactuales >= $producto['li
 $requisitocumplido = true;
 $reqname = '';
 if ($producto['requisito'] > 0) {
-    require_once($CFG->libdir.'/completionlib.php');
+    require_once($CFG->libdir . '/completionlib.php');
     $completion = new completion_info($course);
     $reqcminfo = get_fast_modinfo($courseid)->get_cm($producto['requisito']);
     if ($reqcminfo) {
         $reqname = $reqcminfo->name;
         $completiondata = $completion->get_data($reqcminfo, false, $USER->id);
-        $requisitocumplido = ($completiondata->completionstate == COMPLETION_COMPLETE || $completiondata->completionstate == COMPLETION_COMPLETE_PASS);
+        $requisitocumplido = ($completiondata->completionstate == COMPLETION_COMPLETE ||
+            $completiondata->completionstate == COMPLETION_COMPLETE_PASS);
     }
 }
 
@@ -192,7 +193,8 @@ $disabled = ($saldo < $producto['costo']) || (!$requisitocumplido);
 $btntext = get_string('canjear', 'local_xpstore');
 if ($disabled) {
     if (!$requisitocumplido) {
-        $strreq = get_string_manager()->string_exists('requires', 'local_xpstore') ? get_string('requires', 'local_xpstore') : 'Requiere';
+        $sm = get_string_manager();
+        $strreq = $sm->string_exists('requires', 'local_xpstore') ? get_string('requires', 'local_xpstore') : 'Requiere';
         $btntext = $reqname . ' ' . $strreq;
     } else {
         $btntext = get_string('insuficiente', 'local_xpstore');

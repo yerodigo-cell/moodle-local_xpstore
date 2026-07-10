@@ -174,6 +174,8 @@ if ($logs) {
 
         $saldodisponible = local_xpstore_get_balance($userid, $courseid);
 
+        $reseturl = new moodle_url($url, ['action' => 'resetuser', 'userid' => $userid, 'sesskey' => sesskey()]);
+
         $userdata = [
             'userid' => $userid,
             'userpichtml' => $userpichtml,
@@ -183,7 +185,7 @@ if ($logs) {
             'str_totalspent' => get_string('totalspent', 'local_xpstore', $totalgastado),
             'str_remainingbalance' => get_string('remainingbalance', 'local_xpstore', $saldodisponible),
             'profileurl' => $profileurl,
-            'userreseturl' => (new moodle_url($url, ['action' => 'resetuser', 'userid' => $userid, 'sesskey' => sesskey()]))->out(false),
+            'userreseturl' => $reseturl->out(false),
             'logs' => [],
         ];
 
