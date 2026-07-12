@@ -1,26 +1,12 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * XP Store (local_xpstore)
+ * Local xpstore language strings
  *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_xpstore
+ * @copyright  2024
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Ekintza';
@@ -148,8 +134,9 @@ $string['savecolors'] = 'Gorde Koloreak';
 $string['saveicons'] = 'Gorde ikonoak';
 $string['searchactivity'] = 'Bilatu (Jarduera)...';
 $string['searchfilters'] = 'Bilaketa-iragazkiak';
-$string['searchfilters_help'] = 'Txostena bi irizpideren arabera iragazi dezakezu:<br><br><b>Jarduera:</b> Moodleko jardueraren izenaren edo sariari esleitutako etiketa pertsonalizatuaren bidez bilatzen du.<br><b>Mota:</b> Sariaren motaren bidez bilatzen du (adibidez, Berezia, Bonusa, etab.).';
+$string['searchfilters_help'] = 'Txostena hiru irizpide erabiliz iragazi dezakezu:<br><br><b>Partaidea:</b> Ikaslearen izenaren edo abizenaren arabera bilatzen du.<br><b>Jarduera:</b> Moodle jardueraren izenaren arabera edo sariari esleitutako etiketa pertsonalizatuaren arabera bilatzen du.<br><b>Mota:</b> Sariaren motaren arabera bilatzen du (adibidez, Berezia, Bonusa, etab.).';
 $string['searchtype'] = 'Bilatu (Mota)...';
+$string['searchuser'] = 'Bilatu (Partaidea)...';
 $string['secondarycolor'] = 'Bigarren Mailako Kolorea';
 $string['settings'] = 'Ezarpenak';
 $string['show_menu_tooltip'] = 'Erakutsi denda ikastaroko menuan';

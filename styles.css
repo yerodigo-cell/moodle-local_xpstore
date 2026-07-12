@@ -1176,12 +1176,21 @@ body.pagelayout-embedded,
     .local_xpstore-container .u-info {
         flex-basis: calc(100% - 80px);
     }
-    .local_xpstore-container .u-badges {
+    .local_xpstore-container .u-stats {
         order: 4;
         width: 100%;
-        margin-top: 12px;
-        padding-left: 50px;
+        margin-top: 15px;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
         flex-wrap: wrap;
+        gap: 12px !important;
+        justify-content: flex-start;
+        background: #f9f9f9;
+        padding: 12px;
+        border-radius: 8px;
+    }
+    .local_xpstore-container .u-stats-divider {
+        display: none;
     }
     .local_xpstore-container .u-avatar-container img.userpicture {
         width: 40px;
@@ -1647,5 +1656,116 @@ body.pagelayout-embedded,
     /* When tabs stack or collapse on mobile, ensure active tab text is white for contrast against blue background */
     .local_xpstore-container .nav-tabs .xpstore-nav-tab.active {
         color: #ffffff !important;
+    }
+}
+
+/* Report Page Search Filters */
+.local_xpstore-container .search-filters-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    padding: 0 12px;
+    background: #fafafa;
+    transition: border-color 0.2s;
+}
+
+.local_xpstore-container .search-input {
+    background: transparent !important;
+    box-shadow: none !important;
+    flex-grow: 1;
+    min-width: 150px;
+    height: 42px;
+    outline: none;
+    padding-left: 5px;
+}
+
+.local_xpstore-container .search-divider {
+    width: 1px;
+    height: 24px;
+    background: #dcdcdc;
+}
+
+.local_xpstore-container .search-btn {
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 0 24px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Report Page User Stats */
+.local_xpstore-container .u-stats {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 20px;
+}
+
+.local_xpstore-container .stat-item {
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.local_xpstore-container .stat-redemptions {
+    color: #444;
+}
+
+.local_xpstore-container .stat-redemptions span {
+    font-weight: 600;
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.local_xpstore-container .stat-spent {
+    color: #f57c00;
+}
+
+.local_xpstore-container .stat-spent i {
+    font-size: 0.8rem;
+    margin-right: 3px;
+}
+
+.local_xpstore-container .stat-balance {
+    color: #2E7D32;
+}
+
+.local_xpstore-container .stat-balance i {
+    font-size: 0.8rem;
+    margin-right: 3px;
+}
+
+.local_xpstore-container .u-stats-divider {
+    width: 1px;
+    height: 20px;
+    background: #eaeaea;
+}
+
+@media (max-width: 768px) {
+    .local_xpstore-container .search-filters-container {
+        flex-wrap: wrap;
+        padding: 5px 12px;
+    }
+    .local_xpstore-container .search-divider {
+        display: none;
+    }
+    .local_xpstore-container .search-input {
+        width: 100%;
+        min-width: 100%;
+        border-bottom: 1px solid #eaeaea !important;
+        height: 42px;
+    }
+    .local_xpstore-container .search-input:last-child {
+        border-bottom: none !important;
+    }
+    .local_xpstore-container .search-btn {
+        width: 100%;
+        justify-content: center;
+        margin-top: 5px;
     }
 }

@@ -1,26 +1,12 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * XP Store (local_xpstore)
+ * Local xpstore language strings
  *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_xpstore
+ * @copyright  2024
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Azione';
@@ -148,8 +134,9 @@ $string['savecolors'] = 'Salva Colori';
 $string['saveicons'] = 'Salva icone';
 $string['searchactivity'] = 'Cerca (Attività)...';
 $string['searchfilters'] = 'Filtri di ricerca';
-$string['searchfilters_help'] = 'Puoi filtrare il report usando due criteri:<br><br><b>Attività:</b> Cerca tramite il nome dell\'attività Moodle o l\'etichetta personalizzata assegnata alla ricompensa.<br><b>Tipo:</b> Cerca per tipo di ricompensa (es. Speciale, Bonus, ecc.).';
+$string['searchfilters_help'] = 'Puoi filtrare il report utilizzando tre criteri:<br><br><b>Partecipante:</b> Cerca per nome o cognome dello studente.<br><b>Attività:</b> Cerca per il nome dell\'attività Moodle o per l\'etichetta personalizzata assegnata alla ricompensa.<br><b>Tipo:</b> Cerca per il tipo di ricompensa (es. Speciale, Bonus, ecc.).';
 $string['searchtype'] = 'Cerca (Tipo)...';
+$string['searchuser'] = 'Cerca (Partecipante)...';
 $string['secondarycolor'] = 'Colore Secondario';
 $string['settings'] = 'Impostazioni';
 $string['show_menu_tooltip'] = 'Mostra il negozio nel menu del corso';

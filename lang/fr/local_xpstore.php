@@ -1,26 +1,12 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * XP Store (local_xpstore)
+ * Local xpstore language strings
  *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_xpstore
+ * @copyright  2024
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Action';
@@ -146,10 +132,11 @@ $string['resethistory'] = 'Effacer l\'historique d\'échange';
 $string['saldo'] = 'Votre solde actuel';
 $string['savecolors'] = 'Enregistrer les couleurs';
 $string['saveicons'] = 'Enregistrer les icônes';
-$string['searchactivity'] = 'Rechercher (Activité)...';
+$string['searchactivity'] = 'Recherche (Activité)...';
 $string['searchfilters'] = 'Filtres de recherche';
-$string['searchfilters_help'] = 'Vous pouvez filtrer le rapport en utilisant deux critères:<br><br><b>Activité:</b> Recherche par le nom de l\'activité Moodle ou par l\'étiquette personnalisée attribuée à la récompense.<br><b>Type:</b> Recherche par le type de récompense (ex. Spécial, Bonus, etc.).';
-$string['searchtype'] = 'Rechercher (Type)...';
+$string['searchfilters_help'] = 'Vous pouvez filtrer le rapport à l\'aide de trois critères :<br><br><b>Participant :</b> Recherche par le prénom ou le nom de l\'étudiant.<br><b>Activité :</b> Recherche par le nom de l\'activité Moodle ou par l\'étiquette personnalisée attribuée à la récompense.<br><b>Type :</b> Recherche par type de récompense (ex. Spécial, Bonus, etc.).';
+$string['searchtype'] = 'Recherche (Type)...';
+$string['searchuser'] = 'Recherche (Participant)...';
 $string['secondarycolor'] = 'Couleur secondaire';
 $string['settings'] = 'Paramètres';
 $string['show_menu_tooltip'] = 'Afficher la boutique dans le menu du cours';

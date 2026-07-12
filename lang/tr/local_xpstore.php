@@ -1,26 +1,12 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * XP Store (local_xpstore)
+ * Local xpstore language strings
  *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_xpstore
+ * @copyright  2024
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'İşlem';
@@ -148,8 +134,9 @@ $string['savecolors'] = 'Renkleri Kaydet';
 $string['saveicons'] = 'İkonları kaydet';
 $string['searchactivity'] = 'Ara (Etkinlik)...';
 $string['searchfilters'] = 'Arama filtreleri';
-$string['searchfilters_help'] = 'Raporu iki kritere göre filtreleyebilirsiniz:<br><br><b>Etkinlik:</b> Moodle etkinlik adıyla veya ödüle atanan özel etiketle arar.<br><b>Tür:</b> Ödül türüne göre arar (örn. Özel, Bonus, vb.).';
+$string['searchfilters_help'] = 'Raporu üç kriter kullanarak filtreleyebilirsiniz:<br><br><b>Katılımcı:</b> Öğrencinin adına veya soyadına göre arama yapar.<br><b>Etkinlik:</b> Moodle etkinliğinin adına veya ödüle atanan özel etikete göre arama yapar.<br><b>Tür:</b> Ödül türüne göre arama yapar (örn. Özel, Bonus vb.).';
 $string['searchtype'] = 'Ara (Tür)...';
+$string['searchuser'] = 'Ara (Katılımcı)...';
 $string['secondarycolor'] = 'İkincil Renk';
 $string['settings'] = 'Ayarlar';
 $string['show_menu_tooltip'] = 'Mağazayı kurs menüsünde göster';

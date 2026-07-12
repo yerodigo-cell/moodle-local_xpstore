@@ -1,26 +1,12 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * XP Store (local_xpstore)
+ * Local xpstore language strings
  *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_xpstore
+ * @copyright  2024
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Действие';
@@ -146,10 +132,11 @@ $string['resethistory'] = 'Очистить историю обменов';
 $string['saldo'] = 'Ваш текущий баланс';
 $string['savecolors'] = 'Сохранить цвета';
 $string['saveicons'] = 'Сохранить иконки';
-$string['searchactivity'] = 'Поиск (Элемент)...';
+$string['searchactivity'] = 'Поиск (Элемент курса)...';
 $string['searchfilters'] = 'Фильтры поиска';
-$string['searchfilters_help'] = 'Вы можете отфильтровать отчет, используя два критерия:<br><br><b>Элемент курса:</b> Поиск по названию элемента курса Moodle или пользовательской метке, назначенной вознаграждению.<br><b>Тип:</b> Поиск по типу вознаграждения (например, Специальное, Бонус и т.д.).';
+$string['searchfilters_help'] = 'Вы можете отфильтровать отчет, используя три критерия:<br><br><b>Участник:</b> Поиск по имени или фамилии студента.<br><b>Элемент курса:</b> Поиск по названию элемента курса Moodle или пользовательской метке, назначенной для награды.<br><b>Тип:</b> Поиск по типу награды (например, Особая, Бонус и т. д.).';
 $string['searchtype'] = 'Поиск (Тип)...';
+$string['searchuser'] = 'Поиск (Участник)...';
 $string['secondarycolor'] = 'Дополнительный цвет';
 $string['settings'] = 'Настройки';
 $string['show_menu_tooltip'] = 'Показать магазин в меню курса';

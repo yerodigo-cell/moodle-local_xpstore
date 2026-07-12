@@ -1,26 +1,12 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * XP Store (local_xpstore)
+ * Local xpstore language strings
  *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_xpstore
+ * @copyright  2024
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Дія';
@@ -148,8 +134,9 @@ $string['savecolors'] = 'Зберегти кольори';
 $string['saveicons'] = 'Зберегти значки';
 $string['searchactivity'] = 'Пошук (Діяльність)...';
 $string['searchfilters'] = 'Фільтри пошуку';
-$string['searchfilters_help'] = 'Ви можете відфільтрувати звіт за двома критеріями:<br><br><b>Діяльність:</b> Пошук за назвою діяльності Moodle або спеціальною міткою, призначеною нагороді.<br><b>Тип:</b> Пошук за типом нагороди (наприклад, Спеціальна, Бонус тощо).';
+$string['searchfilters_help'] = 'Ви можете фільтрувати звіт за трьома критеріями:<br><br><b>Учасник:</b> Пошук за іменем або прізвищем студента.<br><b>Діяльність:</b> Пошук за назвою діяльності Moodle або спеціальною міткою, призначеною нагороді.<br><b>Тип:</b> Пошук за типом нагороди (наприклад, Спеціальна, Бонус тощо).';
 $string['searchtype'] = 'Пошук (Тип)...';
+$string['searchuser'] = 'Пошук (Учасник)...';
 $string['secondarycolor'] = 'Другорядний колір';
 $string['settings'] = 'Налаштування';
 $string['show_menu_tooltip'] = 'Показати магазин у меню курсу';

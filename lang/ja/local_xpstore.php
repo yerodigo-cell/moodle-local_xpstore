@@ -1,26 +1,12 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * XP Store (local_xpstore)
+ * Local xpstore language strings
  *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_xpstore
+ * @copyright  2024
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'アクション';
@@ -146,10 +132,11 @@ $string['resethistory'] = '引き換え履歴をクリア';
 $string['saldo'] = '現在の残高';
 $string['savecolors'] = '色を保存';
 $string['saveicons'] = 'アイコンを保存';
-$string['searchactivity'] = '検索（活動）...';
+$string['searchactivity'] = '検索 (活動)...';
 $string['searchfilters'] = '検索フィルター';
-$string['searchfilters_help'] = 'レポートは2つの条件を使用してフィルタリングできます:<br><br><b>活動:</b> Moodleの活動名または報酬に割り当てられたカスタムラベルで検索します。<br><b>タイプ:</b> 報酬タイプで検索します（例：特別、ボーナスなど）。';
-$string['searchtype'] = '検索（タイプ）...';
+$string['searchfilters_help'] = '3つの基準を使用してレポートをフィルタリングできます:<br><br><b>参加者:</b> 学生の名または姓で検索します。<br><b>活動:</b> Moodle活動の名前または報酬に割り当てられたカスタムラベルで検索します。<br><b>タイプ:</b> 報酬タイプ (例: 特別、ボーナスなど) で検索します。';
+$string['searchtype'] = '検索 (タイプ)...';
+$string['searchuser'] = '検索 (参加者)...';
 $string['secondarycolor'] = 'サブカラー';
 $string['settings'] = '設定';
 $string['show_menu_tooltip'] = 'コースメニューにストアを表示';

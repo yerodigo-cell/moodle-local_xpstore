@@ -1,26 +1,12 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
- * XP Store (local_xpstore)
+ * Local xpstore language strings
  *
- * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    local_xpstore
+ * @copyright  2024
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 defined('MOODLE_INTERNAL') || die();
 
 $string['action'] = 'Aktion';
@@ -146,10 +132,11 @@ $string['resethistory'] = 'Einlösungshistorie löschen';
 $string['saldo'] = 'Dein aktuelles Guthaben';
 $string['savecolors'] = 'Farben speichern';
 $string['saveicons'] = 'Icons speichern';
-$string['searchactivity'] = 'Suchen (Aktivität)...';
+$string['searchactivity'] = 'Suche (Aktivität)...';
 $string['searchfilters'] = 'Suchfilter';
-$string['searchfilters_help'] = 'Sie können den Bericht nach zwei Kriterien filtern:<br><br><b>Aktivität:</b> Sucht nach dem Namen der Moodle-Aktivität oder der benutzerdefinierten Bezeichnung (Label), die der Belohnung zugewiesen wurde.<br><b>Typ:</b> Sucht nach dem Belohnungstyp (z.B. Spezial, Bonus, usw.).';
-$string['searchtype'] = 'Suchen (Typ)...';
+$string['searchfilters_help'] = 'Sie können den Bericht nach drei Kriterien filtern:<br><br><b>Teilnehmer:</b> Sucht nach dem Vor- oder Nachnamen des Schülers.<br><b>Aktivität:</b> Sucht nach dem Namen der Moodle-Aktivität oder dem benutzerdefinierten Label, das der Belohnung zugewiesen ist.<br><b>Typ:</b> Sucht nach dem Belohnungstyp (z. B. Spezial, Bonus usw.).';
+$string['searchtype'] = 'Suche (Typ)...';
+$string['searchuser'] = 'Suche (Teilnehmer)...';
 $string['secondarycolor'] = 'Sekundärfarbe';
 $string['settings'] = 'Einstellungen';
 $string['show_menu_tooltip'] = 'Shop im Kursmenü anzeigen';

@@ -49,18 +49,18 @@
             <form action="report.php" method="GET" style="display: flex; gap: 10px; align-items: center; margin: 0; flex-wrap: wrap;">
                 <input type="hidden" name="id" value="{{courseid}}">
                 
-                <div style="display: flex; align-items: center; gap: 10px; flex-grow: 1; border: 1px solid #dcdcdc; border-radius: 8px; padding: 0 12px; background: #fafafa; transition: border-color 0.2s;">
+                <div class="search-filters-container">
                     <i class="fa fa-user text-muted" style="font-size: 0.9rem;"></i>
-                    <input type="text" name="searchuser" class="form-control border-0 shadow-none" placeholder="{{str_searchuser}}" value="{{searchuser}}" style="background: transparent; box-shadow: none; flex-grow: 1; min-width: 150px; height: 42px; outline: none; padding-left: 5px;">
-                    <div style="width: 1px; height: 24px; background: #dcdcdc;"></div>
+                    <input type="text" name="searchuser" class="form-control border-0 shadow-none search-input" placeholder="{{str_searchuser}}" value="{{searchuser}}">
+                    <div class="search-divider"></div>
                     <i class="fa fa-tag text-muted" style="font-size: 0.9rem;"></i>
-                    <input type="text" name="search" class="form-control border-0 shadow-none" placeholder="{{str_searchactivity}}" value="{{search}}" style="background: transparent; box-shadow: none; flex-grow: 1; min-width: 150px; height: 42px; outline: none; padding-left: 5px;">
-                    <div style="width: 1px; height: 24px; background: #dcdcdc;"></div>
+                    <input type="text" name="search" class="form-control border-0 shadow-none search-input" placeholder="{{str_searchactivity}}" value="{{search}}">
+                    <div class="search-divider"></div>
                     <i class="fa fa-search text-muted" style="font-size: 0.9rem; margin-left: 5px;"></i>
-                    <input type="text" name="searchlabel" class="form-control border-0 shadow-none" placeholder="{{str_searchtype}}" value="{{searchlabel}}" style="background: transparent; box-shadow: none; flex-grow: 1; min-width: 150px; height: 42px; outline: none; padding-left: 5px;">
+                    <input type="text" name="searchlabel" class="form-control border-0 shadow-none search-input" placeholder="{{str_searchtype}}" value="{{searchlabel}}">
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="border-radius: 8px; font-weight: 600; padding: 0 24px; height: 44px; display: flex; align-items: center; gap: 8px;">
+                <button type="submit" class="btn btn-primary search-btn">
                     {{str_search}}
                 </button>
                 
@@ -89,17 +89,17 @@
                     </div>
                     <div class="u-email">{{useremail}}</div>
                 </div>
-                <div class="u-stats" style="display: flex; gap: 24px; align-items: center; margin-left: auto; margin-right: 20px;">
-                    <div class="stat-item" style="font-size: 0.95rem; font-weight: 700; color: #444;">
-                        {{totalcanjes}} <span style="font-weight: 600; color: #888; font-size: 0.85rem;">{{str_redemptions}}</span>
+                <div class="u-stats">
+                    <div class="stat-item stat-redemptions">
+                        {{totalcanjes}} <span>{{str_redemptions}}</span>
                     </div>
-                    <div style="width: 1px; height: 20px; background: #eaeaea;"></div>
-                    <div class="stat-item" style="font-size: 0.95rem; font-weight: 700; color: #f57c00;">
-                        <i class="fa fa-star" style="font-size: 0.8rem; margin-right: 3px;"></i>{{str_totalspent}}
+                    <div class="u-stats-divider"></div>
+                    <div class="stat-item stat-spent">
+                        <i class="fa fa-star"></i>{{str_totalspent}}
                     </div>
-                    <div style="width: 1px; height: 20px; background: #eaeaea;"></div>
-                    <div class="stat-item" style="font-size: 0.95rem; font-weight: 700; color: #2E7D32;">
-                        <i class="fa fa-money" style="font-size: 0.8rem; margin-right: 3px;"></i>{{str_remainingbalance}}
+                    <div class="u-stats-divider"></div>
+                    <div class="stat-item stat-balance">
+                        <i class="fa fa-money"></i>{{str_remainingbalance}}
                     </div>
                 </div>
                 <a href="{{userreseturl}}" class="btn-reset-user" onclick="event.stopPropagation(); return confirm('{{str_confirmresetuser}}');" style="color: #adb5bd; border: none; background: transparent; font-size: 1.1rem; padding: 6px 10px; border-radius: 6px; transition: all 0.2s; cursor: pointer; z-index: 2;" title="{{str_resetuser}}" onmouseover="this.style.color='#dc3545'; this.style.backgroundColor='#fff5f5';" onmouseout="this.style.color='#adb5bd'; this.style.backgroundColor='transparent';">
