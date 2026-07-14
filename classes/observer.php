@@ -43,7 +43,7 @@ class observer {
 
         // Get all unique module names present in the new course.
         $modinfo = get_fast_modinfo($newcourseid);
-        $modnames = array_unique(array_map(function($cm) {
+        $modnames = array_unique(array_map(function ($cm) {
             return $cm->modname;
         }, $modinfo->get_cms()));
 
@@ -152,7 +152,7 @@ class observer {
                                         $records = $DB->get_records($modname, ['course' => $newcourseid]);
                                         foreach ($records as $record) {
                                             $updated = false;
-                                            
+
                                             if (isset($record->intro) && strpos($record->intro, 'cmid=' . $oldcmid) !== false) {
                                                 $newintro = preg_replace($cmidpattern, $cmidreplacement, $record->intro);
                                                 if ($newintro !== $record->intro) {
@@ -160,7 +160,7 @@ class observer {
                                                     $updated = true;
                                                 }
                                             }
-                                            
+
                                             if (isset($record->content) && strpos($record->content, 'cmid=' . $oldcmid) !== false) {
                                                 $newcontent = preg_replace($cmidpattern, $cmidreplacement, $record->content);
                                                 if ($newcontent !== $record->content) {
@@ -168,7 +168,7 @@ class observer {
                                                     $updated = true;
                                                 }
                                             }
-                                            
+
                                             if ($updated) {
                                                 $DB->update_record($modname, $record);
                                             }
