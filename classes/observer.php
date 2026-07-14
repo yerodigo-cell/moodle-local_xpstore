@@ -41,39 +41,43 @@ class observer {
 
         $oldcourseid = null;
 
-        // Fix labels and find old course id.
-        if ($DB->get_manager()->table_exists('label')) {
-            $labels = $DB->get_records('label', ['course' => $newcourseid]);
-            foreach ($labels as $label) {
-                if (strpos($label->intro, '/local/xpstore/') !== false) {
-                    if (!$oldcourseid && preg_match($pattern, $label->intro, $matches)) {
-                        $oldcourseid = (int)$matches[2];
-                    }
-                    $newintro = preg_replace($pattern, $replacement, $label->intro);
-                    if ($newintro !== $label->intro) {
-                        $DB->set_field('label', 'intro', $newintro, ['id' => $label->id]);
-                    }
-                }
-            }
-        }
+        // Get all unique module names present in the new course.
+        $modinfo = get_fast_modinfo($newcourseid);
+        $modnames = array_unique(array_map(function($cm) {
+            return $cm->modname;
+        }, $modinfo->get_cms()));
 
-        // Fix pages and find old course id if not found yet.
-        if ($DB->get_manager()->table_exists('page')) {
-            $pages = $DB->get_records('page', ['course' => $newcourseid]);
-            foreach ($pages as $page) {
-                if (strpos($page->intro, '/local/xpstore/') !== false || strpos($page->content, '/local/xpstore/') !== false) {
-                    if (!$oldcourseid && preg_match($pattern, $page->intro, $matches)) {
-                        $oldcourseid = (int)$matches[2];
-                    }
-                    if (!$oldcourseid && preg_match($pattern, $page->content, $matches)) {
-                        $oldcourseid = (int)$matches[2];
+        // Fix all activities and find old course id.
+        foreach ($modnames as $modname) {
+            if ($DB->get_manager()->table_exists($modname)) {
+                $records = $DB->get_records($modname, ['course' => $newcourseid]);
+                foreach ($records as $record) {
+                    $updated = false;
+
+                    if (isset($record->intro) && strpos($record->intro, '/local/xpstore/') !== false) {
+                        if (!$oldcourseid && preg_match($pattern, $record->intro, $matches)) {
+                            $oldcourseid = (int)$matches[2];
+                        }
+                        $newintro = preg_replace($pattern, $replacement, $record->intro);
+                        if ($newintro !== $record->intro) {
+                            $record->intro = $newintro;
+                            $updated = true;
+                        }
                     }
 
-                    $newintro = preg_replace($pattern, $replacement, $page->intro);
-                    $newcontent = preg_replace($pattern, $replacement, $page->content);
-                    if ($newintro !== $page->intro || $newcontent !== $page->content) {
-                        $DB->set_field('page', 'intro', $newintro, ['id' => $page->id]);
-                        $DB->set_field('page', 'content', $newcontent, ['id' => $page->id]);
+                    if (isset($record->content) && strpos($record->content, '/local/xpstore/') !== false) {
+                        if (!$oldcourseid && preg_match($pattern, $record->content, $matches)) {
+                            $oldcourseid = (int)$matches[2];
+                        }
+                        $newcontent = preg_replace($pattern, $replacement, $record->content);
+                        if ($newcontent !== $record->content) {
+                            $record->content = $newcontent;
+                            $updated = true;
+                        }
+                    }
+
+                    if ($updated) {
+                        $DB->update_record($modname, $record);
                     }
                 }
             }
@@ -139,35 +143,34 @@ class observer {
                                 $parts[0] = $newcmid;
                                 $newcatalogparts[] = $tipochar . implode(':', $parts);
 
-                                // Replace cmid=OLD in all labels/pages so individual widgets keep working.
+                                // Replace cmid=OLD in all activities so individual widgets keep working.
                                 $cmidpattern = '/([?&]|&amp;)cmid=' . $oldcmid . '([&"\']|&amp;)/';
                                 $cmidreplacement = '${1}cmid=' . $newcmid . '${2}';
 
-                                if ($DB->get_manager()->table_exists('label')) {
-                                    $alllabels = $DB->get_records('label', ['course' => $newcourseid]);
-                                    foreach ($alllabels as $l) {
-                                        if (strpos($l->intro, 'cmid=' . $oldcmid) !== false) {
-                                            $newl = preg_replace($cmidpattern, $cmidreplacement, $l->intro);
-                                            if ($newl !== $l->intro) {
-                                                $DB->set_field('label', 'intro', $newl, ['id' => $l->id]);
+                                foreach ($modnames as $modname) {
+                                    if ($DB->get_manager()->table_exists($modname)) {
+                                        $records = $DB->get_records($modname, ['course' => $newcourseid]);
+                                        foreach ($records as $record) {
+                                            $updated = false;
+                                            
+                                            if (isset($record->intro) && strpos($record->intro, 'cmid=' . $oldcmid) !== false) {
+                                                $newintro = preg_replace($cmidpattern, $cmidreplacement, $record->intro);
+                                                if ($newintro !== $record->intro) {
+                                                    $record->intro = $newintro;
+                                                    $updated = true;
+                                                }
                                             }
-                                        }
-                                    }
-                                }
-
-                                if ($DB->get_manager()->table_exists('page')) {
-                                    $allpages = $DB->get_records('page', ['course' => $newcourseid]);
-                                    foreach ($allpages as $p) {
-                                        if (strpos($p->intro, 'cmid=' . $oldcmid) !== false) {
-                                            $newintro = preg_replace($cmidpattern, $cmidreplacement, $p->intro);
-                                            if ($newintro !== $p->intro) {
-                                                $DB->set_field('page', 'intro', $newintro, ['id' => $p->id]);
+                                            
+                                            if (isset($record->content) && strpos($record->content, 'cmid=' . $oldcmid) !== false) {
+                                                $newcontent = preg_replace($cmidpattern, $cmidreplacement, $record->content);
+                                                if ($newcontent !== $record->content) {
+                                                    $record->content = $newcontent;
+                                                    $updated = true;
+                                                }
                                             }
-                                        }
-                                        if (strpos($p->content, 'cmid=' . $oldcmid) !== false) {
-                                            $newcontent = preg_replace($cmidpattern, $cmidreplacement, $p->content);
-                                            if ($newcontent !== $p->content) {
-                                                $DB->set_field('page', 'content', $newcontent, ['id' => $p->id]);
+                                            
+                                            if ($updated) {
+                                                $DB->update_record($modname, $record);
                                             }
                                         }
                                     }
