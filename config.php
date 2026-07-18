@@ -437,7 +437,7 @@ if (!empty($configraw)) {
                 'scrolling="no" allowtransparency="true"></iframe>';
 
             $catalogitems[] = [
-                'tipolower' => strtolower($tipo),
+                'tipolower' => ($tipo === 'M' ? 'g' : strtolower($tipo)),
                 'labeltipo' => $labeltipo,
                 'cat' => $cat,
                 'realname' => $realname,
