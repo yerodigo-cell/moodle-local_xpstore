@@ -104,8 +104,9 @@ if ($action === 'comprar' && confirm_sesskey()) {
     if ($requisito > 0) {
         require_once($CFG->libdir . '/completionlib.php');
         $completion = new completion_info($course);
-        $reqcminfo = get_fast_modinfo($courseid)->get_cm($requisito);
-        if ($reqcminfo) {
+        $modinfo = get_fast_modinfo($courseid);
+        if (isset($modinfo->cms[$requisito])) {
+            $reqcminfo = $modinfo->cms[$requisito];
             $completiondata = $completion->get_data($reqcminfo, false, $USER->id);
             $requisitocumplido = ($completiondata->completionstate == COMPLETION_COMPLETE ||
                 $completiondata->completionstate == COMPLETION_COMPLETE_PASS);
