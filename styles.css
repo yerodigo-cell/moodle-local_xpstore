@@ -1423,32 +1423,7 @@ body.pagelayout-embedded,
     color: #00acc1;
 }
 
-.local_xpstore-config-wrapper .widget-generator {
-    background: #e0f7fa;
-    border: 1px solid #b2ebf2;
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 30px;
-}
 
-.local_xpstore-config-wrapper .btn-copy-w {
-    background: white;
-    border: 1px solid #00acc1;
-    color: #00838f;
-    border-radius: 8px;
-    padding: 6px 15px;
-    font-weight: bold;
-    font-size: 0.85rem;
-    transition: 0.2s;
-    margin-right: 10px;
-    margin-bottom: 10px;
-    display: inline-block;
-}
-
-.local_xpstore-config-wrapper .btn-copy-w:hover {
-    background: #00acc1;
-    color: white;
-}
 
 @media (max-width: 768px) {
     .local_xpstore-config-wrapper {
