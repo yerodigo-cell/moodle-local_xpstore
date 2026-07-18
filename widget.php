@@ -118,8 +118,9 @@ $reqname = '';
 if ($producto['requisito'] > 0) {
     require_once($CFG->libdir . '/completionlib.php');
     $completion = new completion_info($course);
-    $reqcminfo = get_fast_modinfo($courseid)->get_cm($producto['requisito']);
-    if ($reqcminfo) {
+    $modinfo = get_fast_modinfo($courseid);
+    if (isset($modinfo->cms[$producto['requisito']])) {
+        $reqcminfo = $modinfo->cms[$producto['requisito']];
         $reqname = $reqcminfo->name;
         $completiondata = $completion->get_data($reqcminfo, false, $USER->id);
         $requisitocumplido = ($completiondata->completionstate == COMPLETION_COMPLETE ||
