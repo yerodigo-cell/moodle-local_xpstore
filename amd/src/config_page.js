@@ -59,10 +59,10 @@ define([], function() {
                         } else if (selectedType === 'F') {
                             show = (optData.modname === 'forum');
                         } else if (selectedType === 'G') {
-                            var gradables = ['quiz', 'assign', 'forum', 'workshop', 'scorm', 'lesson', 'h5pactivity'];
+                            var gradables = ['quiz', 'assign', 'forum', 'workshop', 'scorm', 'lesson', 'h5pactivity', 'manual'];
                             show = gradables.indexOf(optData.modname) !== -1;
                         } else {
-                            show = true;
+                            show = (optData.modname !== 'manual');
                         }
 
                         if (show) {
