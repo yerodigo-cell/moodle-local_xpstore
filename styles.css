@@ -510,15 +510,7 @@ body.pagelayout-embedded,
 .local_xpstore-container .icon-widget-title {
     color: #00838f;
 }
-.local_xpstore-container .btn-copy-w-store {
-    background: #00838f;
-    color: white;
-}
-.local_xpstore-container .btn-copy-w-history {
-    background: white;
-    border-color: #7d2ae8;
-    color: #7d2ae8;
-}
+
 .local_xpstore-container .form-box-colors {
     background: #e8f4f8;
     border-color: #bde0eb;
