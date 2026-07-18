@@ -249,7 +249,7 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
             }
         } else if ($type === 'M') {
             $gradeitem = $DB->get_record('grade_items', ['id' => $cmid]);
-            
+
             if ($gradeitem) {
                 $grade = $DB->get_record('grade_grades', ['itemid' => $gradeitem->id, 'userid' => $userid]);
 
