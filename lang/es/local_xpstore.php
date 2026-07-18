@@ -194,3 +194,4 @@ $string['widget_panel_title'] = 'Widgets (embeber tienda o categorías)';
 $string['widgeterror'] = 'Recompensa no disponible.';
 $string['widgetunlocked'] = '¡Desbloqueado!';
 $string['widgetunlockeddesc'] = 'Ya puedes usar tu recompensa.';
+$string['manualgradeitem'] = '[CALIFICACIÓN MANUAL] ';

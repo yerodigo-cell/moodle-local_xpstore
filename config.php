@@ -307,11 +307,12 @@ foreach ($modinfo->get_cms() as $cm) {
 }
 
 $manual_items = $DB->get_records('grade_items', ['courseid' => $courseid, 'itemtype' => 'manual']);
+$manual_prefix = get_string('manualgradeitem', 'local_xpstore');
 foreach ($manual_items as $item) {
     $activityoptions[] = [
         'id' => 'm' . $item->id,
         'modname' => 'manual',
-        'name' => "[CALIFICACIÓN MANUAL] " . $item->itemname,
+        'name' => $manual_prefix . $item->itemname,
         'selected' => ('m' . $item->id == $ecmid),
     ];
 }
