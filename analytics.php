@@ -45,10 +45,14 @@ $PAGE->set_title(get_string('analytics', 'local_xpstore'));
 // Logic to reset the cycle.
 $action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'reset' && confirm_sesskey()) {
-    $resetsql = "DELETE g FROM {local_xpstore_gastos} g
-                 JOIN {course_modules} cm ON g.itemid = cm.id
-                 WHERE cm.course = ?";
-    $DB->execute($resetsql, [$courseid]);
+    $sql = "SELECT g.id FROM {local_xpstore_gastos} g
+            LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
+            LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+            WHERE cm.course = ? OR gi.courseid = ?";
+    $gastos = $DB->get_fieldset_sql($sql, [$courseid, $courseid]);
+    if (!empty($gastos)) {
+        $DB->delete_records_list('local_xpstore_gastos', 'id', $gastos);
+    }
     redirect($url, get_string('productdeleted', 'local_xpstore'));
 }
 
@@ -77,20 +81,23 @@ foreach ($itemsraw as $item) {
 $totalpurchases = $DB->count_records_sql("
     SELECT COUNT(g.id)
     FROM {local_xpstore_gastos} g
-    JOIN {course_modules} cm ON g.itemid = cm.id
-    WHERE cm.course = ?", [$courseid]);
+    LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
+    LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+    WHERE cm.course = ? OR gi.courseid = ?", [$courseid, $courseid]);
 
 $totalxp = $DB->get_field_sql("
     SELECT SUM(g.amount)
     FROM {local_xpstore_gastos} g
-    JOIN {course_modules} cm ON g.itemid = cm.id
-    WHERE cm.course = ?", [$courseid]) ?: 0;
+    LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
+    LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+    WHERE cm.course = ? OR gi.courseid = ?", [$courseid, $courseid]) ?: 0;
 
 $engagedstudents = $DB->count_records_sql("
     SELECT COUNT(DISTINCT g.userid)
     FROM {local_xpstore_gastos} g
-    JOIN {course_modules} cm ON g.itemid = cm.id
-    WHERE cm.course = ?", [$courseid]);
+    LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
+    LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+    WHERE cm.course = ? OR gi.courseid = ?", [$courseid, $courseid]);
 
 // Course total students.
 $coursecontext = context_course::instance($courseid);
@@ -98,13 +105,14 @@ $totalstudentsincourse = count(get_enrolled_users($coursecontext, '', 0, 'u.id')
 $engagementrate = $totalstudentsincourse > 0 ? round(($engagedstudents / $totalstudentsincourse) * 100) : 0;
 
 // Data for charts.
-$sql = "SELECT cm.id as itemid, g.itemtype, COUNT(g.id) as purchases, SUM(g.amount) as totalxp
+$sql = "SELECT CONCAT(g.itemtype, '_', g.itemid) as uniqueid, g.itemid, g.itemtype, COUNT(g.id) as purchases, SUM(g.amount) as totalxp
         FROM {local_xpstore_gastos} g
-        JOIN {course_modules} cm ON g.itemid = cm.id
-        WHERE cm.course = ?
-        GROUP BY cm.id, g.itemtype
+        LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
+        LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+        WHERE cm.course = ? OR gi.courseid = ?
+        GROUP BY g.itemid, g.itemtype
         ORDER BY purchases DESC";
-$itemsdata = $DB->get_records_sql($sql, [$courseid]);
+$itemsdata = $DB->get_records_sql($sql, [$courseid, $courseid]);
 
 $chartdatalabels = [];
 $chartdatapurchases = [];
@@ -116,12 +124,16 @@ $activitypurchases = [];
 // Prepare data.
 if ($itemsdata) {
     foreach ($itemsdata as $item) {
-        $cm = $DB->get_record('course_modules', ['id' => $item->itemid]);
-        if ($cm) {
-            $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
-            $activityname = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
+        if ($item->itemtype === 'M') {
+            $activityname = $DB->get_field('grade_items', 'itemname', ['id' => $item->itemid]);
         } else {
-            $activityname = get_string('activitydeleted', 'local_xpstore');
+            $cm = $DB->get_record('course_modules', ['id' => $item->itemid]);
+            if ($cm) {
+                $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+                $activityname = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
+            } else {
+                $activityname = get_string('activitydeleted', 'local_xpstore');
+            }
         }
 
         $tipostr = strtolower($item->itemtype);

@@ -57,10 +57,14 @@ if ($action === 'reset' && confirm_sesskey()) {
 
 if ($action === 'resetuser' && confirm_sesskey()) {
     $userid = required_param('userid', PARAM_INT);
-    $resetsql = "DELETE g FROM {local_xpstore_gastos} g
-                 JOIN {course_modules} cm ON g.itemid = cm.id
-                 WHERE cm.course = ? AND g.userid = ?";
-    $DB->execute($resetsql, [$courseid, $userid]);
+    $sql = "SELECT g.id FROM {local_xpstore_gastos} g
+            LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
+            LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+            WHERE (cm.course = ? OR gi.courseid = ?) AND g.userid = ?";
+    $gastos = $DB->get_fieldset_sql($sql, [$courseid, $courseid, $userid]);
+    if (!empty($gastos)) {
+        $DB->delete_records_list('local_xpstore_gastos', 'id', $gastos);
+    }
     redirect($url, get_string('userreset', 'local_xpstore'));
 }
 
