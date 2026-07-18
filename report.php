@@ -246,7 +246,7 @@ if ($logs) {
                     ['id' => $courseid, 'userid' => $log->userid]
                 ))->out(false);
             } else if (isset($modinfo->cms[$log->itemid])) {
-                $cmurl = $modinfo->cms[$log->itemid]->url->out(false);
+                $cmurl = $modinfo->cms[$log->itemid]->url ? $modinfo->cms[$log->itemid]->url->out(false) : '';
             }
 
             $activityhtml = htmlspecialchars($activityname);

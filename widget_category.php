@@ -165,7 +165,7 @@ foreach ($todoslosproductos as $item) {
                 $boughtthis = ($status === 'success' && $boughtcmid == $cid && $tipocompra == $tipochar);
                 $gotogradebook = ($boughtthis && $tipochar == 'G');
 
-                $cmurl = isset($modinfo->cms[$cid]) ?
+                $cmurl = (isset($modinfo->cms[$cid]) && $modinfo->cms[$cid]->url) ?
                     $modinfo->cms[$cid]->url->out(false) :
                     (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
                 $gradebookurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
@@ -280,7 +280,7 @@ if ($status === 'success') {
         $strgotodest = get_string('gotogradebook', 'local_xpstore');
         $strsuccessunlock = get_string('success_unlock_gradebook', 'local_xpstore', $a);
     } else {
-        $redirecturl = isset($modinfo->cms[$boughtcmid]) ?
+        $redirecturl = (isset($modinfo->cms[$boughtcmid]) && $modinfo->cms[$boughtcmid]->url) ?
             $modinfo->cms[$boughtcmid]->url->out(false) :
             (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
         $strgotodest = get_string('gotoactivity', 'local_xpstore');

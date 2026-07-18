@@ -124,7 +124,7 @@ if ($logs) {
         if ($isgrade) {
             $gradeurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
         } else {
-            $cmurl = isset($modinfo->cms[$log->itemid])
+            $cmurl = (isset($modinfo->cms[$log->itemid]) && $modinfo->cms[$log->itemid]->url)
                 ? $modinfo->cms[$log->itemid]->url->out(false)
                 : (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
         }
