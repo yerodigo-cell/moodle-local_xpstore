@@ -295,7 +295,9 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
             }
         }
 
-        rebuild_course_cache($cm->course, true);
+        if ($courseid) {
+            rebuild_course_cache($courseid, true);
+        }
         return true;
     } catch (Exception $e) {
         return false;
