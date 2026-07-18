@@ -60,9 +60,8 @@ foreach ($items as $item) {
     $parts = explode(':', $rest);
 
     if (count($parts) >= 2 && (int)$parts[0] === $cmidreq && $tipochar === $tiporeq) {
-        $cm = $DB->get_record('course_modules', ['id' => (int)$parts[0], 'course' => $courseid]);
-        if ($cm) {
-            $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+        if ($tipochar === 'M') {
+            $realname = $DB->get_field('grade_items', 'itemname', ['id' => (int)$parts[0]]) ?: get_string('deletedactivity', 'local_xpstore');
             $producto = [
                 'tipo' => $tipochar,
                 'cid' => (int)$parts[0],
@@ -74,8 +73,26 @@ foreach ($items as $item) {
                     : get_string('defaultcategory', 'local_xpstore'),
                 'limite' => (int)($parts[5] ?? 0),
                 'requisito' => (int)($parts[6] ?? 0),
-                'n_real' => $DB->get_field($modname, 'name', ['id' => $cm->instance]),
+                'n_real' => $realname,
             ];
+        } else {
+            $cm = $DB->get_record('course_modules', ['id' => (int)$parts[0], 'course' => $courseid]);
+            if ($cm) {
+                $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+                $producto = [
+                    'tipo' => $tipochar,
+                    'cid' => (int)$parts[0],
+                    'costo' => (int)($parts[1] ?? 0),
+                    'n_custom' => $parts[2] ?? '',
+                    'boost' => $parts[3] ?? '0',
+                    'cat' => isset($parts[4]) && trim($parts[4]) !== ''
+                        ? trim($parts[4])
+                        : get_string('defaultcategory', 'local_xpstore'),
+                    'limite' => (int)($parts[5] ?? 0),
+                    'requisito' => (int)($parts[6] ?? 0),
+                    'n_real' => $DB->get_field($modname, 'name', ['id' => $cm->instance]),
+                ];
+            }
         }
         break;
     }
@@ -136,6 +153,7 @@ $iconmap = [
     'A' => 'file-text',
     'F' => 'comments',
     'G' => 'star',
+    'M' => 'star',
     'S' => 'unlock-alt',
 ];
 $icon = $iconmap[$producto['tipo']] ?? 'gift';
@@ -153,22 +171,24 @@ $cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '
 $cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
 $cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: $cpstore;
 
-$isbonus = ($producto['tipo'] == 'G' && $producto['boost'] != '0');
+$isbonus = (($producto['tipo'] == 'G' || $producto['tipo'] == 'M') && $producto['boost'] != '0');
 $isspecial = ($producto['tipo'] == 'S');
 $statussuccess = ($status === 'success');
 
 $desturl = null;
 $strsuccessunlock = '';
 if ($statussuccess) {
-    $dest = ($producto['tipo'] == 'G') ? '/grade/report/user/index.php' : '/course/view.php';
+    $dest = ($producto['tipo'] == 'G' || $producto['tipo'] == 'M') ? '/grade/report/user/index.php' : '/course/view.php';
     $destmoodleurl = new moodle_url($dest, ['id' => $courseid]);
 
     $activityname = '';
     $modinfo = get_fast_modinfo($courseid);
-    if ($producto['tipo'] != 'G') {
+    if ($producto['tipo'] != 'G' && $producto['tipo'] != 'M') {
         $destmoodleurl = $modinfo->cms[$producto['cid']]->url ?? $destmoodleurl;
     }
-    if (isset($modinfo->cms[$producto['cid']])) {
+    if ($producto['tipo'] == 'M') {
+        $activityname = $DB->get_field('grade_items', 'itemname', ['id' => $producto['cid']]) ?: '';
+    } else if (isset($modinfo->cms[$producto['cid']])) {
         $activityname = $modinfo->cms[$producto['cid']]->name;
     }
     $desturl = $destmoodleurl->out(false);
@@ -180,7 +200,7 @@ if ($statussuccess) {
     }
     $a->activity = $activityname ?: get_string('course', 'local_xpstore');
 
-    if ($producto['tipo'] == 'G') {
+    if ($producto['tipo'] == 'G' || $producto['tipo'] == 'M') {
         $strsuccessunlock = get_string('success_unlock_gradebook', 'local_xpstore', $a);
     } else {
         $strsuccessunlock = get_string('success_unlock_reward', 'local_xpstore', $a);
@@ -230,7 +250,7 @@ $templatedata = [
     'str_widgetunlockeddesc' => get_string('widgetunlockeddesc', 'local_xpstore'),
     'str_points' => get_string('points', 'local_xpstore'),
     'str_specialcontent' => get_string('specialcontent', 'local_xpstore'),
-    'str_goto_dest' => ($producto['tipo'] == 'G') ?
+    'str_goto_dest' => ($producto['tipo'] == 'G' || $producto['tipo'] == 'M') ?
         get_string('gotogradebook', 'local_xpstore') :
         get_string('gotoactivity', 'local_xpstore'),
     'success_icon' => $successicon,

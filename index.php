@@ -162,9 +162,13 @@ foreach ($todoslosproductos as $item) {
         $requisito = (int)($parts[6] ?? 0);
 
         $cms = $modinfo->get_cms();
-        if (isset($cms[$cid])) {
-            $cm = $cms[$cid];
-            $nreal = $cm->name;
+        if ($tipochar === 'M' || isset($cms[$cid])) {
+            if ($tipochar === 'M') {
+                $nreal = $DB->get_field('grade_items', 'itemname', ['id' => $cid]) ?: get_string('deletedactivity', 'local_xpstore');
+            } else {
+                $cm = $cms[$cid];
+                $nreal = $cm->name;
+            }
             $iconmap = [
                 'Q' => 'bolt',
                 'A' => 'file-text',
@@ -178,15 +182,19 @@ foreach ($todoslosproductos as $item) {
             $comprasactuales = $DB->count_records('local_xpstore_gastos', $comprasparams);
             $limitealcanzado = ($limite > 0 && $comprasactuales >= $limite);
 
-            $isbonus = ($tipochar == 'G' && !empty($boost) && $boost != '0');
+            $isbonus = (($tipochar == 'G' || $tipochar == 'M') && !empty($boost) && $boost != '0');
             $isspecial = ($tipochar == 'S');
 
             $boughtthis = ($status === 'success' && $boughtcmid == $cid && $tipocompra == $tipochar);
-            $gotogradebook = ($boughtthis && $tipochar == 'G');
+            $gotogradebook = ($boughtthis && ($tipochar == 'G' || $tipochar == 'M'));
 
-            $cmurl = (isset($modinfo->cms[$cid]) && $modinfo->cms[$cid]->url) ?
-                $modinfo->cms[$cid]->url->out(false) :
-                (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
+            if ($tipochar === 'M') {
+                $cmurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
+            } else {
+                $cmurl = (isset($modinfo->cms[$cid]) && $modinfo->cms[$cid]->url) ?
+                    $modinfo->cms[$cid]->url->out(false) :
+                    (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
+            }
             $gradebookurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
 
             $requisitocumplido = true;
@@ -262,7 +270,7 @@ foreach ($storecategories as $nombreseccion => $productos) {
     ];
 }
 
-$isgradesuccess = ($status === 'success' && $tipocompra === 'G');
+$isgradesuccess = ($status === 'success' && ($tipocompra === 'G' || $tipocompra === 'M'));
 $redirecturl = '';
 $strgotodest = '';
 $strsuccessunlock = '';
@@ -275,13 +283,16 @@ if ($status === 'success') {
         $pparts = explode(':', substr($it, 1));
         if ($ptipo === $tipocompra && (int)$pparts[0] === $boughtcmid) {
             $itemname = !empty($pparts[2]) ? $pparts[2] :
-                (isset($modinfo->cms[$boughtcmid]) ? $modinfo->cms[$boughtcmid]->name : '');
+                ($ptipo === 'M' ? ($DB->get_field('grade_items', 'itemname', ['id' => $boughtcmid]) ?: '') :
+                (isset($modinfo->cms[$boughtcmid]) ? $modinfo->cms[$boughtcmid]->name : ''));
             $itemcat = !empty($pparts[4]) ? trim($pparts[4]) : get_string('defaultcategory', 'local_xpstore');
             $successicon = isset($caticons[$itemcat]) ? $caticons[$itemcat] : 'trophy';
             break;
         }
     }
-    if (isset($modinfo->cms[$boughtcmid])) {
+    if ($tipocompra === 'M') {
+        $activityname = $DB->get_field('grade_items', 'itemname', ['id' => $boughtcmid]) ?: '';
+    } else if (isset($modinfo->cms[$boughtcmid])) {
         $activityname = $modinfo->cms[$boughtcmid]->name;
     }
     if (empty($itemname)) {
@@ -292,7 +303,7 @@ if ($status === 'success') {
     $a->reward = $itemname;
     $a->activity = $activityname;
 
-    if ($tipocompra === 'G') {
+    if ($tipocompra === 'G' || $tipocompra === 'M') {
         $redirecturl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
         $strgotodest = get_string('gotogradebook', 'local_xpstore');
         $strsuccessunlock = get_string('success_unlock_gradebook', 'local_xpstore', $a);

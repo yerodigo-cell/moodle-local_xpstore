@@ -94,13 +94,15 @@ foreach ($itemsraw as $item) {
     }
 }
 
-$sql = "SELECT g.*, cm.module, cm.instance
+$sql = "SELECT g.*, cm.module, cm.instance, gi.itemname as gi_itemname
         FROM {local_xpstore_gastos} g
-        JOIN {course_modules} cm ON g.itemid = cm.id
-        WHERE g.userid = ? AND cm.course = ?
+        LEFT JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype != 'M'
+        LEFT JOIN {grade_items} gi ON gi.id = g.itemid AND g.itemtype = 'M'
+        WHERE g.userid = ? 
+        AND (cm.course = ? OR gi.courseid = ?)
         ORDER BY g.timecreated DESC";
 
-$logs = $DB->get_records_sql($sql, [$USER->id, $courseid]);
+$logs = $DB->get_records_sql($sql, [$USER->id, $courseid, $courseid]);
 
 if ($logs) {
     $templatedata['has_logs'] = true;
@@ -108,8 +110,12 @@ if ($logs) {
 
     foreach ($logs as $log) {
         $totalgastado += $log->amount;
-        $modname = $DB->get_field('modules', 'name', ['id' => $log->module]);
-        $activityname = $DB->get_field($modname, 'name', ['id' => $log->instance]);
+        if ($log->itemtype === 'M') {
+            $activityname = $log->gi_itemname;
+        } else {
+            $modname = $DB->get_field('modules', 'name', ['id' => $log->module]);
+            $activityname = $DB->get_field($modname, 'name', ['id' => $log->instance]);
+        }
 
         $tipostr = strtolower($log->itemtype);
 
@@ -117,7 +123,11 @@ if ($logs) {
             ? get_string('type_' . $tipostr, 'local_xpstore')
             : 'Legacy';
 
-        $isgrade = ($log->itemtype === 'G');
+        if ($log->itemtype === 'M') {
+            $labeltipo = get_string('type_g', 'local_xpstore');
+        }
+
+        $isgrade = ($log->itemtype === 'G' || $log->itemtype === 'M');
         $gradeurl = '';
         $cmurl = '';
 
@@ -138,7 +148,7 @@ if ($logs) {
             ? $mapvalores[$tipocharupper][$log->itemid]
             : '0';
 
-        if ($tipocharupper === 'G' && $valornota !== '0') {
+        if (($tipocharupper === 'G' || $tipocharupper === 'M') && $valornota !== '0') {
             $valnum = floatval($valornota);
             $suffix = ' (+' . $valnum . ' pts)';
             $customlabel = $customlabel ? $customlabel . $suffix : $suffix;

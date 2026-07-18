@@ -136,14 +136,16 @@ $templatedata = array_merge([
     'users' => [],
 ], $navdata);
 
-$sql = "SELECT g.*, u.firstname, u.lastname, u.picture, u.imagealt, u.email
+$sql = "SELECT g.*, u.firstname, u.lastname, u.picture, u.imagealt, u.email,
+               cm.module, cm.instance, gi.itemname as gi_itemname
         FROM {local_xpstore_gastos} g
         JOIN {user} u ON g.userid = u.id
-        JOIN {course_modules} cm ON g.itemid = cm.id
-        WHERE cm.course = ?
+        LEFT JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype != 'M'
+        LEFT JOIN {grade_items} gi ON gi.id = g.itemid AND g.itemtype = 'M'
+        WHERE (cm.course = ? OR gi.courseid = ?)
         ORDER BY u.firstname ASC, g.timecreated DESC";
 
-$logs = $DB->get_records_sql($sql, [$courseid]);
+$logs = $DB->get_records_sql($sql, [$courseid, $courseid]);
 $grouped = [];
 
 if ($logs) {
@@ -190,13 +192,17 @@ if ($logs) {
         ];
 
         foreach ($userlogs as $log) {
-            $cm = $DB->get_record('course_modules', ['id' => $log->itemid]);
-
-            if ($cm) {
-                $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
-                $activityname = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
+            if ($log->itemtype === 'M') {
+                $activityname = $log->gi_itemname;
             } else {
-                $activityname = get_string('activitydeleted', 'local_xpstore');
+                $cm = $DB->get_record('course_modules', ['id' => $log->itemid]);
+
+                if ($cm) {
+                    $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+                    $activityname = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
+                } else {
+                    $activityname = get_string('activitydeleted', 'local_xpstore');
+                }
             }
 
             $tipostr = strtolower($log->itemtype);
@@ -205,6 +211,9 @@ if ($logs) {
             $labeltipo = get_string_manager()->string_exists('type_' . $tipostr, 'local_xpstore')
                 ? get_string('type_' . $tipostr, 'local_xpstore')
                 : 'Legacy';
+            if ($log->itemtype === 'M') {
+                $labeltipo = get_string('type_g', 'local_xpstore');
+            }
 
             $categoriatexto = isset($mapcategorias[$tipocharupper][$log->itemid])
                 ? $mapcategorias[$tipocharupper][$log->itemid]
@@ -218,7 +227,7 @@ if ($logs) {
                 ? $mapvalores[$tipocharupper][$log->itemid]
                 : '0';
 
-            if ($tipocharupper === 'G' && $valornota !== '0') {
+            if (($tipocharupper === 'G' || $tipocharupper === 'M') && $valornota !== '0') {
                 $valnum = floatval($valornota);
                 $suffix = ' (+' . $valnum . ' pts)';
                 $customlabel = $customlabel ? $customlabel . $suffix : $suffix;
@@ -240,7 +249,7 @@ if ($logs) {
             }
 
             $cmurl = '';
-            if ($tipostr === 'g') {
+            if ($tipostr === 'g' || $tipostr === 'm') {
                 $cmurl = (new moodle_url(
                     '/grade/report/user/index.php',
                     ['id' => $courseid, 'userid' => $log->userid]

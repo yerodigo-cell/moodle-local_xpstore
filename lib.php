@@ -138,11 +138,14 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
     global $DB, $CFG;
 
     try {
-        $cm = $DB->get_record('course_modules', ['id' => $cmid], '*', MUST_EXIST);
+        $cm = null;
+        if ($type !== 'M') {
+            $cm = $DB->get_record('course_modules', ['id' => $cmid], '*', MUST_EXIST);
+        }
         $deadline = time() + (24 * 60 * 60);
 
         // If course ID was not sent, we try to get it from the Course Module.
-        if (!$courseid) {
+        if (!$courseid && $cm) {
             $courseid = $cm->course;
         }
 
@@ -223,6 +226,30 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
                 'courseid' => $cm->course,
             ]);
 
+            if ($gradeitem) {
+                $grade = $DB->get_record('grade_grades', ['itemid' => $gradeitem->id, 'userid' => $userid]);
+
+                if ($grade) {
+                    $newvalue = $grade->finalgrade + $gradevalue;
+                    $grade->finalgrade = ($newvalue > $gradeitem->grademax) ? $gradeitem->grademax : $newvalue;
+                    $grade->overridden = time();
+                    $DB->update_record('grade_grades', $grade);
+                } else {
+                    $newgrade = (object)[
+                        'itemid' => $gradeitem->id,
+                        'userid' => $userid,
+                        'rawgrade' => $gradevalue,
+                        'finalgrade' => $gradevalue,
+                        'overridden' => time(),
+                        'timecreated' => time(),
+                        'timemodified' => time(),
+                    ];
+                    $DB->insert_record('grade_grades', $newgrade);
+                }
+            }
+        } else if ($type === 'M') {
+            $gradeitem = $DB->get_record('grade_items', ['id' => $cmid]);
+            
             if ($gradeitem) {
                 $grade = $DB->get_record('grade_grades', ['itemid' => $gradeitem->id, 'userid' => $userid]);
 

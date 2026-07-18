@@ -50,7 +50,13 @@ $catalogkey = 'catalog_course_' . $courseid;
 
 if ($action === 'add' && confirm_sesskey()) {
     $tipo = required_param('tipo', PARAM_ALPHA);
-    $cmid = required_param('cmid', PARAM_INT);
+    $cmid = required_param('cmid', PARAM_ALPHANUM);
+
+    if ($tipo === 'G' && strpos($cmid, 'm') === 0) {
+        $tipo = 'M';
+        $cmid = substr($cmid, 1);
+    }
+    $cmid = (int)$cmid;
     $costo = required_param('costo', PARAM_INT);
     $nombre = required_param('nombre', PARAM_TEXT);
     $valornota = optional_param('valor_nota', '0', PARAM_FLOAT);
@@ -87,7 +93,13 @@ if ($action === 'add' && confirm_sesskey()) {
 if ($action === 'edit_save' && confirm_sesskey()) {
     $olditem = required_param('old_item', PARAM_TEXT);
     $tipo = required_param('tipo', PARAM_ALPHA);
-    $cmid = required_param('cmid', PARAM_INT);
+    $cmid = required_param('cmid', PARAM_ALPHANUM);
+
+    if ($tipo === 'G' && strpos($cmid, 'm') === 0) {
+        $tipo = 'M';
+        $cmid = substr($cmid, 1);
+    }
+    $cmid = (int)$cmid;
     $costo = required_param('costo', PARAM_INT);
     $nombre = required_param('nombre', PARAM_TEXT);
     $valornota = optional_param('valor_nota', '0', PARAM_FLOAT);
@@ -240,7 +252,12 @@ if ($action === 'load_edit') {
 
     if (count($parts) >= 2) {
         $etipo = $tipochar;
-        $ecmid = (int)$parts[0];
+        if ($etipo === 'M') {
+            $etipo = 'G';
+            $ecmid = 'm' . $parts[0];
+        } else {
+            $ecmid = (int)$parts[0];
+        }
         $ecosto = $parts[1];
         $enombre = $parts[2];
         $evalor = $parts[3];
@@ -287,6 +304,16 @@ foreach ($modinfo->get_cms() as $cm) {
             'selected' => ($cm->id == $erequisito),
         ];
     }
+}
+
+$manual_items = $DB->get_records('grade_items', ['courseid' => $courseid, 'itemtype' => 'manual']);
+foreach ($manual_items as $item) {
+    $activityoptions[] = [
+        'id' => 'm' . $item->id,
+        'modname' => 'manual',
+        'name' => "[CALIFICACIÓN MANUAL] " . $item->itemname,
+        'selected' => ('m' . $item->id == $ecmid),
+    ];
 }
 
 $configraw = get_config('local_xpstore', $catalogkey) ?: '';
@@ -383,12 +410,18 @@ if (!empty($configraw)) {
 
             $modinfo = get_fast_modinfo($courseid);
             $cms = $modinfo->get_cms();
-            if (!isset($cms[$cid])) {
+            if ($tipo !== 'M' && !isset($cms[$cid])) {
                 continue;
             }
-            $cm = $cms[$cid];
-            $realname = $cm->name;
-            $labeltipo = get_string('type_' . strtolower($tipo), 'local_xpstore');
+            
+            if ($tipo === 'M') {
+                $realname = $DB->get_field('grade_items', 'itemname', ['id' => $cid]) ?: get_string('deletedactivity', 'local_xpstore');
+                $labeltipo = get_string('type_g', 'local_xpstore');
+            } else {
+                $cm = $cms[$cid];
+                $realname = $cm->name;
+                $labeltipo = get_string('type_' . strtolower($tipo), 'local_xpstore');
+            }
 
             $reqname = '';
             if ($requisito > 0 && isset($cms[$requisito])) {
