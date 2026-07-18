@@ -98,7 +98,7 @@ $sql = "SELECT g.*, cm.module, cm.instance, gi.itemname as gi_itemname
         FROM {local_xpstore_gastos} g
         LEFT JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype != 'M'
         LEFT JOIN {grade_items} gi ON gi.id = g.itemid AND g.itemtype = 'M'
-        WHERE g.userid = ? 
+        WHERE g.userid = ?
         AND (cm.course = ? OR gi.courseid = ?)
         ORDER BY g.timecreated DESC";
 

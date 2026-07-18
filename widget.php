@@ -61,7 +61,8 @@ foreach ($items as $item) {
 
     if (count($parts) >= 2 && (int)$parts[0] === $cmidreq && $tipochar === $tiporeq) {
         if ($tipochar === 'M') {
-            $realname = $DB->get_field('grade_items', 'itemname', ['id' => (int)$parts[0]]) ?: get_string('deletedactivity', 'local_xpstore');
+            $realname = $DB->get_field('grade_items', 'itemname', ['id' => (int)$parts[0]])
+                ?: get_string('deletedactivity', 'local_xpstore');
             $producto = [
                 'tipo' => $tipochar,
                 'cid' => (int)$parts[0],

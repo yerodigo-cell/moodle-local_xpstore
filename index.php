@@ -165,7 +165,8 @@ foreach ($todoslosproductos as $item) {
         $cms = $modinfo->get_cms();
         if ($tipochar === 'M' || isset($cms[$cid])) {
             if ($tipochar === 'M') {
-                $nreal = $DB->get_field('grade_items', 'itemname', ['id' => $cid]) ?: get_string('deletedactivity', 'local_xpstore');
+                $nreal = $DB->get_field('grade_items', 'itemname', ['id' => $cid])
+                    ?: get_string('deletedactivity', 'local_xpstore');
             } else {
                 $cm = $cms[$cid];
                 $nreal = $cm->name;

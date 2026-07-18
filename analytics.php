@@ -105,7 +105,8 @@ $totalstudentsincourse = count(get_enrolled_users($coursecontext, '', 0, 'u.id')
 $engagementrate = $totalstudentsincourse > 0 ? round(($engagedstudents / $totalstudentsincourse) * 100) : 0;
 
 // Data for charts.
-$sql = "SELECT CONCAT(g.itemtype, '_', g.itemid) as uniqueid, g.itemid, g.itemtype, COUNT(g.id) as purchases, SUM(g.amount) as totalxp
+$sql = "SELECT CONCAT(g.itemtype, '_', g.itemid) as uniqueid, g.itemid, g.itemtype, " .
+       "COUNT(g.id) as purchases, SUM(g.amount) as totalxp
         FROM {local_xpstore_gastos} g
         LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
         LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'

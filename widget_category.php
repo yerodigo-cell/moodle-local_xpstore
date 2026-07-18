@@ -146,7 +146,8 @@ foreach ($todoslosproductos as $item) {
             $cms = $modinfo->get_cms();
             if ($tipochar === 'M' || isset($cms[$cid])) {
                 if ($tipochar === 'M') {
-                    $nreal = $DB->get_field('grade_items', 'itemname', ['id' => $cid]) ?: get_string('deletedactivity', 'local_xpstore');
+                    $nreal = $DB->get_field('grade_items', 'itemname', ['id' => $cid])
+                        ?: get_string('deletedactivity', 'local_xpstore');
                 } else {
                     $cm = $cms[$cid];
                     $nreal = $cm->name;
@@ -274,7 +275,8 @@ if ($status === 'success') {
     }
     if (empty($activityname)) {
         if ($tipocompra === 'M') {
-            $activityname = $DB->get_field('grade_items', 'itemname', ['id' => $boughtcmid]) ?: get_string('course', 'local_xpstore');
+            $activityname = $DB->get_field('grade_items', 'itemname', ['id' => $boughtcmid])
+                ?: get_string('course', 'local_xpstore');
         } else if (isset($modinfo->cms[$boughtcmid])) {
             $activityname = $modinfo->cms[$boughtcmid]->name;
         } else {

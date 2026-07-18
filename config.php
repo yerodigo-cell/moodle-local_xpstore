@@ -306,13 +306,13 @@ foreach ($modinfo->get_cms() as $cm) {
     }
 }
 
-$manual_items = $DB->get_records('grade_items', ['courseid' => $courseid, 'itemtype' => 'manual']);
-$manual_prefix = get_string('manualgradeitem', 'local_xpstore');
-foreach ($manual_items as $item) {
+$manualitems = $DB->get_records('grade_items', ['courseid' => $courseid, 'itemtype' => 'manual']);
+$manualprefix = get_string('manualgradeitem', 'local_xpstore');
+foreach ($manualitems as $item) {
     $activityoptions[] = [
         'id' => 'm' . $item->id,
         'modname' => 'manual',
-        'name' => $manual_prefix . $item->itemname,
+        'name' => $manualprefix . $item->itemname,
         'selected' => ('m' . $item->id == $ecmid),
     ];
 }
@@ -414,9 +414,9 @@ if (!empty($configraw)) {
             if ($tipo !== 'M' && !isset($cms[$cid])) {
                 continue;
             }
-            
             if ($tipo === 'M') {
-                $realname = $DB->get_field('grade_items', 'itemname', ['id' => $cid]) ?: get_string('deletedactivity', 'local_xpstore');
+                $realname = $DB->get_field('grade_items', 'itemname', ['id' => $cid])
+                    ?: get_string('deletedactivity', 'local_xpstore');
                 $labeltipo = get_string('type_g', 'local_xpstore');
             } else {
                 $cm = $cms[$cid];
