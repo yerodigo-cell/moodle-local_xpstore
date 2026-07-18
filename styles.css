@@ -248,30 +248,45 @@ body.pagelayout-embedded,
 }
 
 .local_xpstore-container .widget-generator {
-    background: #e0f7fa;
-    border: 1px solid #b2ebf2;
-    border-radius: 15px;
-    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #eaeaea;
+    border-radius: 12px;
+    padding: 24px;
     margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 
 .local_xpstore-container .btn-copy-w {
-    background: white;
-    border: 1px solid #00acc1;
-    color: #00838f;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
     border-radius: 8px;
-    padding: 6px 15px;
-    font-weight: bold;
+    padding: 8px 16px;
+    font-weight: 600;
     font-size: 0.85rem;
-    transition: 0.2s;
+    transition: all 0.2s ease;
     margin-right: 10px;
     margin-bottom: 10px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.local_xpstore-container .btn-copy-w i {
+    color: #0056D2;
+    font-size: 1rem;
 }
 
 .local_xpstore-container .btn-copy-w:hover {
-    background: #00acc1;
-    color: white;
+    background: #ffffff;
+    border-color: #0056D2;
+    color: #0056D2;
+    box-shadow: 0 2px 8px rgba(0, 86, 210, 0.1);
+    transform: translateY(-1px);
+}
+
+.local_xpstore-container .btn-copy-w:active {
+    transform: translateY(0);
 }
 
 @media (max-width: 768px) {
