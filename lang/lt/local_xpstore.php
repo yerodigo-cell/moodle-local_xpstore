@@ -112,6 +112,7 @@ $string['limit'] = 'Limitas';
 $string['limitreached'] = 'Pasiekėte maksimalų šios prekės pirkimo limitą.';
 $string['limitzero'] = '0 = ∞ (Neribota)';
 $string['linkedactivity'] = 'Susijusi veikla';
+$string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = 'Meniu: Paslėptas';
 $string['menuvisibility_help'] = 'Įjungia arba išjungia tiesioginės prieigos nuorodą į parduotuvę studentų kurso navigacijos meniu. Rekomenduojame palikti ją paslėptą ir vietoj to naudoti parduotuvės valdiklius, nes jie suteikia labiau įtraukiančią patirtį (įskaitant garso efektus ir animacijas perkant apdovanojimus).';
 $string['menuvisible'] = 'Meniu: Matomas';

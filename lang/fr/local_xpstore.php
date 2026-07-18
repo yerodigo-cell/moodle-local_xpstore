@@ -112,6 +112,7 @@ $string['limit'] = 'Limite';
 $string['limitreached'] = 'Vous avez atteint la limite d\'achat maximale pour cet article.';
 $string['limitzero'] = '0 = ∞ (Infini)';
 $string['linkedactivity'] = 'Activité liée';
+$string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = 'Menu : Masqué';
 $string['menuvisibility_help'] = 'Active ou désactive le lien d\'accès direct à la boutique dans le menu de navigation du cours pour les étudiants. Nous recommandons de le garder masqué et d\'utiliser plutôt les widgets de la boutique, car ils offrent une expérience plus immersive (incluant des effets sonores et des animations lors de l\'achat de récompenses).';
 $string['menuvisible'] = 'Menu : Visible';

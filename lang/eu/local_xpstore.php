@@ -112,6 +112,7 @@ $string['limit'] = 'Muga';
 $string['limitreached'] = 'Elementu honen gehienezko erosketa-muga gainditu duzu.';
 $string['limitzero'] = '0 = ∞ (Infinitua)';
 $string['linkedactivity'] = 'Lotutako Jarduera';
+$string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = 'Menua: Ezkutatuta';
 $string['menuvisibility_help'] = 'Ikasleentzako ikastaroko nabigazio menuan dendara joateko zuzeneko lotura gaitu edo desgaitzen du. Ezkutatuta edukitzea eta dendako Widget-ak erabiltzea gomendatzen dugu, esperientzia murgilgarriagoa eskaintzen baitute (sariak erostean soinu-efektuak eta animazioak barne).';
 $string['menuvisible'] = 'Menua: Ikusgai';

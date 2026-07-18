@@ -112,6 +112,7 @@ $string['limit'] = 'Raja';
 $string['limitreached'] = 'Olet saavuttanut tämän tuotteen enimmäisostorajan.';
 $string['limitzero'] = '0 = ∞ (Rajoittamaton)';
 $string['linkedactivity'] = 'Linkitetty aktiviteetti';
+$string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = 'Valikko: Piilotettu';
 $string['menuvisibility_help'] = 'Ottaa käyttöön tai poistaa käytöstä kaupan suoran pääsyn linkin opiskelijoiden kurssivalikossa. Suosittelemme pitämään sen piilotettuna ja käyttämään sen sijaan kauppawidgettejä, sillä ne tarjoavat mukaansatempaavamman kokemuksen (mukaan lukien ääniefektit ja animaatiot palkintoja ostettaessa).';
 $string['menuvisible'] = 'Valikko: Näkyvissä';

@@ -112,6 +112,7 @@ $string['limit'] = '制限';
 $string['limitreached'] = 'このアイテムの最大購入制限に達しました。';
 $string['limitzero'] = '0 = ∞ (無限)';
 $string['linkedactivity'] = 'リンクされた活動';
+$string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = 'メニュー：非表示';
 $string['menuvisibility_help'] = '学生向けのコースナビゲーションメニューのストアへの直接アクセスリンクを有効または無効にします。報酬を購入する際のサウンドエフェクトやアニメーションなど、より没入感のある体験を提供するため、非表示にしてストアウィジェットを使用することをお勧めします。';
 $string['menuvisible'] = 'メニュー：表示';

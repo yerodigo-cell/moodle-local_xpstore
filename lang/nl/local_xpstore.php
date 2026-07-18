@@ -112,6 +112,7 @@ $string['limit'] = 'Limiet';
 $string['limitreached'] = 'Je hebt de maximale aankooplimiet voor dit item bereikt.';
 $string['limitzero'] = '0 = ∞ (Oneindig)';
 $string['linkedactivity'] = 'Gekoppelde Activiteit';
+$string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = 'Menu: Verborgen';
 $string['menuvisibility_help'] = 'Schakelt de directe toegangslink naar de winkel in het cursusnavigatiemenu voor studenten in of uit. We raden aan om deze verborgen te houden en in plaats daarvan Winkel Widgets te gebruiken, omdat deze een meer meeslepende ervaring bieden (inclusief geluidseffecten en animaties bij het kopen van beloningen).';
 $string['menuvisible'] = 'Menu: Zichtbaar';

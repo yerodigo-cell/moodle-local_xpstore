@@ -113,6 +113,7 @@ $string['limit'] = 'Límite';
 $string['limitreached'] = 'Has alcanzado el límite máximo de compra para este artículo.';
 $string['limitzero'] = '0 = ∞ (Infinito)';
 $string['linkedactivity'] = 'Actividad Vinculada';
+$string['manualgradeitem'] = '[CALIFICACIÓN MANUAL] ';
 $string['menuhidden'] = 'Menú: Oculto';
 $string['menuvisibility_help'] = 'Activa o desactiva el enlace de acceso directo a la tienda en el menú de navegación del curso para los estudiantes. Recomendamos mantenerlo oculto y usar los Widgets de la tienda en su lugar, ya que brindan una experiencia más inmersiva (incluyendo efectos de sonido y animaciones al comprar recompensas).';
 $string['menuvisible'] = 'Menú: Visible';
