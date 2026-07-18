@@ -273,7 +273,7 @@ if ($logs) {
                 'activityhtml' => $activityhtml,
                 'customlabel' => htmlspecialchars($customlabel),
                 'categoriatexto' => htmlspecialchars($categoriatexto),
-                'tipostr' => $tipostr,
+                'tipostr' => ($log->itemtype === 'M') ? 'g' : $tipostr,
                 'labeltipo' => $labeltipo,
                 'amount' => $log->amount,
                 'date' => userdate($log->timecreated, get_string('strftimedatetime', 'langconfig')),

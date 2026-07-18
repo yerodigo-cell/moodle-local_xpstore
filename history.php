@@ -157,7 +157,7 @@ if ($logs) {
         $templatedata['logs'][] = [
             'activityname' => htmlspecialchars($activityname),
             'customlabel' => htmlspecialchars($customlabel),
-            'tipostr' => $tipostr,
+            'tipostr' => ($log->itemtype === 'M') ? 'g' : $tipostr,
             'labeltipo' => $labeltipo,
             'amount' => $log->amount,
             'date' => userdate($log->timecreated, get_string('strftimedatetime', 'langconfig')),
