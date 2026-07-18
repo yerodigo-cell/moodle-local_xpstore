@@ -445,7 +445,7 @@ if (!empty($configraw)) {
                 'has_item_limit' => ($limiteactual > 0),
                 'limiteactual' => $limiteactual,
                 'displayname' => $name ?: $realname,
-                'is_grade_boost' => ($tipo == 'G'),
+                'is_grade_boost' => ($tipo === 'G' || $tipo === 'M'),
                 'val' => $val,
                 'has_req' => ($requisito > 0),
                 'req_name' => $reqname,
