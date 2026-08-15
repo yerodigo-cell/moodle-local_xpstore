@@ -496,7 +496,10 @@ function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid) {
             // Check if this specific xpstore restriction already exists.
             $exists = false;
             foreach ($tree['c'] as $cond) {
-                if (isset($cond['type']) && $cond['type'] === 'xpstore' && isset($cond['productid']) && $cond['productid'] == $productid) {
+                if (
+                    isset($cond['type']) && $cond['type'] === 'xpstore' &&
+                    isset($cond['productid']) && $cond['productid'] == $productid
+                ) {
                     $exists = true;
                     break;
                 }
