@@ -1,0 +1,61 @@
+{{!
+    @template local_xpstore/widget_balance
+
+    Example context (json):
+    {
+        "cpstore": "#0056D2",
+        "cbstore": "#00C9A7",
+        "saldo": 100,
+        "str_balance": "BALANCE"
+    }
+}}
+<div class="local_xpstore-container local_xpstore-embedded-container tienda-wrapper" style="--cp: {{cpstore}}; --cb: {{cbstore}}; --gradient: linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%); padding: 15px;">
+    <div class="wallet-header" style="justify-content: center; text-align: center; margin-bottom: 0;">
+        <div class="text-uppercase small mb-1" style="letter-spacing: 1px; font-weight: bold; opacity: 0.9; width: 100%;">
+            {{str_balance}}
+        </div>
+        <div class="xp-balance" style="width: 100%;"><span class="xp-balance-value">{{saldo}}</span> XP</div>
+    </div>
+</div>
+
+<script>
+(function() {
+    function autoResizeXpStore() {
+        try {
+            if (window.frameElement) {
+                var container = document.querySelector('.local_xpstore-embedded-container');
+                if (container) {
+                    var newH = container.scrollHeight;
+                    if (newH > 50) {
+                        window.frameElement.style.height = (newH + 20) + 'px';
+                    }
+                }
+            }
+        } catch(e) {}
+    }
+
+    var count = 0;
+    var interval = setInterval(function() {
+        autoResizeXpStore();
+        count++;
+        if (count > 10) clearInterval(interval);
+    }, 500);
+
+    window.addEventListener('load', autoResizeXpStore);
+    window.addEventListener('resize', autoResizeXpStore);
+})();
+
+(function() {
+    try {
+        if (window.BroadcastChannel) {
+            var bc = new BroadcastChannel('xpstore_balance_sync');
+            bc.onmessage = function(ev) {
+                if (ev.data && ev.data.type === 'update_balance' && ev.data.newBalance !== undefined) {
+                    var els = document.querySelectorAll('.xp-balance-value');
+                    els.forEach(function(el) { el.textContent = ev.data.newBalance; });
+                }
+            };
+        }
+    } catch(e) {}
+})();
+</script>
