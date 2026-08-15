@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -276,6 +276,7 @@ $availabletypes = [
     'G' => get_string('type_g', 'local_xpstore'),
     'F' => get_string('type_f', 'local_xpstore'),
     'S' => get_string('type_s', 'local_xpstore'),
+    'U' => get_string('type_u', 'local_xpstore'),
 ];
 foreach ($availabletypes as $val => $label) {
     $typeoptions[] = [
@@ -468,6 +469,11 @@ $urlhistoryw = $CFG->wwwroot . "/local/xpstore/widget_history.php?id={$courseid}
 $iframehistory = '<iframe src="' . $urlhistoryw . '" width="100%" height="150" ' .
     'style="border: none; overflow: hidden;" scrolling="no"></iframe>';
 
+$urlbalancew = $CFG->wwwroot . "/local/xpstore/widget_balance.php?id={$courseid}";
+$iframebalance = '<iframe src="' . $urlbalancew . '" width="100%" height="180" ' .
+    'style="border: none; overflow: hidden;" scrolling="no"></iframe>';
+
+
 $activetab = ($tab === 'settings' || in_array($action, ['savesettings', 'resetcolors', 'togglemenu'])) ? 'settings' : 'products';
 
 $navdata = local_xpstore_get_navigation_data($courseid, $activetab);
@@ -564,6 +570,9 @@ $templatedata = array_merge([
 
     'iframehistory' => $iframehistory,
     'str_history_button' => get_string('history_button', 'local_xpstore'),
+
+    'iframebalance' => $iframebalance,
+    'str_balance_button' => get_string('balance_button', 'local_xpstore'),
 
     'category_iframe_options' => $categoryiframeoptions,
     'str_category_short' => get_string('category_short', 'local_xpstore'),

@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -183,6 +183,7 @@ $string['type_g'] = 'Бонус';
 $string['type_help'] = 'Виберіть тип переваги:<br><br><b>Додаткова спроба:</b> Працює з тестами.<br><b>Подовження на 24 год:</b> Працює лише із завданнями.<br><b>Форум (Класичний):</b> Дозволяє публікувати після дати закриття.<br><b>Бонус:</b> Додає додаткові бали безпосередньо в журнал оцінок.<br><b>Спеціальний:</b> Розблоковує прихований вміст або VIP-групи.';
 $string['type_q'] = 'Додаткова спроба';
 $string['type_s'] = 'Спеціальний';
+$string['type_u'] = 'Unlock';
 $string['update'] = 'Оновити';
 $string['user'] = 'Користувач';
 $string['viewanalytics'] = 'Переглянути аналітику';

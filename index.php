@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -177,6 +177,7 @@ foreach ($todoslosproductos as $item) {
                 'F' => 'comments',
                 'G' => 'star',
                 'S' => 'unlock-alt',
+                'U' => 'unlock',
             ];
             $icon = $iconmap[$tipochar] ?? 'gift';
 
@@ -185,7 +186,7 @@ foreach ($todoslosproductos as $item) {
             $limitealcanzado = ($limite > 0 && $comprasactuales >= $limite);
 
             $isbonus = (($tipochar == 'G' || $tipochar == 'M') && !empty($boost) && $boost != '0');
-            $isspecial = ($tipochar == 'S');
+            $isspecial = ($tipochar == 'S' || $tipochar == 'U');
 
             $boughtthis = ($status === 'success' && $boughtcmid == $cid && $tipocompra == $tipochar);
             $gotogradebook = ($boughtthis && ($tipochar == 'G' || $tipochar == 'M'));

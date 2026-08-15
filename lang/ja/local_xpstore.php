@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -183,6 +183,7 @@ $string['type_g'] = 'ボーナス';
 $string['type_help'] = '特典のタイプを選択してください:<br><br><b>追加の受験:</b> 小テストで機能します。<br><b>24時間延長:</b> 課題でのみ機能します。<br><b>フォーラム (レガシー):</b> 終了日時後の投稿を許可します。<br><b>ボーナス:</b> 評定表に直接追加のポイントを追加します。<br><b>特別:</b> 非表示のコンテンツやVIPグループのロックを解除します。';
 $string['type_q'] = '追加の受験';
 $string['type_s'] = '特別';
+$string['type_u'] = 'Unlock';
 $string['update'] = '更新';
 $string['user'] = 'ユーザー';
 $string['viewanalytics'] = 'アナリティクスを表示';

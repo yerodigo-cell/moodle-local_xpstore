@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -82,6 +82,7 @@ $string['gradepoints'] = 'Bonus (+)';
 $string['hide_menu_tooltip'] = 'Hide store from course menu';
 $string['history'] = 'Purchase History';
 $string['history_button'] = 'History Button';
+$string['balance_button'] = 'Balance Widget';
 $string['icon_award'] = 'Award Ribbon';
 $string['icon_bolt'] = 'Lightning Bolt';
 $string['icon_book'] = 'Book';
@@ -183,6 +184,7 @@ $string['type_g'] = 'Bonus';
 $string['type_help'] = 'Select the type of benefit:<br><br><b>Extra Attempt:</b> Works with Quizzes.<br><b>24h Extension:</b> Works only with Assignments.<br><b>Forum (Legacy):</b> Allows posting after the cut-off date.<br><b>Bonus:</b> Adds extra points directly to the gradebook.<br><b>Special:</b> Unlocks hidden content or VIP groups.';
 $string['type_q'] = 'Extra Attempt';
 $string['type_s'] = 'Special';
+$string['type_u'] = 'Unlock';
 $string['update'] = 'Update';
 $string['usecache'] = 'Use cache';
 $string['usecache_desc'] = 'Enable caching for the widget. This will improve performance by storing the widget data for 3 minutes.';

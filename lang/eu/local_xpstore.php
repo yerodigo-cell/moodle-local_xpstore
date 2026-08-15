@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -183,6 +183,7 @@ $string['type_g'] = 'Saria';
 $string['type_help'] = 'Hautatu onura mota:<br><br><b>Saiakera Estra:</b> Galdetegiekin funtzionatzen du.<br><b>24h-ko luzapena:</b> Zereginekin soilik funtzionatzen du.<br><b>Foroa (Klasikoa):</b> Ixteko dataren ostean argitaratzea ahalbidetzen du.<br><b>Saria:</b> Puntu gehigarriak gehitzen ditu zuzenean kalifikazio-liburuan.<br><b>Berezia:</b> Ezkutuko edukia edo VIP taldeak desblokeatzen ditu.';
 $string['type_q'] = 'Saiakera Estra';
 $string['type_s'] = 'Berezia';
+$string['type_u'] = 'Unlock';
 $string['update'] = 'Eguneratu';
 $string['user'] = 'Erabiltzailea';
 $string['viewanalytics'] = 'Ikusi analitikak';

@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -183,6 +183,7 @@ $string['type_g'] = 'Bonus';
 $string['type_help'] = 'Avantaj türünü seçin:<br><br><b>Ekstra Deneme:</b> Sınavlar ile çalışır.<br><b>24s Uzatma:</b> Sadece Ödevlerle çalışır.<br><b>Forum (Klasik):</b> Kapanış tarihinden sonra gönderi yapılmasına izin verir.<br><b>Bonus:</b> Doğrudan not defterine ekstra puan ekler.<br><b>Özel:</b> Gizli içeriğin veya VIP gruplarının kilidini açar.';
 $string['type_q'] = 'Ekstra Deneme';
 $string['type_s'] = 'Özel';
+$string['type_u'] = 'Unlock';
 $string['update'] = 'Güncelle';
 $string['user'] = 'Kullanıcı';
 $string['viewanalytics'] = 'Analitikleri Görüntüle';

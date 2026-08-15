@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -183,6 +183,7 @@ $string['type_g'] = 'Premija';
 $string['type_help'] = 'Pasirinkite privalumo tipą:<br><br><b>Papildomas bandymas:</b> Veikia su testais.<br><b>24 val. pratęsimas:</b> Veikia tik su užduotimis.<br><b>Forumas (Klasikinis):</b> Leidžia skelbti po uždarymo datos.<br><b>Premija:</b> Prideda papildomus taškus tiesiai į įvertinimų knygelę.<br><b>Specialus:</b> Atrakina paslėptą turinį arba VIP grupes.';
 $string['type_q'] = 'Papildomas bandymas';
 $string['type_s'] = 'Specialus';
+$string['type_u'] = 'Unlock';
 $string['update'] = 'Atnaujinti';
 $string['user'] = 'Vartotojas';
 $string['viewanalytics'] = 'Peržiūrėti analitiką';

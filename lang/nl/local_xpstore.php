@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -183,6 +183,7 @@ $string['type_g'] = 'Bonus';
 $string['type_help'] = 'Selecteer het type voordeel:<br><br><b>Extra Poging:</b> Werkt met Quizzen.<br><b>24u Verlenging:</b> Werkt alleen met Opdrachten.<br><b>Forum (Klassiek):</b> Maakt plaatsen na de sluitingsdatum mogelijk.<br><b>Bonus:</b> Voegt direct extra punten toe aan de cijferlijst.<br><b>Speciaal:</b> Ontgrendelt verborgen inhoud of VIP-groepen.';
 $string['type_q'] = 'Extra Poging';
 $string['type_s'] = 'Speciaal';
+$string['type_u'] = 'Unlock';
 $string['update'] = 'Bijwerken';
 $string['user'] = 'Gebruiker';
 $string['viewanalytics'] = 'Bekijk Analytics';

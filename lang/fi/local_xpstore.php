@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -183,6 +183,7 @@ $string['type_g'] = 'Bonus';
 $string['type_help'] = 'Valitse edun tyyppi:<br><br><b>Ylimääräinen yritys:</b> Toimii tenttien kanssa.<br><b>24h pidennys:</b> Toimii vain tehtävien kanssa.<br><b>Foorumi (Klassinen):</b> Sallii julkaisemisen sulkemispäivän jälkeen.<br><b>Bonus:</b> Lisää lisäpisteitä suoraan arviointikirjaan.<br><b>Erityinen:</b> Avaa piilotetun sisällön tai VIP-ryhmät.';
 $string['type_q'] = 'Ylimääräinen yritys';
 $string['type_s'] = 'Erityinen';
+$string['type_u'] = 'Unlock';
 $string['update'] = 'Päivitä';
 $string['user'] = 'Käyttäjä';
 $string['viewanalytics'] = 'Näytä analytiikka';

@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -183,6 +183,7 @@ $string['type_g'] = '奖励分';
 $string['type_help'] = '选择奖励类型：<br><br><b>额外尝试：</b>适用于测验。<br><b>24小时延期：</b>仅适用于作业。<br><b>论坛（经典）：</b>允许在截止日期后发帖。<br><b>奖励分：</b>直接向成绩单添加额外分数。<br><b>特殊：</b>解锁隐藏内容或 VIP 群组。';
 $string['type_q'] = '额外尝试';
 $string['type_s'] = '特殊';
+$string['type_u'] = 'Unlock';
 $string['update'] = '更新';
 $string['user'] = '用户';
 $string['viewanalytics'] = '查看数据分析';

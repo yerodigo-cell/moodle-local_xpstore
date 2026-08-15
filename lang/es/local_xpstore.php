@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -82,6 +82,7 @@ $string['gradepoints'] = 'Bonificación (+)';
 $string['hide_menu_tooltip'] = 'Ocultar tienda del menú del curso';
 $string['history'] = 'Historial de Compras';
 $string['history_button'] = 'Botón Historial';
+$string['balance_button'] = 'Widget de Saldo';
 $string['icon_award'] = 'Cinta de Premio';
 $string['icon_bolt'] = 'Rayo';
 $string['icon_book'] = 'Book';
@@ -183,6 +184,7 @@ $string['type_g'] = 'Bonificación';
 $string['type_help'] = 'Selecciona el tipo de beneficio:<br><br><b>Intento Extra:</b> Funciona con los cuestionarios (Quizzes).<br><b>Plazo 24h:</b> Funciona solo con las tareas (Assignments).<br><b>Foro (Histórico):</b> Permite publicar después de la fecha de cierre.<br><b>Bonus (Nota):</b> Añade puntos extra directos a la calificación.<br><b>Especial:</b> Habilita el acceso a material oculto o grupos VIP.';
 $string['type_q'] = 'Quiz (Intento Extra)';
 $string['type_s'] = 'Especial';
+$string['type_u'] = 'Desbloquear';
 $string['update'] = 'Actualizar';
 $string['usecache'] = 'Usar caché';
 $string['usecache_desc'] = 'Habilita el almacenamiento en caché para el widget. Esto mejorará el rendimiento almacenando los datos del widget durante 3 minutos.';

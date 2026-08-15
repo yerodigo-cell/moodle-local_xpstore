@@ -18,7 +18,7 @@
  * XP Store (local_xpstore)
  *
  * @package     local_xpstore
- * @copyright   2026 Yeison Díaz
+ * @copyright   2026 EduPlugins Studio
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -183,6 +183,7 @@ $string['type_g'] = 'Bonus';
 $string['type_help'] = 'Izberite vrsto ugodnosti:<br><br><b>Dodatni poskus:</b> Deluje s kvizi.<br><b>24-urno podaljšanje:</b> Deluje samo z nalogami.<br><b>Forum (Klasično):</b> Omogoča objavljanje po končnem datumu.<br><b>Bonus:</b> Dodatne točke doda neposredno v redovalnico.<br><b>Posebno:</b> Oklene skrito vsebino ali VIP skupine.';
 $string['type_q'] = 'Dodatni poskus';
 $string['type_s'] = 'Posebno';
+$string['type_u'] = 'Unlock';
 $string['update'] = 'Posodobi';
 $string['user'] = 'Uporabnik';
 $string['viewanalytics'] = 'Ogled analitike';
