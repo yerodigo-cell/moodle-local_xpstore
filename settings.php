@@ -34,5 +34,14 @@ if ($ADMIN->fulltree) {
         get_string('global_settings_info', 'local_xpstore')
     ));
 
+    // Suggest installing availability_xpstore if it's not present.
+    if (!\core_plugin_manager::instance()->get_plugin_info('availability_xpstore')) {
+        $settings->add(new admin_setting_heading(
+            'local_xpstore_missing_availability',
+            '',
+            '<div class="alert alert-info mt-3">' . get_string('missing_availability', 'local_xpstore') . '</div>'
+        ));
+    }
+
     $ADMIN->add('localplugins', $settings);
 }

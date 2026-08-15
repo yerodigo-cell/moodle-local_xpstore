@@ -76,6 +76,7 @@ $string['error'] = 'Error al procesar el canje';
 $string['exito'] = '¡Canje exitoso!';
 $string['full_store'] = 'Tienda Completa';
 $string['global_settings_info'] = '¡XP Store está instalado correctamente! Este plugin no requiere configuración global. Para configurar la tienda, los colores y los productos, por favor dirígete a la página principal de cualquier curso y haz clic en el botón "Configuración de XP Store".';
+$string['missing_availability'] = '<strong>Sugerencia:</strong> Hemos notado que aún no has instalado el plugin complementario <strong>availability_xpstore</strong>. Aunque la Tienda XP funciona perfectamente sin él, instalarlo te permitirá restringir automáticamente el acceso a las actividades hasta que los estudiantes compren una "Llave Maestra" (Unlock).';
 $string['gotoactivity'] = 'Ir a la Actividad';
 $string['gotogradebook'] = 'Ir al Libro de Calificaciones';
 $string['gradepoints'] = 'Bonificación (+)';

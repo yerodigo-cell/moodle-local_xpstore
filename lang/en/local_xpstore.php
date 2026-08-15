@@ -76,6 +76,7 @@ $string['error'] = 'Error processing redemption';
 $string['exito'] = 'Redemption successful!';
 $string['full_store'] = 'Full Store';
 $string['global_settings_info'] = 'XP Store is successfully installed! This plugin does not require global configuration. To configure the store, colors, and products, please go to the main page of any course and click the "XP Store Config" button.';
+$string['missing_availability'] = '<strong>Note:</strong> We noticed you haven\'t installed the <strong>availability_xpstore</strong> plugin yet. While the XP Store works without it, installing it will unlock the ability to automatically restrict course activities until a student purchases an "Unlock" product.';
 $string['gotoactivity'] = 'Go to Activity';
 $string['gotogradebook'] = 'Go to Gradebook';
 $string['gradepoints'] = 'Bonus (+)';
