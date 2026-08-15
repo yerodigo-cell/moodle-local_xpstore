@@ -18,7 +18,7 @@
  * Privacy provider.
  *
  * @package    local_xpstore
- * @copyright  2026 Yeison Díaz
+ * @copyright  2026 EduPlugins Studio
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -36,7 +36,7 @@ use core_privacy\local\request\writer;
 /**
  * Privacy API provider for local_xpstore.
  *
- * @copyright  2026 Yeison Díaz
+ * @copyright  2026 EduPlugins Studio
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements

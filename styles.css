@@ -242,6 +242,10 @@ body.pagelayout-embedded,
     background: #f3e8ff;
     color: #7e22ce;
 }
+.local_xpstore-container .bg-u {
+    background: #eef2ff;
+    color: #4f46e5;
+}
 
 .local_xpstore-container .form-control-sm {
     height: 38px;
@@ -1413,6 +1417,10 @@ body.pagelayout-embedded,
 .bg-s {
     background: #e0f7fa;
     color: #00acc1;
+}
+.bg-u {
+    background: #eef2ff;
+    color: #4f46e5;
 }
 
 
