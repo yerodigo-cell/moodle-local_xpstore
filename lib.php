@@ -453,3 +453,65 @@ function local_xpstore_get_navigation_data($courseid, $activetab) {
         'tab_settings' => ($activetab === 'settings'),
     ];
 }
+
+/**
+ * Automates xpstore restriction injection for Unlock rewards.
+ *
+ * @param int $cmid The course module ID.
+ * @param string $productid The product ID to restrict access to (e.g. U123).
+ * @param int $courseid The course ID for cache rebuild.
+ */
+function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid) {
+    global $DB, $CFG;
+    require_once($CFG->dirroot . '/course/lib.php');
+
+    $cm = $DB->get_record('course_modules', ['id' => $cmid]);
+    if (!$cm) {
+        return;
+    }
+
+    $availability = $cm->availability;
+    $newrestriction = ['type' => 'xpstore', 'productid' => (string)$productid];
+
+    if (empty($availability)) {
+        $tree = [
+            'op' => '&',
+            'c' => [$newrestriction],
+            'showc' => [true], // Unlock is typically visible so students know what to buy.
+            'show' => true,
+        ];
+        $availability = json_encode($tree);
+    } else {
+        $tree = json_decode($availability, true);
+        if (!is_array($tree) || !isset($tree['c']) || !isset($tree['showc'])) {
+            // Invalid JSON, overwrite safely.
+            $tree = [
+                'op' => '&',
+                'c' => [$newrestriction],
+                'showc' => [true],
+                'show' => true,
+            ];
+            $availability = json_encode($tree);
+        } else {
+            // Check if this specific xpstore restriction already exists.
+            $exists = false;
+            foreach ($tree['c'] as $cond) {
+                if (isset($cond['type']) && $cond['type'] === 'xpstore' && isset($cond['productid']) && $cond['productid'] == $productid) {
+                    $exists = true;
+                    break;
+                }
+            }
+            if (!$exists) {
+                $tree['c'][] = $newrestriction;
+                $tree['showc'][] = true; // Add 'eye open'.
+                $tree['show'] = true; // Ensure root show is true.
+                $availability = json_encode($tree);
+            }
+        }
+    }
+
+    if ($cm->availability !== $availability) {
+        $DB->set_field('course_modules', 'availability', $availability, ['id' => $cmid]);
+        rebuild_course_cache($courseid, true);
+    }
+}

@@ -86,6 +86,10 @@ if ($action === 'add' && confirm_sesskey()) {
 
         // Auto-apply group restriction to the activity.
         local_xpstore_apply_special_restriction($cmid, $groupid, $courseid);
+    } else if ($tipo === 'U') {
+        // Auto-apply xpstore restriction to the activity.
+        $productid = $tipo . $cmid;
+        local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid);
     }
     redirect($url, get_string('productadded', 'local_xpstore'));
 }
@@ -137,6 +141,10 @@ if ($action === 'edit_save' && confirm_sesskey()) {
 
         // Auto-apply group restriction to the updated activity.
         local_xpstore_apply_special_restriction($cmid, $groupid, $courseid);
+    } else if ($tipo === 'U') {
+        // Auto-apply xpstore restriction to the updated activity.
+        $productid = $tipo . $cmid;
+        local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid);
     }
 
     redirect($url, get_string('productupdated', 'local_xpstore'));
