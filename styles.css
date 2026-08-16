@@ -1686,6 +1686,14 @@ body.pagelayout-embedded,
     display: flex;
     align-items: center;
     gap: 8px;
+    background-color: #0365c9 !important;
+    border-color: #0365c9 !important;
+    color: #fff !important;
+}
+.local_xpstore-container .search-btn:hover {
+    background-color: #0252a3 !important;
+    border-color: #0252a3 !important;
+    color: #fff !important;
 }
 
 /* Report Page User Stats */
