@@ -142,7 +142,7 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
         if ($type !== 'M') {
             $cm = $DB->get_record('course_modules', ['id' => $cmid], '*', MUST_EXIST);
         }
-        $deadline = time() + (24 * 60 * 60);
+        $deadline = time() + (3 * 24 * 60 * 60);
 
         // If course ID was not sent, we try to get it from the Course Module.
         if (!$courseid && $cm) {
