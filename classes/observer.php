@@ -171,8 +171,10 @@ class observer {
 
                                     $newreqid = null;
                                     foreach ($newmodinfo->get_cms() as $newreqcmcand) {
-                                        if ($newreqcmcand->name === $oldreqname && 
-                                                $newreqcmcand->modname === $oldreqmodname) {
+                                        if (
+                                            $newreqcmcand->name === $oldreqname &&
+                                            $newreqcmcand->modname === $oldreqmodname
+                                        ) {
                                             $newreqid = $newreqcmcand->id;
                                             break;
                                         }
@@ -190,8 +192,8 @@ class observer {
 
                             // Replace cmid=OLD in all activities so individual widgets keep working.
                             // We match either tipo=T...cmid=C or cmid=C...tipo=T to avoid false overlap (especially for grade items).
-                            $cmidpattern = '/([?&]|&amp;)(tipo=' . preg_quote($tipochar) . 
-                                    '([&]|&amp;)cmid=' . preg_quote($oldcmid) . '|cmid=' . preg_quote($oldcmid) . 
+                            $cmidpattern = '/([?&]|&amp;)(tipo=' . preg_quote($tipochar) .
+                                    '([&]|&amp;)cmid=' . preg_quote($oldcmid) . '|cmid=' . preg_quote($oldcmid) .
                                     '([&]|&amp;)tipo=' . preg_quote($tipochar) . ')([&"\']|&amp;)/';
                             // Normalize to tipo=T&cmid=NEW (using the matched ampersand style).
                             $cmidreplacement = function ($matches) use ($tipochar, $newcmid) {
@@ -205,10 +207,15 @@ class observer {
                                 $newproductid = 'U' . $newcmid;
                                 $cmrecords = $DB->get_records('course_modules', ['course' => $newcourseid]);
                                 foreach ($cmrecords as $cmrec) {
-                                    if (!empty($cmrec->availability) && 
-                                            strpos($cmrec->availability, '"' . $oldproductid . '"') !== false) {
-                                        $newavail = str_replace('"' . $oldproductid . '"', 
-                                                '"' . $newproductid . '"', $cmrec->availability);
+                                    if (
+                                        !empty($cmrec->availability) &&
+                                        strpos($cmrec->availability, '"' . $oldproductid . '"') !== false
+                                    ) {
+                                        $newavail = str_replace(
+                                            '"' . $oldproductid . '"',
+                                            '"' . $newproductid . '"',
+                                            $cmrec->availability
+                                        );
                                         if ($newavail !== $cmrec->availability) {
                                             $cmrec->availability = $newavail;
                                             $DB->update_record('course_modules', $cmrec);
@@ -232,8 +239,11 @@ class observer {
                                         }
 
                                         if (isset($record->content) && strpos($record->content, 'cmid=' . $oldcmid) !== false) {
-                                            $newcontent = preg_replace_callback($cmidpattern, $cmidreplacement, 
-                                                    $record->content);
+                                            $newcontent = preg_replace_callback(
+                                                $cmidpattern,
+                                                $cmidreplacement,
+                                                $record->content
+                                            );
                                             if ($newcontent !== $record->content) {
                                                 $record->content = $newcontent;
                                                 $updated = true;
