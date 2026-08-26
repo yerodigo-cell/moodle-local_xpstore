@@ -123,29 +123,94 @@ class observer {
                     if (count($parts) >= 2) {
                         $oldcmid = (int)$parts[0];
 
-                        // Find the old cm's name and modname.
-                        if (isset($oldmodinfo->cms[$oldcmid])) {
-                            $oldcm = $oldmodinfo->cms[$oldcmid];
-                            $oldname = $oldcm->name;
-                            $oldmodname = $oldcm->modname;
+                        // Search for the corresponding cm or grade item in the new course.
+                        $newcmid = null;
 
-                            // Search for the corresponding cm in the new course.
-                            $newcmid = null;
-                            foreach ($newmodinfo->get_cms() as $newcm) {
-                                if ($newcm->name === $oldname && $newcm->modname === $oldmodname) {
-                                    $newcmid = $newcm->id;
-                                    break;
+                        if ($tipochar === 'M') {
+                            // It's a manual grade item, not a course module.
+                            $olditemname = $DB->get_field('grade_items', 'itemname', ['id' => $oldcmid]);
+                            if ($olditemname) {
+                                // Find the new grade item by name in the new course.
+                                $newitemid = $DB->get_field('grade_items', 'id', [
+                                    'courseid' => $newcourseid,
+                                    'itemtype' => 'manual',
+                                    'itemname' => $olditemname
+                                ]);
+                                if ($newitemid) {
+                                    $newcmid = $newitemid;
                                 }
                             }
+                        } else {
+                            // Find the old cm's name and modname.
+                            if (isset($oldmodinfo->cms[$oldcmid])) {
+                                $oldcm = $oldmodinfo->cms[$oldcmid];
+                                $oldname = $oldcm->name;
+                                $oldmodname = $oldcm->modname;
+
+                                // Search for the corresponding cm in the new course.
+                                foreach ($newmodinfo->get_cms() as $newcm) {
+                                    if ($newcm->name === $oldname && $newcm->modname === $oldmodname) {
+                                        $newcmid = $newcm->id;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
 
                             // If we found it, update the ID in the catalog string and in the widget URLs.
                             if ($newcmid) {
                                 $parts[0] = $newcmid;
+
+                                // Also map the requirement (requisito) ID if it exists.
+                                if (isset($parts[6]) && (int)$parts[6] > 0) {
+                                    $oldreqid = (int)$parts[6];
+                                    if (isset($oldmodinfo->cms[$oldreqid])) {
+                                        $oldreqcm = $oldmodinfo->cms[$oldreqid];
+                                        $oldreqname = $oldreqcm->name;
+                                        $oldreqmodname = $oldreqcm->modname;
+
+                                        $newreqid = null;
+                                        foreach ($newmodinfo->get_cms() as $newreqcm_cand) {
+                                            if ($newreqcm_cand->name === $oldreqname && $newreqcm_cand->modname === $oldreqmodname) {
+                                                $newreqid = $newreqcm_cand->id;
+                                                break;
+                                            }
+                                        }
+
+                                        if ($newreqid) {
+                                            $parts[6] = $newreqid;
+                                        } else {
+                                            $parts[6] = 0; // Reset if not found
+                                        }
+                                    }
+                                }
+
                                 $newcatalogparts[] = $tipochar . implode(':', $parts);
 
                                 // Replace cmid=OLD in all activities so individual widgets keep working.
-                                $cmidpattern = '/([?&]|&amp;)cmid=' . $oldcmid . '([&"\']|&amp;)/';
-                                $cmidreplacement = '${1}cmid=' . $newcmid . '${2}';
+                                // We match either tipo=T...cmid=C or cmid=C...tipo=T to avoid false overlap (especially for grade items).
+                                $cmidpattern = '/([?&]|&amp;)(tipo=' . preg_quote($tipochar) . '([&]|&amp;)cmid=' . preg_quote($oldcmid) . '|cmid=' . preg_quote($oldcmid) . '([&]|&amp;)tipo=' . preg_quote($tipochar) . ')([&"\']|&amp;)/';
+                                // Normalize to tipo=T&cmid=NEW (using the matched ampersand style).
+                                $cmidreplacement = function($matches) use ($tipochar, $newcmid) {
+                                    $amp = isset($matches[3]) && $matches[3] ? $matches[3] : (isset($matches[4]) ? $matches[4] : '&');
+                                    return $matches[1] . 'tipo=' . $tipochar . $amp . 'cmid=' . $newcmid . $matches[5];
+                                };
+
+                                // Fix 'Unlock' availability restrictions that contain U{oldcmid}.
+                                if ($tipochar === 'U') {
+                                    $oldproductid = 'U' . $oldcmid;
+                                    $newproductid = 'U' . $newcmid;
+                                    $cmrecords = $DB->get_records('course_modules', ['course' => $newcourseid]);
+                                    foreach ($cmrecords as $cmrec) {
+                                        if (!empty($cmrec->availability) && strpos($cmrec->availability, '"' . $oldproductid . '"') !== false) {
+                                            $newavail = str_replace('"' . $oldproductid . '"', '"' . $newproductid . '"', $cmrec->availability);
+                                            if ($newavail !== $cmrec->availability) {
+                                                $cmrec->availability = $newavail;
+                                                $DB->update_record('course_modules', $cmrec);
+                                            }
+                                        }
+                                    }
+                                }
 
                                 foreach ($modnames as $modname) {
                                     if ($DB->get_manager()->table_exists($modname)) {
@@ -154,7 +219,7 @@ class observer {
                                             $updated = false;
 
                                             if (isset($record->intro) && strpos($record->intro, 'cmid=' . $oldcmid) !== false) {
-                                                $newintro = preg_replace($cmidpattern, $cmidreplacement, $record->intro);
+                                                $newintro = preg_replace_callback($cmidpattern, $cmidreplacement, $record->intro);
                                                 if ($newintro !== $record->intro) {
                                                     $record->intro = $newintro;
                                                     $updated = true;
@@ -162,7 +227,7 @@ class observer {
                                             }
 
                                             if (isset($record->content) && strpos($record->content, 'cmid=' . $oldcmid) !== false) {
-                                                $newcontent = preg_replace($cmidpattern, $cmidreplacement, $record->content);
+                                                $newcontent = preg_replace_callback($cmidpattern, $cmidreplacement, $record->content);
                                                 if ($newcontent !== $record->content) {
                                                     $record->content = $newcontent;
                                                     $updated = true;
@@ -173,13 +238,11 @@ class observer {
                                                 $DB->update_record($modname, $record);
                                             }
                                         }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
+                                    } // end if table exists
+                                } // end foreach modnames
+                            } // end if newcmid
+                    } // end if count parts
+                } // end foreach items
                 if (!empty($newcatalogparts)) {
                     $newcatalog = implode(',', $newcatalogparts);
                     set_config('catalog_course_' . $newcourseid, $newcatalog, 'local_xpstore');
