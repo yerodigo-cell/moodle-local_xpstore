@@ -191,7 +191,8 @@ class observer {
                             $newcatalogparts[] = $tipochar . implode(':', $parts);
 
                             // Replace cmid=OLD in all activities so individual widgets keep working.
-                            // We match either tipo=T...cmid=C or cmid=C...tipo=T to avoid false overlap (especially for grade items).
+                            // We match either tipo=T...cmid=C or cmid=C...tipo=T to avoid false overlap
+                            // (especially for grade items).
                             $cmidpattern = '/([?&]|&amp;)(tipo=' . preg_quote($tipochar) .
                                     '([&]|&amp;)cmid=' . preg_quote($oldcmid) . '|cmid=' . preg_quote($oldcmid) .
                                     '([&]|&amp;)tipo=' . preg_quote($tipochar) . ')([&"\']|&amp;)/';
