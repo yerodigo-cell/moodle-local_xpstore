@@ -114,6 +114,7 @@ $string['limitzero'] = '0 = ∞ (Sınırsız)';
 $string['linkedactivity'] = 'Bağlı Etkinlik';
 $string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = 'Menü: Gizli';
+$string['menuvisibility'] = 'Menu visibility';
 $string['menuvisibility_help'] = 'Öğrenciler için kurs gezinme menüsündeki mağaza doğrudan erişim bağlantısını etkinleştirir veya devre dışı bırakır. Ödül satın alırken ses efektleri ve animasyonlar içerdiğinden daha sürükleyici bir deneyim sağlaması nedeniyle bunu gizli tutmanızı ve bunun yerine Mağaza Widget\'larını kullanmanızı öneririz.';
 $string['menuvisible'] = 'Menü: Görünür';
 $string['mockup_sampleitem'] = 'Örnek Öğe';

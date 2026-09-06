@@ -114,6 +114,7 @@ $string['limitzero'] = '0 = ∞ (Unendlich)';
 $string['linkedactivity'] = 'Verknüpfte Aktivität';
 $string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = 'Menü: Verborgen';
+$string['menuvisibility'] = 'Menu visibility';
 $string['menuvisibility_help'] = 'Aktiviert oder deaktiviert den direkten Zugangslink zum Shop im Kursnavigationsmenü für die Lernenden. Wir empfehlen, ihn verborgen zu lassen und stattdessen Shop-Widgets zu verwenden, da diese ein immersiveres Erlebnis bieten (einschließlich Soundeffekten und Animationen beim Kauf von Belohnungen).';
 $string['menuvisible'] = 'Menü: Sichtbar';
 $string['mockup_sampleitem'] = 'Musterartikel';

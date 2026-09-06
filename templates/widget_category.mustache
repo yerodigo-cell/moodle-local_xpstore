@@ -96,6 +96,11 @@
                                     {{str_specialcontent}}
                                 </div>
                             {{/is_special}}
+                            {{#is_unlock}}
+                                <div class="grade-badge" style="background: var(--cb); color: white;">
+                                    {{str_unlockcontent}}
+                                </div>
+                            {{/is_unlock}}
 
                             <div class="font-weight-bold" style="font-size: 0.95rem; line-height: 1.2; margin-bottom: 4px;">
                                 {{displayname}}

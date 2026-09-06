@@ -72,6 +72,11 @@
                         {{str_specialcontent}}
                     </div>
                 {{/is_special}}
+                {{#is_unlock}}
+                    <div class="w-badge" style="background: var(--cb); color: white;">
+                        {{str_unlockcontent}}
+                    </div>
+                {{/is_unlock}}
 
                 <div class="w-title">
                     {{displayname}}

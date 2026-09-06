@@ -186,7 +186,8 @@ foreach ($todoslosproductos as $item) {
             $limitealcanzado = ($limite > 0 && $comprasactuales >= $limite);
 
             $isbonus = (($tipochar == 'G' || $tipochar == 'M') && !empty($boost) && $boost != '0');
-            $isspecial = ($tipochar == 'S' || $tipochar == 'U');
+            $isspecial = ($tipochar == 'S');
+            $isunlock = ($tipochar == 'U');
 
             $boughtthis = ($status === 'success' && $boughtcmid == $cid && $tipocompra == $tipochar);
             $gotogradebook = ($boughtthis && ($tipochar == 'G' || $tipochar == 'M'));
@@ -237,6 +238,7 @@ foreach ($todoslosproductos as $item) {
                 'boost' => $boost,
                 'is_bonus' => $isbonus,
                 'is_special' => $isspecial,
+                'is_unlock' => $isunlock,
                 'limite' => $limite,
                 'has_limit' => ($limite > 0),
                 'comprasactuales' => $comprasactuales,
@@ -251,6 +253,7 @@ foreach ($todoslosproductos as $item) {
                 'btntext' => $btntext,
                 'str_points' => get_string('points', 'local_xpstore'),
                 'str_specialcontent' => get_string('specialcontent', 'local_xpstore'),
+                'str_unlockcontent' => get_string('type_u', 'local_xpstore'),
                 'str_redemptions_count' => get_string('redemptions_count', 'local_xpstore'),
                 'str_gotoactivity' => get_string('gotoactivity', 'local_xpstore'),
                 'str_gotogradebook' => get_string('gotogradebook', 'local_xpstore'),

@@ -114,6 +114,7 @@ $string['limitzero'] = '0 = ∞ (Бесконечно)';
 $string['linkedactivity'] = 'Связанный элемент';
 $string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = 'Меню: Скрыто';
+$string['menuvisibility'] = 'Menu visibility';
 $string['menuvisibility_help'] = 'Включает или отключает прямую ссылку на магазин в навигационном меню курса для студентов. Мы рекомендуем скрыть ее и использовать виджеты магазина, так как они обеспечивают более захватывающий опыт (включая звуковые эффекты и анимацию при покупке наград).';
 $string['menuvisible'] = 'Меню: Видимо';
 $string['mockup_sampleitem'] = 'Образец товара';

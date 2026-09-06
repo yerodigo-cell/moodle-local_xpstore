@@ -114,6 +114,7 @@ $string['limitzero'] = '0 = ∞ (Neskončno)';
 $string['linkedactivity'] = 'Povezana dejavnost';
 $string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = 'Meni: Skrit';
+$string['menuvisibility'] = 'Menu visibility';
 $string['menuvisibility_help'] = 'Omogoči ali onemogoči neposredno povezavo za dostop do trgovine v navigacijskem meniju tečaja za študente. Priporočamo, da jo skrijete in namesto tega uporabite pripomočke trgovine, saj zagotavljajo bolj poglobljeno izkušnjo (vključno z zvočnimi učinki in animacijami pri nakupu nagrad).';
 $string['menuvisible'] = 'Meni: Viden';
 $string['mockup_sampleitem'] = 'Primer elementa';

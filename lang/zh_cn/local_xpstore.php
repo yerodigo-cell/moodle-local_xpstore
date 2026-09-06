@@ -114,6 +114,7 @@ $string['limitzero'] = '0 = ∞ (无限制)';
 $string['linkedactivity'] = '关联活动';
 $string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = '菜单：已隐藏';
+$string['menuvisibility'] = 'Menu visibility';
 $string['menuvisibility_help'] = '为学生启用或禁用课程导航菜单中商店的直接访问链接。我们建议将其隐藏并使用商店小工具代替，因为它们提供更加沉浸式的体验（包括购买奖励时的声音效果和动画）。';
 $string['menuvisible'] = '菜单：可见';
 $string['mockup_sampleitem'] = '商品示例';

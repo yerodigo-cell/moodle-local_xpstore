@@ -175,6 +175,7 @@ $cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: $cps
 
 $isbonus = (($producto['tipo'] == 'G' || $producto['tipo'] == 'M') && $producto['boost'] != '0');
 $isspecial = ($producto['tipo'] == 'S');
+$isunlock = ($producto['tipo'] == 'U');
 $statussuccess = ($status === 'success');
 
 $desturl = null;
@@ -233,6 +234,7 @@ $templatedata = [
     'is_bonus' => $isbonus,
     'boost' => $producto['boost'],
     'is_special' => $isspecial,
+    'is_unlock' => $isunlock,
     'displayname' => $producto['n_custom'] ?: $producto['n_real'],
     'n_real' => $producto['n_real'],
     'desturl' => $desturl,
@@ -252,6 +254,7 @@ $templatedata = [
     'str_widgetunlockeddesc' => get_string('widgetunlockeddesc', 'local_xpstore'),
     'str_points' => get_string('points', 'local_xpstore'),
     'str_specialcontent' => get_string('specialcontent', 'local_xpstore'),
+    'str_unlockcontent' => get_string('type_u', 'local_xpstore'),
     'str_goto_dest' => ($producto['tipo'] == 'G' || $producto['tipo'] == 'M') ?
         get_string('gotogradebook', 'local_xpstore') :
         get_string('gotoactivity', 'local_xpstore'),

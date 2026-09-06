@@ -23,6 +23,7 @@ The store allows teachers to configure different types of benefits based on stan
 * 🔓 **Special:** Unlocks exclusive content or access to VIP areas within the course. Upon purchase, the plugin automatically creates a dedicated Moodle group for the target activity and seamlessly assigns the student to it.
   * _Setup Tip:_ The teacher only needs to set up the reward in the store. The plugin handles the group creation and student enrollment automatically under the hood!
   * **_Important:_** Leave the label unchanged when editing this reward. Changing it will create more than one group, rendering the reward inaccessible to students.
+* 🔑 **Unlock:** Works with the XP Availability plugin. Students can spend XP to unlock access to specific course modules or activities. Requires the [XP Store Availability](https://marketplace.moodle.com/plugins/4040) plugin to be installed.
 ---
 
 ## Store Configuration

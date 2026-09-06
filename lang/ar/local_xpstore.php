@@ -114,6 +114,7 @@ $string['limitzero'] = '0 = ∞ (غير محدود)';
 $string['linkedactivity'] = 'النشاط المرتبط';
 $string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = 'القائمة: مخفية';
+$string['menuvisibility'] = 'Menu visibility';
 $string['menuvisibility_help'] = 'يُمكّن أو يُعطّل رابط الوصول المباشر إلى المتجر في قائمة التنقل الخاصة بالدورة التدريبية للطلاب. نوصي بإبقائه مخفيًا واستخدام أدوات المتجر (Widgets) بدلاً من ذلك، حيث توفر تجربة غامرة أكثر (بما في ذلك المؤثرات الصوتية والرسوم المتحركة عند شراء المكافآت).';
 $string['menuvisible'] = 'القائمة: مرئية';
 $string['mockup_sampleitem'] = 'عنصر تجريبي';

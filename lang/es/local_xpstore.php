@@ -116,6 +116,7 @@ $string['limitzero'] = '0 = ∞ (Infinito)';
 $string['linkedactivity'] = 'Actividad Vinculada';
 $string['manualgradeitem'] = '[CALIFICACIÓN MANUAL] ';
 $string['menuhidden'] = 'Menú: Oculto';
+$string['menuvisibility'] = 'Menu visibility';
 $string['menuvisibility_help'] = 'Activa o desactiva el acceso directo a la tienda en el menú de navegación lateral del curso para los estudiantes. Te recomendamos mantenerlo oculto y utilizar Widgets en su lugar, ya que ofrecen una experiencia mucho más inmersiva (incluyendo animaciones y efectos de sonido al obtener recompensas).';
 $string['menuvisible'] = 'Menú: Visible';
 $string['missing_availability'] = '<strong>Sugerencia:</strong> Hemos notado que aún no has instalado el plugin complementario <strong>availability_xpstore</strong>. Aunque la Tienda XP funciona perfectamente sin él, instalarlo te permitirá restringir automáticamente el acceso a las actividades hasta que los estudiantes compren una "Llave Maestra" (Unlock).';

@@ -116,6 +116,7 @@ $string['limitzero'] = '0 = ∞ (Infinite)';
 $string['linkedactivity'] = 'Linked Activity';
 $string['manualgradeitem'] = '[GRADE ITEM] ';
 $string['menuhidden'] = 'Menu: Hidden';
+$string['menuvisibility'] = 'Menu visibility';
 $string['menuvisibility_help'] = 'Enables or disables the direct access link to the store in the course navigation menu for students. We recommend keeping it hidden and using Store Widgets instead, as they provide a more immersive experience (including sound effects and animations when purchasing rewards).';
 $string['menuvisible'] = 'Menu: Visible';
 $string['missing_availability'] = '<strong>Note:</strong> We noticed you haven\'t installed the <strong>availability_xpstore</strong> plugin yet. While the XP Store works without it, installing it will unlock the ability to automatically restrict course activities until a student purchases an "Unlock" product.';
