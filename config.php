@@ -482,6 +482,11 @@ $iframebalance = '<iframe src="' . $urlbalancew . '" width="100%" height="180" '
     'style="border: none; overflow: hidden;" scrolling="no"></iframe>';
 
 
+$menuvisible = get_config('local_xpstore', 'show_menu_course_' . $courseid);
+if ($menuvisible === false) {
+    $menuvisible = '0';
+}
+
 $activetab = ($tab === 'settings' || in_array($action, ['savesettings', 'resetcolors', 'togglemenu'])) ? 'settings' : 'products';
 
 $navdata = local_xpstore_get_navigation_data($courseid, $activetab);
