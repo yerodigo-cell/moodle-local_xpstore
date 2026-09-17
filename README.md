@@ -2,6 +2,8 @@
 
 A gamification plugin for Moodle that transforms the learning experience by allowing students to redeem their experience points (earned through `Level Up XP`) for rewards, grade boosts, or special content within each course.
 
+_(**Note:** Independently developed, not affiliated with or endorsed by Level Up)._
+
 ## Key Features
 
 * **Independent Catalogs per Course:** Each course has its own isolated configuration, product catalog, and color palette.
