@@ -392,7 +392,7 @@ foreach ($manualitems as $item) {
 
     // In Moodle 4, i/manual_item is often black/grey, so we just show it directly.
     $iconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; margin-right: 8px; vertical-align: middle;">' .
-                '<img src="' . $iconurl . '" class="icon" alt="" style="width: 24px; height: 24px;">' .
+                '<img src="' . $iconurl . '" class="icon" alt="" style="width: 16px; height: 16px;">' .
                 '</span>';
     // Remove the $manualprefix (e.g. "[GRADE ITEM] ").
     $namehtml = $iconhtml . $item->itemname;
@@ -510,7 +510,7 @@ if (!empty($configraw)) {
                 try {
                     $iconurl = $OUTPUT->image_url('i/manual_item')->out();
                     $iconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; margin-right: 8px; vertical-align: middle;">' .
-                                '<img src="' . $iconurl . '" class="icon" alt="" style="width: 24px; height: 24px;">' .
+                                '<img src="' . $iconurl . '" class="icon" alt="" style="width: 16px; height: 16px;">' .
                                 '</span>';
                 } catch (Exception $e) {
                     $iconhtml = '';
