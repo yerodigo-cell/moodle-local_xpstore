@@ -349,10 +349,9 @@ $getcmiconhtml = function ($cm) {
         }
 
         $bgcolor = isset($purposecolors[$purpose]) ? $purposecolors[$purpose] : $purposecolors['default'];
-        $bglight = $bgcolor . '26'; // 15% opacity.
 
         return '<span class="xpstore-icon-container" ' .
-               'style="background-color: ' . $bglight . '; width: 28px; height: 28px; min-width: 28px; display: inline-flex; ' .
+               'style="width: 28px; height: 28px; min-width: 28px; display: inline-flex; ' .
                'align-items: center; justify-content: center; border-radius: 6px; margin-right: 8px; ' .
                'vertical-align: middle; overflow: hidden;">' .
                '<span style="background-color: ' . $bgcolor . '; width: 26px; height: 26px; min-width: 26px; min-height: 26px; flex-shrink: 0; ' .
