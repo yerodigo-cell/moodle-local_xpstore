@@ -80,6 +80,7 @@ $string['global_settings_info'] = 'XP Store is successfully installed! This plug
 $string['gotoactivity'] = 'Go to Activity';
 $string['gotogradebook'] = 'Go to Gradebook';
 $string['gradepoints'] = 'Bonus (+)';
+$string['hiddenwhenlocked'] = 'Hidden when locked';
 $string['hiddenwhenlocked_help'] = 'Choose whether the activity remains visible with a Restricted label or is completely hidden from the course page before a student buys it.';
 $string['hide_menu_tooltip'] = 'Hide store from course menu';
 $string['hideactivity'] = 'Hide activity in course?';

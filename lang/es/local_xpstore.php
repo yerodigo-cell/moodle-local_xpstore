@@ -80,6 +80,7 @@ $string['global_settings_info'] = '¡XP Store está instalado correctamente! Est
 $string['gotoactivity'] = 'Ir a la Actividad';
 $string['gotogradebook'] = 'Ir al Libro de Calificaciones';
 $string['gradepoints'] = 'Bonificación (+)';
+$string['hiddenwhenlocked'] = 'Oculto cuando está bloqueado';
 $string['hiddenwhenlocked_help'] = 'Elige si la actividad debe permanecer visible con una etiqueta de Restringido, o si debe ocultarse completamente de la página del curso antes de que el estudiante la compre.';
 $string['hide_menu_tooltip'] = 'Ocultar tienda del menú del curso';
 $string['hideactivity'] = '¿Ocultar actividad en el curso?';
