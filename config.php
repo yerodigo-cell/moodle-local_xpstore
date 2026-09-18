@@ -309,7 +309,7 @@ global $OUTPUT;
 $getcmiconhtml = function ($cm) {
     $iconurl = $cm->get_icon_url()->out();
     if (in_array($cm->modname, ['subsection', 'hvp', 'h5pactivity'])) {
-        return '<img src="' . $iconurl . '" class="activityicon" alt="" ' .
+        return '<img src="' . $iconurl . '" class="xpstore-icon" alt="" ' .
                'style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">';
     } else {
         $purpose = 'default';
@@ -351,16 +351,11 @@ $getcmiconhtml = function ($cm) {
         $bgcolor = isset($purposecolors[$purpose]) ? $purposecolors[$purpose] : $purposecolors['default'];
         $bglight = $bgcolor . '26'; // 15% opacity.
 
-        return '<span class="activityiconcontainer courseicon" ' .
-               'style="background-color: ' . $bglight . '; width: 28px; height: 28px; display: inline-flex; ' .
+        return '<span class="xpstore-icon-container" ' .
+               'style="background-color: ' . $bglight . '; width: 28px; height: 28px; min-width: 28px; display: inline-flex; ' .
                'align-items: center; justify-content: center; border-radius: 6px; margin-right: 8px; ' .
-               'vertical-align: middle; overflow: visible;">' .
-               '<span style="background-color: ' . $bgcolor . '; width: 24px; height: 24px; ' .
-               'transform: scale(1.5); ' .
-               '-webkit-mask-image: url(' . $iconurl . '); -webkit-mask-size: contain; ' .
-               '-webkit-mask-position: center; -webkit-mask-repeat: no-repeat; ' .
-               'mask-image: url(' . $iconurl . '); mask-size: contain; mask-position: center; ' .
-               'mask-repeat: no-repeat;"></span></span>';
+               'vertical-align: middle; overflow: hidden;">' .
+               '<span style="background-color: ' . $bgcolor . '; width: 36px; height: 36px; min-width: 36px; min-height: 36px; flex-shrink: 0; -webkit-mask-image: url(' . $iconurl . '); -webkit-mask-size: 100%; -webkit-mask-position: center; -webkit-mask-repeat: no-repeat; mask-image: url(' . $iconurl . '); mask-size: 100%; mask-position: center; mask-repeat: no-repeat;"></span></span>';
     }
 };
 
