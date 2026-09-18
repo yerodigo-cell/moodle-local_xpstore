@@ -355,10 +355,11 @@ $getcmiconhtml = function ($cm) {
                'style="background-color: ' . $bglight . '; width: 28px; height: 28px; display: inline-flex; ' .
                'align-items: center; justify-content: center; border-radius: 6px; margin-right: 8px; ' .
                'vertical-align: middle;">' .
-               '<span style="background-color: ' . $bgcolor . '; width: 16px; height: 16px; ' .
+               '<span style="background-color: ' . $bgcolor . '; width: 24px; height: 24px; ' .
                '-webkit-mask-image: url(' . $iconurl . '); -webkit-mask-size: contain; ' .
-               '-webkit-mask-repeat: no-repeat; mask-image: url(' . $iconurl . '); ' .
-               'mask-size: contain; mask-repeat: no-repeat;"></span></span>';
+               '-webkit-mask-position: center; -webkit-mask-repeat: no-repeat; ' .
+               'mask-image: url(' . $iconurl . '); mask-size: contain; mask-position: center; ' .
+               'mask-repeat: no-repeat;"></span></span>';
     }
 };
 
