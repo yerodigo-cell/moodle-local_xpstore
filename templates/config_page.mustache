@@ -45,7 +45,7 @@
             <div class="form-box {{#isediting}}editing{{/isediting}}">
         <h5 class="mb-3 font-weight-bold d-flex align-items-center">
             {{#isediting}}
-                <i class="fa fa-pencil mr-2 text-warning"></i> {{str_edit}}
+                <i class="fa fa-pencil mr-2 text-success"></i> {{str_edit}}
             {{/isediting}}
             {{^isediting}}
                 {{str_addproduct}}
@@ -64,41 +64,77 @@
                     {{str_type}}
                     {{{help_type}}}
                 </label>
-                <select name="tipo" id="type_select" class="form-control form-control-sm" required>
+                <div class="dropdown custom-select-dropdown w-100" style="position: relative;">
+                    <button class="form-control form-control-sm text-left d-flex justify-content-between align-items-center bg-white" type="button" id="typeDropdownMenuButton" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border: 1px solid #ced4da; box-shadow: none;">
+                        <span id="selected-type-text">
+                            {{#type_options}}
+                                {{#selected}}<span class="badge-tipo bg-{{valuelower}}">{{label}}</span>{{/selected}}
+                            {{/type_options}}
+                            {{^etipo}}<span class="text-muted">{{str_choosetype}}</span>{{/etipo}}
+                        </span>
+                        <i class="fa fa-caret-down text-muted"></i>
+                    </button>
+                    <div class="dropdown-menu w-100 p-1 shadow-sm" aria-labelledby="typeDropdownMenuButton">
+                        {{#type_options}}
+                            <a class="dropdown-item py-2" href="#" onclick="document.getElementById('type_select').value='{{value}}'; document.getElementById('selected-type-text').innerHTML='<span class=\'badge-tipo bg-{{valuelower}}\'>{{label}}</span>'; document.getElementById('type_select').dispatchEvent(new Event('change')); return false;">
+                                <span class="badge-tipo bg-{{valuelower}}">{{label}}</span>
+                            </a>
+                        {{/type_options}}
+                    </div>
+                    <select name="tipo" id="type_select" required style="opacity:0; position:absolute; z-index:-1; width:0; height:0; top: 50%; left: 50%; pointer-events:none;">
                     <option value="" disabled {{^etipo}}selected{{/etipo}}>{{str_choosetype}}</option>
                     {{#type_options}}
                         <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
                     {{/type_options}}
                 </select>
+                </div>
             </div>
 
             <div class="col-12 col-md-6 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-block">
                     {{str_activity}}
                 </label>
-                <select name="cmid" id="activity_select" class="form-control form-control-sm" required>
-                    <option value="" disabled {{^ecmid}}selected{{/ecmid}}>{{str_chooseactivity}}</option>
-                    {{#activity_options}}
-                        <option value="{{id}}" data-modname="{{modname}}" {{#selected}}selected{{/selected}}>{{{name}}}</option>
-                    {{/activity_options}}
-                </select>
+                <div class="dropdown custom-select-dropdown w-100" style="position: relative;">
+                    <button class="form-control form-control-sm text-left d-flex justify-content-between align-items-center bg-white" type="button" id="activityDropdownMenuButton" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border: 1px solid #ced4da; box-shadow: none;">
+                        <span id="selected-activity-text" class="text-truncate" style="max-width: 90%;">
+                            {{#activity_options}}
+                                {{#selected}}{{{name}}}{{/selected}}
+                            {{/activity_options}}
+                            {{^ecmid}}<span class="text-muted">{{str_chooseactivity}}</span>{{/ecmid}}
+                        </span>
+                        <i class="fa fa-caret-down text-muted"></i>
+                    </button>
+                    <div class="dropdown-menu w-100 p-1 shadow-sm" aria-labelledby="activityDropdownMenuButton" id="activity_dropdown_menu" style="max-height: 300px; overflow-y: auto;">
+                        {{#activity_options}}
+                            <a class="dropdown-item py-2 text-truncate" href="#" onclick="document.getElementById('activity_select').value='{{id}}'; document.getElementById('selected-activity-text').innerHTML=this.innerHTML; document.getElementById('activity_select').dispatchEvent(new Event('change')); return false;">
+                                {{{name}}}
+                            </a>
+                        {{/activity_options}}
+                    </div>
+                    <select name="cmid" id="activity_select" class="form-control form-control-sm" required style="opacity:0; position:absolute; z-index:-1; width:0; height:0; top: 50%; left: 50%; pointer-events:none;">
+                        <option value="" disabled {{^ecmid}}selected{{/ecmid}}>{{str_chooseactivity}}</option>
+                        {{#activity_options}}
+                            <option value="{{id}}" data-modname="{{modname}}" data-html="{{name}}" {{#selected}}selected{{/selected}}>{{{name}}}</option>
+                        {{/activity_options}}
+                    </select>
+                </div>
             </div>
 
             <div class="col-12 col-md-6 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_cost}}</label>
-                <input type="number" name="costo" class="form-control form-control-sm" required value="{{ecosto}}">
+                <input type="number" name="costo" class="form-control form-control-sm bg-white" required value="{{ecosto}}" style="border: 1px solid #ced4da; box-shadow: none;">
             </div>
 
             <div class="col-12 col-md-6 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_limit}}</label>
-                <input type="number" name="limite" min="0" class="form-control form-control-sm" placeholder="{{str_limitzero}}" value="{{elimite}}">
+                <input type="number" name="limite" min="0" class="form-control form-control-sm bg-white" placeholder="{{str_limitzero}}" value="{{elimite}}" style="border: 1px solid #ced4da; box-shadow: none;">
             </div>
 
 
 
             <div class="col-12 col-md-6 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-category">{{str_category}}</label>
-                <input type="text" name="categoria" class="form-control form-control-sm" value="{{ecat}}">
+                <input type="text" name="categoria" class="form-control form-control-sm bg-white" value="{{ecat}}" style="border: 1px solid #ced4da; box-shadow: none;">
             </div>
 
             <div class="col-12 col-md-6 mb-3">
@@ -106,12 +142,12 @@
                     {{str_label}}
                     {{{help_label}}}
                 </label>
-                <input type="text" name="nombre" class="form-control form-control-sm" value="{{enombre}}">
+                <input type="text" name="nombre" class="form-control form-control-sm bg-white" value="{{enombre}}" style="border: 1px solid #ced4da; box-shadow: none;">
             </div>
 
             <div id="bonus_container" class="col-12 col-md-6 mb-3" style="display: none;">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_gradepoints}}</label>
-                <input type="number" step="0.1" name="valor_nota" class="form-control form-control-sm" value="{{evalor}}">
+                <input type="number" step="0.1" name="valor_nota" class="form-control form-control-sm bg-white" value="{{evalor}}" style="border: 1px solid #ced4da; box-shadow: none;">
             </div>
 
             <div class="col-12 col-md-6 mb-3">
@@ -119,22 +155,59 @@
                     {{str_requirement}}
                     {{{help_requirement}}}
                 </label>
-                <select name="requisito" id="requisito_select" class="form-control form-control-sm">
-                    {{#requirement_options}}
-                        <option value="{{id}}" {{#selected}}selected{{/selected}}>{{{name}}}</option>
-                    {{/requirement_options}}
-                </select>
+                <div class="dropdown custom-select-dropdown w-100" style="position: relative;">
+                    <button class="form-control form-control-sm text-left d-flex justify-content-between align-items-center bg-white" type="button" id="requisitoDropdownMenuButton" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border: 1px solid #ced4da; box-shadow: none;">
+                        <span id="selected-requisito-text" class="text-truncate" style="max-width: 90%;">
+                            {{#requirement_options}}
+                                {{#selected}}{{{name}}}{{/selected}}
+                            {{/requirement_options}}
+                        </span>
+                        <i class="fa fa-caret-down text-muted"></i>
+                    </button>
+                    <div class="dropdown-menu w-100 p-1 shadow-sm" aria-labelledby="requisitoDropdownMenuButton" style="max-height: 300px; overflow-y: auto;">
+                        {{#requirement_options}}
+                            <a class="dropdown-item py-2 text-truncate" href="#" onclick="document.getElementById('requisito_select').value='{{id}}'; document.getElementById('selected-requisito-text').innerHTML=this.innerHTML; document.getElementById('requisito_select').dispatchEvent(new Event('change')); return false;">
+                                {{{name}}}
+                            </a>
+                        {{/requirement_options}}
+                    </div>
+                    <select name="requisito" id="requisito_select" class="form-control form-control-sm" style="opacity:0; position:absolute; z-index:-1; width:0; height:0; top: 50%; left: 50%; pointer-events:none;">
+                        {{#requirement_options}}
+                            <option value="{{id}}" {{#selected}}selected{{/selected}}>{{{name}}}</option>
+                        {{/requirement_options}}
+                    </select>
+                </div>
             </div>
 
             <div id="hiddenwhenlocked_container" class="col-12 col-md-6 mb-3" style="display: none;">
-                <label class="small font-weight-bold mb-1 form-label-block">{{str_hideactivity}}</label>
-                <select name="hiddenwhenlocked" class="form-control form-control-sm">
-                    <option value="0" {{^ehiddenwhenlocked}}selected{{/ehiddenwhenlocked}}>{{str_showrestricted}}</option>
-                    <option value="1" {{#ehiddenwhenlocked}}selected{{/ehiddenwhenlocked}}>{{str_hidecompletely}}</option>
-                </select>
+                <label class="small font-weight-bold mb-1 form-label-flex">
+                    {{str_hideactivity}}
+                    {{{help_hiddenwhenlocked}}}
+                </label>
+                <div class="dropdown custom-select-dropdown w-100" style="position: relative;">
+                    <button class="form-control form-control-sm text-left d-flex justify-content-between align-items-center bg-white" type="button" id="hwlDropdownMenuButton" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border: 1px solid #ced4da; box-shadow: none;">
+                        <span id="selected-hwl-text" class="text-truncate" style="max-width: 90%;">
+                            {{#ehiddenwhenlocked}}<i class="fa fa-eye-slash mr-2"></i> <span>{{str_hidecompletely}}</span>{{/ehiddenwhenlocked}}
+                            {{^ehiddenwhenlocked}}<i class="fa fa-eye mr-2"></i> <span>{{str_showrestricted}}</span>{{/ehiddenwhenlocked}}
+                        </span>
+                        <i class="fa fa-caret-down text-muted"></i>
+                    </button>
+                    <div class="dropdown-menu w-100 p-1 shadow-sm" aria-labelledby="hwlDropdownMenuButton">
+                        <a class="dropdown-item py-2 text-truncate" href="#" onclick="document.querySelector('select[name=\'hiddenwhenlocked\']').value='0'; document.getElementById('selected-hwl-text').innerHTML=this.innerHTML; document.querySelector('select[name=\'hiddenwhenlocked\']').dispatchEvent(new Event('change')); return false;">
+                            <i class="fa fa-eye mr-2"></i> <span>{{str_showrestricted}}</span>
+                        </a>
+                        <a class="dropdown-item py-2 text-truncate" href="#" onclick="document.querySelector('select[name=\'hiddenwhenlocked\']').value='1'; document.getElementById('selected-hwl-text').innerHTML=this.innerHTML; document.querySelector('select[name=\'hiddenwhenlocked\']').dispatchEvent(new Event('change')); return false;">
+                            <i class="fa fa-eye-slash mr-2"></i> <span>{{str_hidecompletely}}</span>
+                        </a>
+                    </div>
+                    <select name="hiddenwhenlocked" class="form-control form-control-sm" style="opacity:0; position:absolute; z-index:-1; width:0; height:0; top: 50%; left: 50%; pointer-events:none;">
+                        <option value="0" {{^ehiddenwhenlocked}}selected{{/ehiddenwhenlocked}}>{{str_showrestricted}}</option>
+                        <option value="1" {{#ehiddenwhenlocked}}selected{{/ehiddenwhenlocked}}>{{str_hidecompletely}}</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="col-12 d-flex mt-2" style="justify-content: flex-end !important;">
+            <div class="col-12 d-flex mt-2" style="justify-content: flex-end;">
                 {{#isediting}}
                     <a href="{{url}}" class="btn btn-secondary px-4 py-2 mr-2 btn-config-cancel">{{str_cancel}}</a>
                     <button type="submit" class="btn-ucm-edit px-4 py-2">{{str_update}}</button>
@@ -205,7 +278,7 @@
                                 {{cat}}
                             </span>
                         </td>
-                        <td class="small">{{realname}}</td>
+                        <td class="small">{{{realnamehtml}}}</td>
                         <td class="text-center font-weight-bold" style="color: #0056D2;">{{cost}} XP</td>
                         <td class="text-center font-weight-bold td-limit">
                             {{#has_item_limit}}
@@ -645,7 +718,17 @@
     {{/tab_settings}}
 
 </div>
-
+<style>
+.custom-select-dropdown .dropdown-menu {
+    background-color: #ffffff;
+}
+.custom-select-dropdown .dropdown-item:hover,
+.custom-select-dropdown .dropdown-item:focus,
+.custom-select-dropdown .dropdown-item:active {
+    background-color: #f4f6f9;
+    color: #212529;
+}
+</style>
 {{#js}}
 require(['local_xpstore/config_page'], function(mod) {
     mod.init();

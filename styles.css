@@ -147,8 +147,8 @@ body.pagelayout-embedded,
 }
 
 .local_xpstore-container .form-box.editing {
-    background: #fff3cd;
-    border-color: #ffeeba;
+    background: #e8f5e9;
+    border-color: #c8e6c9;
 }
 
 .local_xpstore-container .btn-ucm-add {
@@ -162,7 +162,7 @@ body.pagelayout-embedded,
 }
 
 .local_xpstore-container .btn-ucm-edit {
-    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
     color: white;
     border: none;
     font-weight: bold;
@@ -1327,8 +1327,8 @@ body.pagelayout-embedded,
 }
 
 .local_xpstore-config-wrapper .form-box.editing {
-    background: #fff3cd;
-    border-color: #ffeeba;
+    background: #e8f5e9;
+    border-color: #c8e6c9;
 }
 
 .local_xpstore-config-wrapper .btn-ucm-add {
@@ -1342,7 +1342,7 @@ body.pagelayout-embedded,
 }
 
 .local_xpstore-config-wrapper .btn-ucm-edit {
-    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
     color: white;
     border: none;
     font-weight: bold;
@@ -1418,6 +1418,11 @@ body.pagelayout-embedded,
     background: #e0f7fa;
     color: #00acc1;
 }
+.bg-f {
+    background: #f3e8ff;
+    color: #7e22ce;
+}
+
 .bg-u {
     background: #eef2ff;
     color: #4f46e5;
