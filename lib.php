@@ -460,8 +460,9 @@ function local_xpstore_get_navigation_data($courseid, $activetab) {
  * @param int $cmid The course module ID.
  * @param string $productid The product ID to restrict access to (e.g. U123).
  * @param int $courseid The course ID for cache rebuild.
+ * @param int $hiddenwhenlocked Whether to completely hide the activity when locked (1 = hide, 0 = show restricted).
  */
-function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid) {
+function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $hiddenwhenlocked = 0) {
     global $DB, $CFG;
     require_once($CFG->dirroot . '/course/lib.php');
 
@@ -472,13 +473,15 @@ function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid) {
 
     $availability = $cm->availability;
     $newrestriction = ['type' => 'xpstore', 'productid' => (string)$productid];
+    
+    $showstatus = empty($hiddenwhenlocked) ? true : false;
 
     if (empty($availability)) {
         $tree = [
             'op' => '&',
             'c' => [$newrestriction],
-            'showc' => [true], // Unlock is typically visible so students know what to buy.
-            'show' => true,
+            'showc' => [$showstatus],
+            'show' => $showstatus,
         ];
         $availability = json_encode($tree);
     } else {
@@ -488,28 +491,42 @@ function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid) {
             $tree = [
                 'op' => '&',
                 'c' => [$newrestriction],
-                'showc' => [true],
-                'show' => true,
+                'showc' => [$showstatus],
+                'show' => $showstatus,
             ];
             $availability = json_encode($tree);
         } else {
             // Check if this specific xpstore restriction already exists.
             $exists = false;
-            foreach ($tree['c'] as $cond) {
+            foreach ($tree['c'] as $index => $cond) {
                 if (
                     isset($cond['type']) && $cond['type'] === 'xpstore' &&
                     isset($cond['productid']) && $cond['productid'] == $productid
                 ) {
                     $exists = true;
+                    // Update existing visibility
+                    if (isset($tree['showc'][$index])) {
+                        $tree['showc'][$index] = $showstatus;
+                    }
                     break;
                 }
             }
             if (!$exists) {
                 $tree['c'][] = $newrestriction;
-                $tree['showc'][] = true; // Add 'eye open'.
-                $tree['show'] = true; // Ensure root show is true.
-                $availability = json_encode($tree);
+                $tree['showc'][] = $showstatus;
             }
+            
+            // Recompute root show property based on all showc properties
+            $allhidden = true;
+            foreach ($tree['showc'] as $sc) {
+                if ($sc) {
+                    $allhidden = false;
+                    break;
+                }
+            }
+            $tree['show'] = !$allhidden;
+            
+            $availability = json_encode($tree);
         }
     }
 

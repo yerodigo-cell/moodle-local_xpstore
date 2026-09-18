@@ -119,10 +119,18 @@
                     {{str_requirement}}
                     {{{help_requirement}}}
                 </label>
-                <select name="requisito" class="form-control form-control-sm">
+                <select name="requisito" id="requisito_select" class="form-control form-control-sm">
                     {{#requirement_options}}
                         <option value="{{id}}" {{#selected}}selected{{/selected}}>{{{name}}}</option>
                     {{/requirement_options}}
+                </select>
+            </div>
+
+            <div id="hiddenwhenlocked_container" class="col-12 col-md-6 mb-3" style="display: none;">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_hideactivity}}</label>
+                <select name="hiddenwhenlocked" class="form-control form-control-sm">
+                    <option value="0" {{^ehiddenwhenlocked}}selected{{/ehiddenwhenlocked}}>{{str_showrestricted}}</option>
+                    <option value="1" {{#ehiddenwhenlocked}}selected{{/ehiddenwhenlocked}}>{{str_hidecompletely}}</option>
                 </select>
             </div>
 

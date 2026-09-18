@@ -63,11 +63,12 @@ if ($action === 'add' && confirm_sesskey()) {
     $categoria = optional_param('categoria', '', PARAM_TEXT);
     $limite = optional_param('limite', 0, PARAM_INT);
     $requisito = optional_param('requisito', 0, PARAM_INT);
+    $hiddenwhenlocked = optional_param('hiddenwhenlocked', 0, PARAM_INT);
 
     $categorialimpia = str_replace(':', '-', trim($categoria));
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
 
-    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:{$limite}:{$requisito}";
+    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:{$limite}:{$requisito}:{$hiddenwhenlocked}";
     $updated = $currentconfig ? $currentconfig . ',' . $newitem : $newitem;
     set_config($catalogkey, $updated, 'local_xpstore');
 
@@ -89,7 +90,7 @@ if ($action === 'add' && confirm_sesskey()) {
     } else if ($tipo === 'U') {
         // Auto-apply xpstore restriction to the activity.
         $productid = $tipo . $cmid;
-        local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid);
+        local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $hiddenwhenlocked);
     }
     redirect($url, get_string('productadded', 'local_xpstore'));
 }
@@ -110,9 +111,10 @@ if ($action === 'edit_save' && confirm_sesskey()) {
     $categoria = optional_param('categoria', '', PARAM_TEXT);
     $limite = optional_param('limite', 0, PARAM_INT);
     $requisito = optional_param('requisito', 0, PARAM_INT);
+    $hiddenwhenlocked = optional_param('hiddenwhenlocked', 0, PARAM_INT);
 
     $categorialimpia = str_replace(':', '-', trim($categoria));
-    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:{$limite}:{$requisito}";
+    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:{$limite}:{$requisito}:{$hiddenwhenlocked}";
 
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
     $items = explode(',', $currentconfig);
@@ -144,7 +146,7 @@ if ($action === 'edit_save' && confirm_sesskey()) {
     } else if ($tipo === 'U') {
         // Auto-apply xpstore restriction to the updated activity.
         $productid = $tipo . $cmid;
-        local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid);
+        local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $hiddenwhenlocked);
     }
 
     redirect($url, get_string('productupdated', 'local_xpstore'));
@@ -250,6 +252,7 @@ $enombre = '';
 $evalor = '0';
 $elimite = '0';
 $erequisito = 0;
+$ehiddenwhenlocked = 0;
 $olditemval = '';
 
 if ($action === 'load_edit') {
@@ -272,6 +275,7 @@ if ($action === 'load_edit') {
         $ecat = $parts[4] ?? '';
         $elimite = $parts[5] ?? '0';
         $erequisito = (int)($parts[6] ?? 0);
+        $ehiddenwhenlocked = (int)($parts[7] ?? 0);
         $olditemval = $itemtoedit;
         $isediting = true;
     }
@@ -300,7 +304,7 @@ $requirementoptions = [
 ];
 $modinfo = get_fast_modinfo($courseid);
 foreach ($modinfo->get_cms() as $cm) {
-    if ($cm->has_view() && !in_array($cm->modname, ['label', 'resource', 'contentview'])) {
+    if ($cm->has_view() && !in_array($cm->modname, ['label', 'resource', 'contentview', 'qbank'])) {
         $activityoptions[] = [
             'id' => $cm->id,
             'modname' => $cm->modname,
@@ -531,6 +535,11 @@ $templatedata = array_merge([
     'help_requirement' => $OUTPUT->help_icon('requirement', 'local_xpstore'),
     'requirement_options' => $requirementoptions,
     'erequisito' => $erequisito,
+    'ehiddenwhenlocked' => $ehiddenwhenlocked,
+
+    'str_hideactivity' => get_string('hideactivity', 'local_xpstore'),
+    'str_showrestricted' => get_string('showrestricted', 'local_xpstore'),
+    'str_hidecompletely' => get_string('hidecompletely', 'local_xpstore'),
 
     'str_cost' => get_string('cost', 'local_xpstore'),
     'ecosto' => $ecosto,

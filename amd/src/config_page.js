@@ -83,6 +83,12 @@ define([], function() {
                         bonusContainer.style.display = (selectedType === 'G') ? '' : 'none';
                     }
 
+                    // Handle Hidden when locked field visibility
+                    var hwlContainer = document.getElementById('hiddenwhenlocked_container');
+                    if (hwlContainer) {
+                        hwlContainer.style.display = (selectedType === 'U') ? '' : 'none';
+                    }
+
                     // Reset selection if it disappeared
                     if (activitySelect.selectedIndex === -1) {
                         activitySelect.selectedIndex = 0;
