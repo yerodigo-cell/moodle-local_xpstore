@@ -356,9 +356,9 @@ $getcmiconhtml = function ($cm) {
                'align-items: center; justify-content: center; border-radius: 6px; margin-right: 8px; ' .
                'vertical-align: middle;">' .
                '<span style="background-color: ' . $bgcolor . '; width: 24px; height: 24px; ' .
-               '-webkit-mask-image: url(' . $iconurl . '); -webkit-mask-size: contain; ' .
+               '-webkit-mask-image: url(' . $iconurl . '); -webkit-mask-size: 160%; ' .
                '-webkit-mask-position: center; -webkit-mask-repeat: no-repeat; ' .
-               'mask-image: url(' . $iconurl . '); mask-size: contain; mask-position: center; ' .
+               'mask-image: url(' . $iconurl . '); mask-size: 160%; mask-position: center; ' .
                'mask-repeat: no-repeat;"></span></span>';
     }
 };
