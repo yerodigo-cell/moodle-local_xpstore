@@ -34,6 +34,7 @@ define([], function() {
                         value: opt.value,
                         text: opt.text,
                         modname: opt.getAttribute('data-modname'),
+                        html: opt.getAttribute('data-html') || opt.text,
                         selected: opt.selected
                     };
                 });
@@ -48,6 +49,11 @@ define([], function() {
                     // Clear all options except the first disabled one
                     while (activitySelect.options.length > 1) {
                         activitySelect.remove(1);
+                    }
+                    
+                    var customActivityMenu = document.getElementById('activity_dropdown_menu');
+                    if (customActivityMenu) {
+                        customActivityMenu.innerHTML = '';
                     }
 
                     backupOptions.forEach(function(optData) {
@@ -74,6 +80,20 @@ define([], function() {
                                 newOption.selected = true;
                             }
                             activitySelect.appendChild(newOption);
+                            
+                            if (customActivityMenu) {
+                                var newLink = document.createElement('a');
+                                newLink.className = 'dropdown-item py-2 text-truncate';
+                                newLink.href = '#';
+                                newLink.onclick = function(e) {
+                                    e.preventDefault();
+                                    activitySelect.value = optData.value;
+                                    document.getElementById('selected-activity-text').innerHTML = optData.html;
+                                    activitySelect.dispatchEvent(new Event('change'));
+                                };
+                                newLink.innerHTML = optData.html;
+                                customActivityMenu.appendChild(newLink);
+                            }
                         }
                     });
 
@@ -92,6 +112,19 @@ define([], function() {
                     // Reset selection if it disappeared
                     if (activitySelect.selectedIndex === -1) {
                         activitySelect.selectedIndex = 0;
+                    }
+                    
+                    var selectedOption = backupOptions.find(function(o) { return o.value === activitySelect.value; });
+                    var selectedOptionHtml = '';
+                    if (selectedOption) {
+                        selectedOptionHtml = selectedOption.html;
+                    } else if (activitySelect.options.length > 0 && activitySelect.selectedIndex >= 0) {
+                        var opt = activitySelect.options[activitySelect.selectedIndex];
+                        selectedOptionHtml = '<span class="text-muted">' + opt.text + '</span>';
+                    }
+                    var activityTextSpan = document.getElementById('selected-activity-text');
+                    if (activityTextSpan) {
+                        activityTextSpan.innerHTML = selectedOptionHtml;
                     }
                 };
 

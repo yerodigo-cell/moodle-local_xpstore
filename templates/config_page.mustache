@@ -266,7 +266,17 @@
                             <input type="checkbox" name="bulkdeleteitems[]" value="{{rawitem}}" class="product-checkbox" style="cursor: pointer;">
                         </td>
                         <td class="px-3">
-                            <span class="badge-tipo bg-{{tipolower}}">{{labeltipo}}</span>
+                            <span class="badge-tipo bg-{{tipolower}}">
+                                {{#is_unlock}}
+                                    {{#hiddenwhenlocked}}
+                                        <i class="fa fa-eye-slash mr-1"></i>
+                                    {{/hiddenwhenlocked}}
+                                    {{^hiddenwhenlocked}}
+                                        <i class="fa fa-eye mr-1"></i>
+                                    {{/hiddenwhenlocked}}
+                                {{/is_unlock}}
+                                {{labeltipo}}
+                            </span>
                             {{#has_req}}
                                 <div class="mt-1 small font-weight-bold" style="color: #d32f2f; font-size: 11px; white-space: nowrap;">
                                     <i class="fa fa-lock mr-1"></i> {{str_requires_short}}: {{req_name}}

@@ -202,3 +202,5 @@ $string['widget_panel_title'] = 'Widgets (embed store or categories)';
 $string['widgeterror'] = 'Reward not available.';
 $string['widgetunlocked'] = 'Unlocked!';
 $string['widgetunlockeddesc'] = 'You can now use your reward.';
+$string['hiddenwhenlocked_help'] = 'Choose whether the activity remains visible with a Restricted label or is completely hidden from the course page before a student buys it.';
+

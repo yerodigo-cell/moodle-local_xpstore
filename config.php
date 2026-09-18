@@ -293,6 +293,7 @@ $availabletypes = [
 foreach ($availabletypes as $val => $label) {
     $typeoptions[] = [
         'value' => $val,
+        'valuelower' => strtolower($val),
         'label' => $label,
         'selected' => ($etipo === $val),
     ];
@@ -303,29 +304,90 @@ $requirementoptions = [
     ['id' => 0, 'name' => get_string('none'), 'selected' => ($erequisito == 0)],
 ];
 $modinfo = get_fast_modinfo($courseid);
+global $OUTPUT;
+
+$get_cm_icon_html = function($cm) {
+    $iconurl = $cm->get_icon_url()->out();
+    if (in_array($cm->modname, ['subsection', 'hvp', 'h5pactivity'])) {
+        return '<img src="' . $iconurl . '" class="activityicon" alt="" style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">';
+    } else {
+        $purpose = 'default';
+        if (method_exists($cm, 'get_purpose')) {
+            $moodle_purpose = $cm->get_purpose();
+        }
+        
+        $purposes = [
+            'assign' => 'assessment', 'quiz' => 'assessment', 'workshop' => 'assessment', 'certificatebeautiful' => 'assessment', 'coursecertificate' => 'assessment',
+            'choice' => 'communication', 'feedback' => 'communication', 'chat' => 'communication', 'bigbluebuttonbn' => 'communication', 'zoom' => 'communication',
+            'book' => 'content', 'folder' => 'content', 'label' => 'content', 'page' => 'content', 'qbank' => 'content', 'resource' => 'content', 'url' => 'content', 'emubook' => 'content', 'videotrack' => 'content', 'codeframe' => 'content',
+            'data' => 'collaboration', 'database' => 'collaboration', 'forum' => 'collaboration', 'glossary' => 'collaboration', 'wiki' => 'collaboration', 'diary' => 'collaboration',
+            'imscp' => 'interactive_content', 'lesson' => 'interactive_content', 'scorm' => 'interactive_content',
+            'attendance' => 'administration', 'lti' => 'other',
+        ];
+        
+        $purpose_colors = [
+            'assessment' => '#ec4899',
+            'communication' => '#fe5701',
+            'content' => '#00a5ad',
+            'collaboration' => '#8b5cf6',
+            'interactive_content' => '#3c73b8',
+            'administration' => '#5d63f6',
+            'other' => '#6c757d',
+            'default' => '#6c757d',
+        ];
+
+        if (isset($purposes[$cm->modname])) {
+            $purpose = $purposes[$cm->modname];
+        } else if (isset($moodle_purpose) && isset($purpose_colors[$moodle_purpose])) {
+            $purpose = $moodle_purpose;
+        }
+
+        $bgcolor = isset($purpose_colors[$purpose]) ? $purpose_colors[$purpose] : $purpose_colors['default'];
+        $bglight = $bgcolor . '26'; // 15% opacity
+        
+        return '<span class="activityiconcontainer courseicon" style="background-color: ' . $bglight . '; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; margin-right: 8px; vertical-align: middle;">' .
+                    '<span style="background-color: ' . $bgcolor . '; width: 16px; height: 16px; -webkit-mask-image: url(' . $iconurl . '); -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; mask-image: url(' . $iconurl . '); mask-size: contain; mask-repeat: no-repeat;"></span>' .
+                    '</span>';
+    }
+};
+
 foreach ($modinfo->get_cms() as $cm) {
     if ($cm->has_view() && !in_array($cm->modname, ['label', 'resource', 'contentview', 'qbank'])) {
+        $iconhtml = $get_cm_icon_html($cm);
+        
+        $namehtml = $iconhtml . $cm->get_formatted_name();
+
         $activityoptions[] = [
             'id' => $cm->id,
             'modname' => $cm->modname,
-            'name' => "[" . strtoupper($cm->modname) . "] " . $cm->get_formatted_name(),
+            'name' => $namehtml,
             'selected' => ($cm->id == $ecmid),
         ];
         $requirementoptions[] = [
             'id' => $cm->id,
-            'name' => "[" . strtoupper($cm->modname) . "] " . $cm->get_formatted_name(),
+            'name' => $namehtml,
             'selected' => ($cm->id == $erequisito),
         ];
     }
 }
 
 $manualitems = $DB->get_records('grade_items', ['courseid' => $courseid, 'itemtype' => 'manual']);
-$manualprefix = get_string('manualgradeitem', 'local_xpstore');
 foreach ($manualitems as $item) {
+    try {
+        $iconurl = $OUTPUT->image_url('i/manual_item')->out();
+    } catch (Exception $e) {
+        $iconurl = ''; // Fallback
+    }
+    
+    // In Moodle 4, i/manual_item is often black/grey, so we just show it directly
+    $iconhtml = '<img src="' . $iconurl . '" class="icon" alt="" style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">';
+    // Remove the $manualprefix (e.g. "[GRADE ITEM] ")
+    $namehtml = $iconhtml . $item->itemname;
+
     $activityoptions[] = [
         'id' => 'm' . $item->id,
         'modname' => 'manual',
-        'name' => $manualprefix . $item->itemname,
+        'name' => $namehtml,
         'selected' => ('m' . $item->id == $ecmid),
     ];
 }
@@ -422,6 +484,7 @@ if (!empty($configraw)) {
             $limiteactual = isset($parts[5]) ? (int)$parts[5] : 0;
             $requisito = isset($parts[6]) ? (int)$parts[6] : 0;
 
+            $iconhtml = '';
             $modinfo = get_fast_modinfo($courseid);
             $cms = $modinfo->get_cms();
             if ($tipo !== 'M' && !isset($cms[$cid])) {
@@ -431,11 +494,19 @@ if (!empty($configraw)) {
                 $realname = $DB->get_field('grade_items', 'itemname', ['id' => $cid])
                     ?: get_string('deletedactivity', 'local_xpstore');
                 $labeltipo = get_string('type_g', 'local_xpstore');
+                try {
+                    $iconurl = $OUTPUT->image_url('i/manual_item')->out();
+                    $iconhtml = '<img src="' . $iconurl . '" class="icon" alt="" style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">';
+                } catch (Exception $e) {
+                    $iconhtml = '';
+                }
             } else {
                 $cm = $cms[$cid];
                 $realname = $cm->name;
                 $labeltipo = get_string('type_' . strtolower($tipo), 'local_xpstore');
+                $iconhtml = $get_cm_icon_html($cm);
             }
+            $realnamehtml = $iconhtml . $realname;
 
             $reqname = '';
             if ($requisito > 0 && isset($cms[$requisito])) {
@@ -452,8 +523,11 @@ if (!empty($configraw)) {
             $catalogitems[] = [
                 'tipolower' => ($tipo === 'M' ? 'g' : strtolower($tipo)),
                 'labeltipo' => $labeltipo,
+                'is_unlock' => ($tipo === 'U'),
+                'hiddenwhenlocked' => (isset($parts[7]) ? (int)$parts[7] : 0),
                 'cat' => $cat,
                 'realname' => $realname,
+                'realnamehtml' => $realnamehtml,
                 'cost' => $cost,
                 'has_item_limit' => ($limiteactual > 0),
                 'limiteactual' => $limiteactual,
@@ -533,6 +607,7 @@ $templatedata = array_merge([
     'str_requires_short' => get_string_manager()->string_exists('requires_short', 'local_xpstore') ?
         get_string('requires_short', 'local_xpstore') : 'Requiere',
     'help_requirement' => $OUTPUT->help_icon('requirement', 'local_xpstore'),
+    'help_hiddenwhenlocked' => $OUTPUT->help_icon('hiddenwhenlocked', 'local_xpstore'),
     'requirement_options' => $requirementoptions,
     'erequisito' => $erequisito,
     'ehiddenwhenlocked' => $ehiddenwhenlocked,
