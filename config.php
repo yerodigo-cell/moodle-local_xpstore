@@ -309,8 +309,9 @@ global $OUTPUT;
 $getcmiconhtml = function ($cm) {
     $iconurl = $cm->get_icon_url()->out();
     if (in_array($cm->modname, ['subsection', 'hvp', 'h5pactivity'])) {
-        return '<img src="' . $iconurl . '" class="xpstore-icon" alt="" ' .
-               'style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">';
+        return '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; margin-right: 8px; vertical-align: middle;">' .
+               '<img src="' . $iconurl . '" class="xpstore-icon" alt="" style="width: 24px; height: 24px;">' .
+               '</span>';
     } else {
         $purpose = 'default';
         if (method_exists($cm, 'get_purpose')) {
@@ -390,8 +391,9 @@ foreach ($manualitems as $item) {
     }
 
     // In Moodle 4, i/manual_item is often black/grey, so we just show it directly.
-    $iconhtml = '<img src="' . $iconurl . '" class="icon" alt="" style="width: 24px; height: 24px; ' .
-                'margin-right: 8px; vertical-align: middle;">';
+    $iconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; margin-right: 8px; vertical-align: middle;">' .
+                '<img src="' . $iconurl . '" class="icon" alt="" style="width: 24px; height: 24px;">' .
+                '</span>';
     // Remove the $manualprefix (e.g. "[GRADE ITEM] ").
     $namehtml = $iconhtml . $item->itemname;
 
@@ -507,8 +509,9 @@ if (!empty($configraw)) {
                 $labeltipo = get_string('type_g', 'local_xpstore');
                 try {
                     $iconurl = $OUTPUT->image_url('i/manual_item')->out();
-                    $iconhtml = '<img src="' . $iconurl . '" class="icon" alt="" ' .
-                                'style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">';
+                    $iconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; margin-right: 8px; vertical-align: middle;">' .
+                                '<img src="' . $iconurl . '" class="icon" alt="" style="width: 24px; height: 24px;">' .
+                                '</span>';
                 } catch (Exception $e) {
                     $iconhtml = '';
                 }
