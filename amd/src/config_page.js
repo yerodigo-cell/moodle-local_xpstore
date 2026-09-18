@@ -50,7 +50,7 @@ define([], function() {
                     while (activitySelect.options.length > 1) {
                         activitySelect.remove(1);
                     }
-                    
+
                     var customActivityMenu = document.getElementById('activity_dropdown_menu');
                     if (customActivityMenu) {
                         customActivityMenu.innerHTML = '';
@@ -80,7 +80,7 @@ define([], function() {
                                 newOption.selected = true;
                             }
                             activitySelect.appendChild(newOption);
-                            
+
                             if (customActivityMenu) {
                                 var newLink = document.createElement('a');
                                 newLink.className = 'dropdown-item py-2 text-truncate';
@@ -113,8 +113,10 @@ define([], function() {
                     if (activitySelect.selectedIndex === -1) {
                         activitySelect.selectedIndex = 0;
                     }
-                    
-                    var selectedOption = backupOptions.find(function(o) { return o.value === activitySelect.value; });
+
+                    var selectedOption = backupOptions.find(function(o) {
+                        return o.value === activitySelect.value;
+                    });
                     var selectedOptionHtml = '';
                     if (selectedOption) {
                         selectedOptionHtml = selectedOption.html;

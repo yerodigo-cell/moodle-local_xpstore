@@ -306,26 +306,32 @@ $requirementoptions = [
 $modinfo = get_fast_modinfo($courseid);
 global $OUTPUT;
 
-$get_cm_icon_html = function($cm) {
+$getcmiconhtml = function ($cm) {
     $iconurl = $cm->get_icon_url()->out();
     if (in_array($cm->modname, ['subsection', 'hvp', 'h5pactivity'])) {
-        return '<img src="' . $iconurl . '" class="activityicon" alt="" style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">';
+        return '<img src="' . $iconurl . '" class="activityicon" alt="" ' .
+               'style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">';
     } else {
         $purpose = 'default';
         if (method_exists($cm, 'get_purpose')) {
-            $moodle_purpose = $cm->get_purpose();
+            $moodlepurpose = $cm->get_purpose();
         }
-        
+
         $purposes = [
-            'assign' => 'assessment', 'quiz' => 'assessment', 'workshop' => 'assessment', 'certificatebeautiful' => 'assessment', 'coursecertificate' => 'assessment',
-            'choice' => 'communication', 'feedback' => 'communication', 'chat' => 'communication', 'bigbluebuttonbn' => 'communication', 'zoom' => 'communication',
-            'book' => 'content', 'folder' => 'content', 'label' => 'content', 'page' => 'content', 'qbank' => 'content', 'resource' => 'content', 'url' => 'content', 'emubook' => 'content', 'videotrack' => 'content', 'codeframe' => 'content',
-            'data' => 'collaboration', 'database' => 'collaboration', 'forum' => 'collaboration', 'glossary' => 'collaboration', 'wiki' => 'collaboration', 'diary' => 'collaboration',
+            'assign' => 'assessment', 'quiz' => 'assessment', 'workshop' => 'assessment',
+            'certificatebeautiful' => 'assessment', 'coursecertificate' => 'assessment',
+            'choice' => 'communication', 'feedback' => 'communication', 'chat' => 'communication',
+            'bigbluebuttonbn' => 'communication', 'zoom' => 'communication',
+            'book' => 'content', 'folder' => 'content', 'label' => 'content', 'page' => 'content',
+            'qbank' => 'content', 'resource' => 'content', 'url' => 'content', 'emubook' => 'content',
+            'videotrack' => 'content', 'codeframe' => 'content',
+            'data' => 'collaboration', 'database' => 'collaboration', 'forum' => 'collaboration',
+            'glossary' => 'collaboration', 'wiki' => 'collaboration', 'diary' => 'collaboration',
             'imscp' => 'interactive_content', 'lesson' => 'interactive_content', 'scorm' => 'interactive_content',
             'attendance' => 'administration', 'lti' => 'other',
         ];
-        
-        $purpose_colors = [
+
+        $purposecolors = [
             'assessment' => '#ec4899',
             'communication' => '#fe5701',
             'content' => '#00a5ad',
@@ -338,23 +344,28 @@ $get_cm_icon_html = function($cm) {
 
         if (isset($purposes[$cm->modname])) {
             $purpose = $purposes[$cm->modname];
-        } else if (isset($moodle_purpose) && isset($purpose_colors[$moodle_purpose])) {
-            $purpose = $moodle_purpose;
+        } else if (isset($moodlepurpose) && isset($purposecolors[$moodlepurpose])) {
+            $purpose = $moodlepurpose;
         }
 
-        $bgcolor = isset($purpose_colors[$purpose]) ? $purpose_colors[$purpose] : $purpose_colors['default'];
-        $bglight = $bgcolor . '26'; // 15% opacity
-        
-        return '<span class="activityiconcontainer courseicon" style="background-color: ' . $bglight . '; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; margin-right: 8px; vertical-align: middle;">' .
-                    '<span style="background-color: ' . $bgcolor . '; width: 16px; height: 16px; -webkit-mask-image: url(' . $iconurl . '); -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; mask-image: url(' . $iconurl . '); mask-size: contain; mask-repeat: no-repeat;"></span>' .
-                    '</span>';
+        $bgcolor = isset($purposecolors[$purpose]) ? $purposecolors[$purpose] : $purposecolors['default'];
+        $bglight = $bgcolor . '26'; // 15% opacity.
+
+        return '<span class="activityiconcontainer courseicon" ' .
+               'style="background-color: ' . $bglight . '; width: 28px; height: 28px; display: inline-flex; ' .
+               'align-items: center; justify-content: center; border-radius: 6px; margin-right: 8px; ' .
+               'vertical-align: middle;">' .
+               '<span style="background-color: ' . $bgcolor . '; width: 16px; height: 16px; ' .
+               '-webkit-mask-image: url(' . $iconurl . '); -webkit-mask-size: contain; ' .
+               '-webkit-mask-repeat: no-repeat; mask-image: url(' . $iconurl . '); ' .
+               'mask-size: contain; mask-repeat: no-repeat;"></span></span>';
     }
 };
 
 foreach ($modinfo->get_cms() as $cm) {
     if ($cm->has_view() && !in_array($cm->modname, ['label', 'resource', 'contentview', 'qbank'])) {
-        $iconhtml = $get_cm_icon_html($cm);
-        
+        $iconhtml = $getcmiconhtml($cm);
+
         $namehtml = $iconhtml . $cm->get_formatted_name();
 
         $activityoptions[] = [
@@ -376,12 +387,13 @@ foreach ($manualitems as $item) {
     try {
         $iconurl = $OUTPUT->image_url('i/manual_item')->out();
     } catch (Exception $e) {
-        $iconurl = ''; // Fallback
+        $iconurl = ''; // Fallback.
     }
-    
-    // In Moodle 4, i/manual_item is often black/grey, so we just show it directly
-    $iconhtml = '<img src="' . $iconurl . '" class="icon" alt="" style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">';
-    // Remove the $manualprefix (e.g. "[GRADE ITEM] ")
+
+    // In Moodle 4, i/manual_item is often black/grey, so we just show it directly.
+    $iconhtml = '<img src="' . $iconurl . '" class="icon" alt="" style="width: 24px; height: 24px; ' .
+                'margin-right: 8px; vertical-align: middle;">';
+    // Remove the $manualprefix (e.g. "[GRADE ITEM] ").
     $namehtml = $iconhtml . $item->itemname;
 
     $activityoptions[] = [
@@ -496,7 +508,8 @@ if (!empty($configraw)) {
                 $labeltipo = get_string('type_g', 'local_xpstore');
                 try {
                     $iconurl = $OUTPUT->image_url('i/manual_item')->out();
-                    $iconhtml = '<img src="' . $iconurl . '" class="icon" alt="" style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">';
+                    $iconhtml = '<img src="' . $iconurl . '" class="icon" alt="" ' .
+                                'style="width: 24px; height: 24px; margin-right: 8px; vertical-align: middle;">';
                 } catch (Exception $e) {
                     $iconhtml = '';
                 }
@@ -504,7 +517,7 @@ if (!empty($configraw)) {
                 $cm = $cms[$cid];
                 $realname = $cm->name;
                 $labeltipo = get_string('type_' . strtolower($tipo), 'local_xpstore');
-                $iconhtml = $get_cm_icon_html($cm);
+                $iconhtml = $getcmiconhtml($cm);
             }
             $realnamehtml = $iconhtml . $realname;
 

@@ -1772,3 +1772,13 @@ body.pagelayout-embedded,
         margin-top: 5px;
     }
 }
+
+.local_xpstore-container .custom-select-dropdown .dropdown-menu {
+    background-color: #ffffff;
+}
+.local_xpstore-container .custom-select-dropdown .dropdown-item:hover,
+.local_xpstore-container .custom-select-dropdown .dropdown-item:focus,
+.local_xpstore-container .custom-select-dropdown .dropdown-item:active {
+    background-color: #f4f6f9;
+    color: #212529;
+}
