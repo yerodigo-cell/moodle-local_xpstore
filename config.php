@@ -309,8 +309,8 @@ global $OUTPUT;
 $getcmiconhtml = function ($cm) {
     $iconurl = $cm->get_icon_url()->out();
     if (in_array($cm->modname, ['subsection', 'hvp', 'h5pactivity'])) {
-        return '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; margin-right: 8px; vertical-align: middle;">' .
-               '<img src="' . $iconurl . '" class="xpstore-icon" alt="" style="width: 24px; height: 24px;">' .
+        return '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; display: inline-block; text-align: center; line-height: 28px; margin: 0 8px 0 0; padding: 0; vertical-align: middle; overflow: hidden;">' .
+               '<img src="' . $iconurl . '" alt="" style="vertical-align: middle; width: 24px; height: 24px;">' .
                '</span>';
     } else {
         $purpose = 'default';
@@ -352,10 +352,10 @@ $getcmiconhtml = function ($cm) {
         $bgcolor = isset($purposecolors[$purpose]) ? $purposecolors[$purpose] : $purposecolors['default'];
 
         return '<span class="xpstore-icon-container" ' .
-               'style="width: 28px; height: 28px; min-width: 28px; display: inline-flex; ' .
-               'align-items: center; justify-content: center; border-radius: 6px; margin-right: 8px; ' .
+               'style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; display: inline-block; ' .
+               'text-align: center; line-height: 28px; border-radius: 6px; margin: 0 8px 0 0; padding: 0; ' .
                'vertical-align: middle; overflow: hidden;">' .
-               '<span style="background-color: ' . $bgcolor . '; width: 26px; height: 26px; min-width: 26px; min-height: 26px; flex-shrink: 0; ' .
+               '<span style="background-color: ' . $bgcolor . '; display: inline-block; vertical-align: middle; width: 26px; height: 26px; min-width: 26px; min-height: 26px; ' .
                '-webkit-mask-image: url(' . $iconurl . '); -webkit-mask-size: 100%; ' .
                '-webkit-mask-position: center; -webkit-mask-repeat: no-repeat; ' .
                'mask-image: url(' . $iconurl . '); mask-size: 100%; mask-position: center; mask-repeat: no-repeat;"></span></span>';
@@ -391,8 +391,8 @@ foreach ($manualitems as $item) {
     }
 
     // In Moodle 4, i/manual_item is often black/grey, so we just show it directly.
-    $iconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; margin-right: 8px; vertical-align: middle;">' .
-                '<img src="' . $iconurl . '" class="icon" alt="" style="width: 16px; height: 16px;">' .
+    $iconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; display: inline-block; text-align: center; line-height: 28px; margin: 0 8px 0 0; padding: 0; vertical-align: middle; overflow: hidden;">' .
+                '<img src="' . $iconurl . '"  alt="" style="vertical-align: middle; width: 16px; height: 16px;">' .
                 '</span>';
     // Remove the $manualprefix (e.g. "[GRADE ITEM] ").
     $namehtml = $iconhtml . $item->itemname;
@@ -509,8 +509,8 @@ if (!empty($configraw)) {
                 $labeltipo = get_string('type_g', 'local_xpstore');
                 try {
                     $iconurl = $OUTPUT->image_url('i/manual_item')->out();
-                    $iconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; margin-right: 8px; vertical-align: middle;">' .
-                                '<img src="' . $iconurl . '" class="icon" alt="" style="width: 16px; height: 16px;">' .
+                    $iconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; display: inline-block; text-align: center; line-height: 28px; margin: 0 8px 0 0; padding: 0; vertical-align: middle; overflow: hidden;">' .
+                                '<img src="' . $iconurl . '"  alt="" style="vertical-align: middle; width: 16px; height: 16px;">' .
                                 '</span>';
                 } catch (Exception $e) {
                     $iconhtml = '';
