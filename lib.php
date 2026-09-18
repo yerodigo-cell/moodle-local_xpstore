@@ -473,7 +473,7 @@ function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $h
 
     $availability = $cm->availability;
     $newrestriction = ['type' => 'xpstore', 'productid' => (string)$productid];
-    
+
     $showstatus = empty($hiddenwhenlocked) ? true : false;
 
     if (empty($availability)) {
@@ -504,7 +504,7 @@ function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $h
                     isset($cond['productid']) && $cond['productid'] == $productid
                 ) {
                     $exists = true;
-                    // Update existing visibility
+                    // Update existing visibility.
                     if (isset($tree['showc'][$index])) {
                         $tree['showc'][$index] = $showstatus;
                     }
@@ -515,8 +515,8 @@ function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $h
                 $tree['c'][] = $newrestriction;
                 $tree['showc'][] = $showstatus;
             }
-            
-            // Recompute root show property based on all showc properties
+
+            // Recompute root show property based on all showc properties.
             $allhidden = true;
             foreach ($tree['showc'] as $sc) {
                 if ($sc) {
@@ -525,7 +525,6 @@ function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $h
                 }
             }
             $tree['show'] = !$allhidden;
-            
             $availability = json_encode($tree);
         }
     }
