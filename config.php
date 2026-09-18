@@ -354,11 +354,12 @@ $getcmiconhtml = function ($cm) {
         return '<span class="activityiconcontainer courseicon" ' .
                'style="background-color: ' . $bglight . '; width: 28px; height: 28px; display: inline-flex; ' .
                'align-items: center; justify-content: center; border-radius: 6px; margin-right: 8px; ' .
-               'vertical-align: middle;">' .
+               'vertical-align: middle; overflow: visible;">' .
                '<span style="background-color: ' . $bgcolor . '; width: 24px; height: 24px; ' .
-               '-webkit-mask-image: url(' . $iconurl . '); -webkit-mask-size: 160%; ' .
+               'transform: scale(1.5); ' .
+               '-webkit-mask-image: url(' . $iconurl . '); -webkit-mask-size: contain; ' .
                '-webkit-mask-position: center; -webkit-mask-repeat: no-repeat; ' .
-               'mask-image: url(' . $iconurl . '); mask-size: 160%; mask-position: center; ' .
+               'mask-image: url(' . $iconurl . '); mask-size: contain; mask-position: center; ' .
                'mask-repeat: no-repeat;"></span></span>';
     }
 };
