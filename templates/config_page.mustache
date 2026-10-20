@@ -846,7 +846,7 @@
 
 </div>
 {{#js}}
-require(['local_xpstore/config_page'], function(mod) {
+require(['local_xpstore/config_page', 'core/notification'], function(mod, notification) {
     mod.init();
 
     // Auto-select default card icon when product Type changes (if user hasn't manually picked one)
@@ -906,7 +906,7 @@ require(['local_xpstore/config_page'], function(mod) {
                 return;
             }
             if (file.size > maxCardImgBytes) {
-                window.alert('{{str_errorimagesize}}');
+                notification.addNotification({message: '{{str_errorimagesize}}', type: 'error'});
                 productIconFile.value = '';
                 return;
             }
@@ -941,7 +941,7 @@ require(['local_xpstore/config_page'], function(mod) {
                 return;
             }
             if (file.size > maxCardImgBytes) {
-                window.alert('{{str_errorimagesize}}');
+                notification.addNotification({message: '{{str_errorimagesize}}', type: 'error'});
                 fileInput.value = '';
                 return;
             }
