@@ -171,15 +171,7 @@ foreach ($todoslosproductos as $item) {
                 $cm = $cms[$cid];
                 $nreal = $cm->name;
             }
-            $iconmap = [
-                'Q' => 'bolt',
-                'A' => 'file-text',
-                'F' => 'comments',
-                'G' => 'star',
-                'S' => 'unlock-alt',
-                'U' => 'unlock',
-            ];
-            $icon = $iconmap[$tipochar] ?? 'gift';
+            $icon = !empty($parts[8]) ? trim($parts[8]) : local_xpstore_get_default_card_icon($tipochar);
 
             $comprasparams = ['userid' => $USER->id, 'itemid' => $cid, 'itemtype' => $tipochar];
             $comprasactuales = $DB->count_records('local_xpstore_gastos', $comprasparams);
@@ -292,7 +284,8 @@ if ($status === 'success') {
                 ($ptipo === 'M' ? ($DB->get_field('grade_items', 'itemname', ['id' => $boughtcmid]) ?: '') :
                 (isset($modinfo->cms[$boughtcmid]) ? $modinfo->cms[$boughtcmid]->name : ''));
             $itemcat = !empty($pparts[4]) ? trim($pparts[4]) : get_string('defaultcategory', 'local_xpstore');
-            $successicon = isset($caticons[$itemcat]) ? $caticons[$itemcat] : 'trophy';
+            $customicon = !empty($pparts[8]) ? trim($pparts[8]) : '';
+            $successicon = $customicon ?: (isset($caticons[$itemcat]) ? $caticons[$itemcat] : 'trophy');
             break;
         }
     }

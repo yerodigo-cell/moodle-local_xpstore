@@ -64,11 +64,16 @@ if ($action === 'add' && confirm_sesskey()) {
     $limite = optional_param('limite', 0, PARAM_INT);
     $requisito = optional_param('requisito', 0, PARAM_INT);
     $hiddenwhenlocked = optional_param('hiddenwhenlocked', 0, PARAM_INT);
+    $icono = optional_param('icono', '', PARAM_ALPHANUMEXT);
+    if ($icono === '') {
+        $icono = local_xpstore_get_default_card_icon($tipo);
+    }
 
     $categorialimpia = str_replace(':', '-', trim($categoria));
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
 
-    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:{$limite}:{$requisito}:{$hiddenwhenlocked}";
+    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:" .
+               "{$limite}:{$requisito}:{$hiddenwhenlocked}:{$icono}";
     $updated = $currentconfig ? $currentconfig . ',' . $newitem : $newitem;
     set_config($catalogkey, $updated, 'local_xpstore');
 
@@ -112,9 +117,14 @@ if ($action === 'edit_save' && confirm_sesskey()) {
     $limite = optional_param('limite', 0, PARAM_INT);
     $requisito = optional_param('requisito', 0, PARAM_INT);
     $hiddenwhenlocked = optional_param('hiddenwhenlocked', 0, PARAM_INT);
+    $icono = optional_param('icono', '', PARAM_ALPHANUMEXT);
+    if ($icono === '') {
+        $icono = local_xpstore_get_default_card_icon($tipo);
+    }
 
     $categorialimpia = str_replace(':', '-', trim($categoria));
-    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:{$limite}:{$requisito}:{$hiddenwhenlocked}";
+    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:" .
+               "{$limite}:{$requisito}:{$hiddenwhenlocked}:{$icono}";
 
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
     $items = explode(',', $currentconfig);
@@ -222,8 +232,10 @@ if ($action === 'savesettings' && confirm_sesskey()) {
 
     $caticons = [];
     $configraw = get_config('local_xpstore', $catalogkey) ?: '';
-    $itemsraw = array_filter(explode(',', $configraw));
-    foreach ($itemsraw as $it) {
+    $itemsraw = array_values(array_filter(explode(',', $configraw)));
+    $updateditems = [];
+    foreach ($itemsraw as $idx => $it) {
+        $tipochar = substr($it, 0, 1);
         $parts = explode(':', substr($it, 1));
         if (count($parts) >= 2) {
             $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
@@ -232,8 +244,22 @@ if ($action === 'savesettings' && confirm_sesskey()) {
             if ($iconval !== null) {
                 $caticons[$cat] = $iconval;
             }
+
+            $itemkey = $tipochar . $parts[0] . '_' . $idx;
+            $cardiconval = optional_param('cardicon_' . $itemkey, null, PARAM_ALPHANUMEXT);
+            if ($cardiconval !== null && $cardiconval !== '') {
+                for ($p = 0; $p <= 7; $p++) {
+                    if (!isset($parts[$p])) {
+                        $parts[$p] = ($p === 2 || $p === 4) ? '' : '0';
+                    }
+                }
+                $parts[8] = $cardiconval;
+                $it = $tipochar . implode(':', $parts);
+            }
         }
+        $updateditems[] = $it;
     }
+    set_config($catalogkey, implode(',', $updateditems), 'local_xpstore');
     set_config('cat_icons_course_' . $courseid, json_encode($caticons), 'local_xpstore');
     redirect(new moodle_url($url, ['tab' => 'settings']), get_string('changessaved'));
 }
@@ -253,6 +279,7 @@ $evalor = '0';
 $elimite = '0';
 $erequisito = 0;
 $ehiddenwhenlocked = 0;
+$eicono = 'bolt';
 $olditemval = '';
 
 if ($action === 'load_edit') {
@@ -276,6 +303,7 @@ if ($action === 'load_edit') {
         $elimite = $parts[5] ?? '0';
         $erequisito = (int)($parts[6] ?? 0);
         $ehiddenwhenlocked = (int)($parts[7] ?? 0);
+        $eicono = !empty($parts[8]) ? trim($parts[8]) : local_xpstore_get_default_card_icon($tipochar);
         $olditemval = $itemtoedit;
         $isediting = true;
     }
@@ -416,12 +444,24 @@ $categoriasunicas = [];
 $hascategories = false;
 $categoryiconoptions = [];
 $categoryiframeoptions = [];
+$cardiconoptions = [];
 $catalogitems = [];
 $hasitems = false;
 
+$availableicons = local_xpstore_get_available_icons();
+$formiconoptions = [];
+foreach ($availableicons as $icoval => $icolabel) {
+    $formiconoptions[] = [
+        'value' => $icoval,
+        'label' => $icolabel,
+        'selected' => ($eicono === $icoval),
+    ];
+}
+$eiconolabel = $availableicons[$eicono] ?? $eicono;
+
 if (!empty($configraw)) {
     $hasitems = true;
-    $itemsraw = array_filter(explode(',', $configraw));
+    $itemsraw = array_values(array_filter(explode(',', $configraw)));
 
     foreach ($itemsraw as $it) {
         $parts = explode(':', substr($it, 1));
@@ -434,29 +474,6 @@ if (!empty($configraw)) {
     if (!empty($categoriasunicas)) {
         $hascategories = true;
         $savedicons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid), true) ?: [];
-        $availableicons = [
-            'trophy' => get_string('icon_trophy', 'local_xpstore'),
-            'star' => get_string('icon_star', 'local_xpstore'),
-            'medal' => get_string('icon_medal', 'local_xpstore'),
-            'award' => get_string('icon_award', 'local_xpstore'),
-            'money' => get_string('icon_money', 'local_xpstore'),
-            'diamond' => get_string('icon_diamond', 'local_xpstore'),
-            'gift' => get_string('icon_gift', 'local_xpstore'),
-            'shopping-cart' => get_string('icon_cart', 'local_xpstore'),
-            'bolt' => get_string('icon_bolt', 'local_xpstore'),
-            'shield' => get_string('icon_shield', 'local_xpstore'),
-                        'gamepad' => get_string('icon_gamepad', 'local_xpstore'),
-            'heart' => get_string('icon_heart', 'local_xpstore'),
-            'ticket' => get_string('icon_ticket', 'local_xpstore'),
-            'magic' => get_string('icon_magic', 'local_xpstore'),
-            'rocket' => get_string('icon_rocket', 'local_xpstore'),
-            'graduation-cap' => get_string('icon_graduation', 'local_xpstore'),
-            'puzzle-piece' => get_string('icon_puzzle', 'local_xpstore'),
-            'music' => get_string('icon_music', 'local_xpstore'),
-            'camera' => get_string('icon_camera', 'local_xpstore'),
-            'globe' => get_string('icon_globe', 'local_xpstore'),
-            'book' => get_string('icon_book', 'local_xpstore'),
-        ];
 
         foreach ($categoriasunicas as $catname) {
             $currenticon = isset($savedicons[$catname]) ? $savedicons[$catname] : 'trophy';
@@ -490,7 +507,7 @@ if (!empty($configraw)) {
         }
     }
 
-    foreach ($itemsraw as $item) {
+    foreach ($itemsraw as $idx => $item) {
         $tipo = substr($item, 0, 1);
         $rest = substr($item, 1);
         $parts = explode(':', $rest);
@@ -502,6 +519,7 @@ if (!empty($configraw)) {
             $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
             $limiteactual = isset($parts[5]) ? (int)$parts[5] : 0;
             $requisito = isset($parts[6]) ? (int)$parts[6] : 0;
+            $cardicon = !empty($parts[8]) ? trim($parts[8]) : local_xpstore_get_default_card_icon($tipo);
 
             $iconhtml = '';
             $modinfo = get_fast_modinfo($courseid);
@@ -545,6 +563,25 @@ if (!empty($configraw)) {
                 'overflow: hidden; border-radius: 15px; display: inline-block; margin: 10px;" ' .
                 'scrolling="no" allowtransparency="true"></iframe>';
 
+            $cardiconlist = [];
+            foreach ($availableicons as $icoval => $icolabel) {
+                $cardiconlist[] = [
+                    'value' => $icoval,
+                    'label' => $icolabel,
+                    'selected' => ($cardicon === $icoval),
+                ];
+            }
+
+            $cardiconoptions[] = [
+                'itemkey' => $tipo . $cid . '_' . $idx,
+                'cardlabel' => $name ?: $realname,
+                'realname' => $realname,
+                'tipolower' => ($tipo === 'M' ? 'g' : strtolower($tipo)),
+                'labeltipo' => $labeltipo,
+                'currenticon' => $cardicon,
+                'icons' => $cardiconlist,
+            ];
+
             $catalogitems[] = [
                 'tipolower' => ($tipo === 'M' ? 'g' : strtolower($tipo)),
                 'labeltipo' => $labeltipo,
@@ -557,6 +594,7 @@ if (!empty($configraw)) {
                 'has_item_limit' => ($limiteactual > 0),
                 'limiteactual' => $limiteactual,
                 'displayname' => $name ?: $realname,
+                'icon' => $cardicon,
                 'is_grade_boost' => ($tipo === 'G' || $tipo === 'M'),
                 'val' => $val,
                 'has_req' => ($requisito > 0),
@@ -595,6 +633,8 @@ $activetab = ($tab === 'settings' || in_array($action, ['savesettings', 'resetco
 $navdata = local_xpstore_get_navigation_data($courseid, $activetab);
 $navdata['isteacher'] = true;
 
+$sm = get_string_manager();
+
 $templatedata = array_merge([
     'str_configtitle' => get_string('configtitle', 'local_xpstore'),
     'url' => $url->out(false),
@@ -623,13 +663,13 @@ $templatedata = array_merge([
     'activity_options' => $activityoptions,
     'ecmid' => $ecmid,
 
-    'str_requirement' => get_string_manager()->string_exists('requirement', 'local_xpstore') ?
+    'str_requirement' => $sm->string_exists('requirement', 'local_xpstore') ?
         get_string('requirement', 'local_xpstore') : 'Requisito',
-    'str_chooserequirement' => get_string_manager()->string_exists('chooserequirement', 'local_xpstore') ?
+    'str_chooserequirement' => $sm->string_exists('chooserequirement', 'local_xpstore') ?
         get_string('chooserequirement', 'local_xpstore') : 'Elige un requisito',
-    'str_requires' => get_string_manager()->string_exists('requires', 'local_xpstore') ?
+    'str_requires' => $sm->string_exists('requires', 'local_xpstore') ?
         get_string('requires', 'local_xpstore') : 'Requiere',
-    'str_requires_short' => get_string_manager()->string_exists('requires_short', 'local_xpstore') ?
+    'str_requires_short' => $sm->string_exists('requires_short', 'local_xpstore') ?
         get_string('requires_short', 'local_xpstore') : 'Requiere',
     'help_requirement' => $OUTPUT->help_icon('requirement', 'local_xpstore'),
     'help_hiddenwhenlocked' => $OUTPUT->help_icon('hiddenwhenlocked', 'local_xpstore'),
@@ -653,6 +693,12 @@ $templatedata = array_merge([
 
     'str_label' => get_string('label', 'local_xpstore'),
     'enombre' => $enombre,
+
+    'str_cardicon' => $sm->string_exists('cardicon', 'local_xpstore') ?
+        get_string('cardicon', 'local_xpstore') : 'Icono de la Tarjeta',
+    'eicono' => $eicono,
+    'eiconolabel' => $eiconolabel,
+    'form_icon_options' => $formiconoptions,
 
     'str_gradepoints' => get_string('gradepoints', 'local_xpstore'),
     'evalor' => $evalor,
@@ -682,6 +728,9 @@ $templatedata = array_merge([
     'has_categories' => $hascategories,
     'str_categoryicons' => get_string('categoryicons', 'local_xpstore'),
     'category_icon_options' => $categoryiconoptions,
+    'str_cardicons' => $sm->string_exists('cardicons', 'local_xpstore') ?
+        get_string('cardicons', 'local_xpstore') : 'Iconos de Tarjetas',
+    'card_icon_options' => $cardiconoptions,
     'str_saveicons' => get_string('saveicons', 'local_xpstore'),
 
     'str_widget_panel_title' => get_string('widget_panel_title', 'local_xpstore'),

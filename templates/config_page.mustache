@@ -145,6 +145,29 @@
                 <input type="text" name="nombre" class="form-control form-control-sm bg-white" value="{{enombre}}" style="border: 1px solid #ced4da; box-shadow: none;">
             </div>
 
+            <div class="col-12 col-md-6 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_cardicon}}</label>
+                <div class="dropdown custom-select-dropdown w-100" style="position: relative;">
+                    <button class="form-control form-control-sm text-left d-flex justify-content-between align-items-center bg-white" type="button" id="cardIconDropdownMenuButton" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border: 1px solid #ced4da; box-shadow: none;">
+                        <span id="selected-card-icon-text" class="d-flex align-items-center text-truncate" style="max-width: 90%;">
+                            <i class="fa fa-{{eicono}} mr-2" id="form_card_icon_preview" style="color: {{ciactual}}; font-size: 16px; width: 20px; text-align: center;"></i>
+                            <span id="form_card_icon_label">{{eiconolabel}}</span>
+                        </span>
+                        <i class="fa fa-caret-down text-muted"></i>
+                    </button>
+                    <div class="dropdown-menu p-2 shadow-sm" aria-labelledby="cardIconDropdownMenuButton" style="min-width: 220px; z-index: 1050;">
+                        <div class="d-flex flex-wrap" style="gap: 6px;">
+                        {{#form_icon_options}}
+                            <button type="button" class="btn btn-light border form-icon-option-btn" data-icon="{{value}}" data-label="{{label}}" onclick="var inp = document.getElementById('product_icon_input'); inp.value = '{{value}}'; inp.setAttribute('data-user-selected', '1'); document.getElementById('form_card_icon_preview').className = 'fa fa-{{value}} mr-2'; document.getElementById('form_card_icon_label').textContent = '{{label}}';" style="width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; padding: 0;" title="{{label}}">
+                                <i class="fa fa-{{value}}" style="color: {{ciactual}};"></i>
+                            </button>
+                        {{/form_icon_options}}
+                        </div>
+                    </div>
+                    <input type="hidden" name="icono" id="product_icon_input" value="{{eicono}}" data-user-selected="{{#isediting}}1{{/isediting}}{{^isediting}}0{{/isediting}}">
+                </div>
+            </div>
+
             <div id="bonus_container" class="col-12 col-md-6 mb-3" style="display: none;">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_gradepoints}}</label>
                 <input type="number" step="0.1" name="valor_nota" class="form-control form-control-sm bg-white" value="{{evalor}}" style="border: 1px solid #ced4da; box-shadow: none;">
@@ -299,6 +322,7 @@
                             {{/has_item_limit}}
                         </td>
                         <td>
+                            <i class="fa fa-{{icon}} mr-1" style="color: {{ciactual}}; width: 18px; text-align: center;"></i>
                             <strong>{{displayname}}</strong> 
                             {{#is_grade_boost}} (+{{val}}) {{/is_grade_boost}}
                         </td>
@@ -438,10 +462,10 @@
                             <button class="btn bg-white border dropdown-toggle w-100 text-left d-flex align-items-center justify-content-between" type="button" id="btn_{{cathash}}" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="background: white; height: 32px; padding: 0 10px;">
                                 <i class="fa fa-{{currenticon}} icon-preview" id="preview_{{cathash}}" style="color: {{ccactual}};"></i>
                             </button>
-                            <div class="dropdown-menu p-2 shadow-sm" aria-labelledby="btn_{{cathash}}" style="min-width: 170px; z-index: 1050;">
+                            <div class="dropdown-menu p-2 shadow-sm" aria-labelledby="btn_{{cathash}}" style="min-width: 210px; z-index: 1050;">
                                 <div class="d-flex flex-wrap" style="gap: 6px;">
                                 {{#icons}}
-                                    <button type="button" class="btn btn-light border" onclick="document.getElementById('preview_{{cathash}}').className = 'fa fa-{{value}} icon-preview'; document.getElementById('input_{{cathash}}').value = '{{value}}';" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0;" title="{{label}}">
+                                    <button type="button" class="btn btn-light border" onclick="document.getElementById('preview_{{cathash}}').className = 'fa fa-{{value}} icon-preview'; document.getElementById('input_{{cathash}}').value = '{{value}}'; var ph = document.getElementById('preview_header_icon'); if (ph) ph.className = 'fa fa-{{value}} mr-2';" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0;" title="{{label}}">
                                         <i class="fa fa-{{value}} text-secondary"></i>
                                     </button>
                                 {{/icons}}
@@ -457,6 +481,39 @@
 
 
     {{/has_categories}}
+
+    {{#has_items}}
+        <div class="form-box form-box-category mb-4">
+            <h5 class="mb-3 font-weight-bold">
+                {{str_cardicons}}
+            </h5>
+            
+            <div class="row align-items-end">
+                {{#card_icon_options}}
+                    <div class="col-12 col-md-3 mb-3">
+                        <label class="small font-weight-bold mb-1 form-label-block text-truncate" title="{{cardlabel}} ({{realname}})">
+                            <span class="badge-tipo bg-{{tipolower}}" style="font-size: 10px; padding: 2px 6px; margin-right: 4px;">{{labeltipo}}</span> {{cardlabel}}
+                        </label>
+                        <div class="dropdown w-100">
+                            <button class="btn bg-white border dropdown-toggle w-100 text-left d-flex align-items-center justify-content-between" type="button" id="btn_card_{{itemkey}}" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="background: white; height: 32px; padding: 0 10px;">
+                                <i class="fa fa-{{currenticon}} card-icon-preview" id="preview_card_{{itemkey}}" style="color: {{ciactual}};"></i>
+                            </button>
+                            <div class="dropdown-menu p-2 shadow-sm" aria-labelledby="btn_card_{{itemkey}}" style="min-width: 210px; z-index: 1050;">
+                                <div class="d-flex flex-wrap" style="gap: 6px;">
+                                {{#icons}}
+                                    <button type="button" class="btn btn-light border" onclick="document.getElementById('preview_card_{{itemkey}}').className = 'fa fa-{{value}} card-icon-preview'; document.getElementById('input_card_{{itemkey}}').value = '{{value}}'; var mc = document.getElementById('preview_mockup_card_icon'); if (mc) mc.className = 'fa fa-{{value}}'; var mw = document.getElementById('preview_mockup_widget_icon'); if (mw) mw.className = 'fa fa-{{value}}';" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0;" title="{{label}}">
+                                        <i class="fa fa-{{value}} text-secondary"></i>
+                                    </button>
+                                {{/icons}}
+                                </div>
+                            </div>
+                            <input type="hidden" name="cardicon_{{itemkey}}" id="input_card_{{itemkey}}" value="{{currenticon}}">
+                        </div>
+                    </div>
+                {{/card_icon_options}}
+            </div>
+        </div>
+    {{/has_items}}
 
     <div class="form-box mt-4 form-box-colors">
         <h5 class="mb-3 font-weight-bold">
@@ -654,7 +711,7 @@
                         <div class="glass-shine"></div>
                         <div>
                             <div style="font-size: 20px; color: var(--ci); margin-bottom: 8px;">
-                                <i class="fa fa-file-text"></i>
+                                <i class="fa fa-file-text" id="preview_mockup_card_icon"></i>
                             </div>
                             <div class="font-weight-bold" style="font-size: 0.95rem; line-height: 1.2; margin-bottom: 4px;">
                                 {{#str}} mockup_sampleitem, local_xpstore {{/str}}
@@ -686,7 +743,7 @@
 
                         <div class="card-body">
                             <div class="w-icon">
-                                <i class="fa fa-star"></i>
+                                <i class="fa fa-star" id="preview_mockup_widget_icon"></i>
                             </div>
                             <div class="w-title">
                                 {{#str}} mockup_sampleitem, local_xpstore {{/str}}
@@ -732,12 +789,58 @@
 require(['local_xpstore/config_page'], function(mod) {
     mod.init();
 
+    // Auto-select default card icon when product Type changes (if user hasn't manually picked one)
+    var typeSelect = document.getElementById('type_select');
+    var productIconInput = document.getElementById('product_icon_input');
+    if (typeSelect && productIconInput) {
+        var defaultTypeIcons = {
+            'Q': 'bolt',
+            'A': 'file-text',
+            'F': 'comments',
+            'G': 'star',
+            'S': 'unlock',
+            'U': 'unlock'
+        };
+        typeSelect.addEventListener('change', function() {
+            if (productIconInput.getAttribute('data-user-selected') !== '1') {
+                var defIcon = defaultTypeIcons[typeSelect.value] || 'gift';
+                var optBtn = document.querySelector('.form-icon-option-btn[data-icon="' + defIcon + '"]');
+                var defLabel = optBtn ? optBtn.getAttribute('data-label') : defIcon;
+                productIconInput.value = defIcon;
+                var prev = document.getElementById('form_card_icon_preview');
+                if (prev) prev.className = 'fa fa-' + defIcon + ' mr-2';
+                var lbl = document.getElementById('form_card_icon_label');
+                if (lbl) lbl.textContent = defLabel;
+            }
+        });
+    }
+
     // Predefined Palettes logic (placed here to avoid requiring Grunt AMD compilation)
     var paletteBtns = document.querySelectorAll('.palette-btn');
     var colorPrimary = document.querySelector('input[name="color_primary"]');
     var colorSecondary = document.querySelector('input[name="color_secondary"]');
     var colorIcon = document.querySelector('input[name="color_icon"]');
     var colorCatIcon = document.querySelector('input[name="color_cat_icon"]');
+
+    if (colorIcon) {
+        var syncCardIconColor = function(e) {
+            document.querySelectorAll('.card-icon-preview').forEach(function(el) {
+                el.style.color = e.target.value;
+            });
+        };
+        colorIcon.addEventListener('input', syncCardIconColor);
+        colorIcon.addEventListener('change', syncCardIconColor);
+    }
+
+    if (colorCatIcon) {
+        var syncCatIconColor = function(e) {
+            document.querySelectorAll('.icon-preview').forEach(function(el) {
+                el.style.color = e.target.value;
+            });
+        };
+        colorCatIcon.addEventListener('input', syncCatIconColor);
+        colorCatIcon.addEventListener('change', syncCatIconColor);
+    }
 
     paletteBtns.forEach(function(btn) {
         btn.addEventListener('click', function() {

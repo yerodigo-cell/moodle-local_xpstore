@@ -60,6 +60,7 @@ foreach ($items as $item) {
     $parts = explode(':', $rest);
 
     if (count($parts) >= 2 && (int)$parts[0] === $cmidreq && $tipochar === $tiporeq) {
+        $customicon = !empty($parts[8]) ? trim($parts[8]) : '';
         if ($tipochar === 'M') {
             $realname = $DB->get_field('grade_items', 'itemname', ['id' => (int)$parts[0]])
                 ?: get_string('deletedactivity', 'local_xpstore');
@@ -74,6 +75,7 @@ foreach ($items as $item) {
                     : get_string('defaultcategory', 'local_xpstore'),
                 'limite' => (int)($parts[5] ?? 0),
                 'requisito' => (int)($parts[6] ?? 0),
+                'icon' => $customicon,
                 'n_real' => $realname,
             ];
         } else {
@@ -91,6 +93,7 @@ foreach ($items as $item) {
                         : get_string('defaultcategory', 'local_xpstore'),
                     'limite' => (int)($parts[5] ?? 0),
                     'requisito' => (int)($parts[6] ?? 0),
+                    'icon' => $customicon,
                     'n_real' => $DB->get_field($modname, 'name', ['id' => $cm->instance]),
                 ];
             }
@@ -150,22 +153,16 @@ $saldo = local_xpstore_get_balance($USER->id, $courseid);
 
 echo $OUTPUT->header();
 
-$iconmap = [
-    'Q' => 'bolt',
-    'A' => 'file-text',
-    'F' => 'comments',
-    'G' => 'star',
-    'M' => 'star',
-    'S' => 'unlock-alt',
-];
-$icon = $iconmap[$producto['tipo']] ?? 'gift';
+$icon = !empty($producto['icon']) ? $producto['icon'] : local_xpstore_get_default_card_icon($producto['tipo']);
 $successicon = $icon;
 
-$caticonsraw = get_config('local_xpstore', 'cat_icons_course_' . $courseid);
-if ($caticonsraw) {
-    $caticons = json_decode($caticonsraw, true);
-    if (isset($producto['cat']) && isset($caticons[$producto['cat']])) {
-        $successicon = $caticons[$producto['cat']];
+if (empty($producto['icon'])) {
+    $caticonsraw = get_config('local_xpstore', 'cat_icons_course_' . $courseid);
+    if ($caticonsraw) {
+        $caticons = json_decode($caticonsraw, true);
+        if (isset($producto['cat']) && isset($caticons[$producto['cat']])) {
+            $successicon = $caticons[$producto['cat']];
+        }
     }
 }
 

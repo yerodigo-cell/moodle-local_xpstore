@@ -93,9 +93,10 @@ function local_xpstore_get_balance($userid, $courseid) {
 
     $sqlg = "SELECT SUM(g.amount)
              FROM {local_xpstore_gastos} g
-             JOIN {course_modules} cm ON g.itemid = cm.id
-             WHERE g.userid = ? AND cm.course = ?";
-    $expenses = $DB->get_field_sql($sqlg, [$userid, $courseid]) ?: 0;
+             LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
+             LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+             WHERE g.userid = ? AND (cm.course = ? OR gi.courseid = ?)";
+    $expenses = $DB->get_field_sql($sqlg, [$userid, $courseid, $courseid]) ?: 0;
 
     return max(0, $totalxp - (int)$expenses);
 }
@@ -324,10 +325,14 @@ function local_xpstore_reset_course_form_definition(&$mform) {
 function local_xpstore_reset_userdata($data) {
     global $DB;
     if (!empty($data->reset_tiendagamificada_gastos)) {
-        $sql = "DELETE g FROM {local_xpstore_gastos} g
-                JOIN {course_modules} cm ON g.itemid = cm.id
-                WHERE cm.course = ?";
-        $DB->execute($sql, [$data->courseid]);
+        $sql = "SELECT g.id FROM {local_xpstore_gastos} g
+                LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
+                LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+                WHERE cm.course = ? OR gi.courseid = ?";
+        $gastos = $DB->get_fieldset_sql($sql, [$data->courseid, $data->courseid]);
+        if (!empty($gastos)) {
+            $DB->delete_records_list('local_xpstore_gastos', 'id', $gastos);
+        }
     }
     return [];
 }
@@ -533,4 +538,65 @@ function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $h
         $DB->set_field('course_modules', 'availability', $availability, ['id' => $cmid]);
         rebuild_course_cache($courseid, true);
     }
+}
+
+/**
+ * Returns the default FontAwesome icon name for a given reward type.
+ *
+ * @param string $type The reward type code (Q, A, F, G, M, S, U).
+ * @return string The FontAwesome icon name (without 'fa-').
+ */
+function local_xpstore_get_default_card_icon($type) {
+    $iconmap = [
+        'Q' => 'bolt',
+        'A' => 'file-text',
+        'F' => 'comments',
+        'G' => 'star',
+        'M' => 'star',
+        'S' => 'unlock',
+        'U' => 'unlock',
+    ];
+    return $iconmap[$type] ?? 'gift';
+}
+
+/**
+ * Returns the list of available FontAwesome icons for categories and cards.
+ *
+ * @return array Associative array of icon_name => localized_label.
+ */
+function local_xpstore_get_available_icons() {
+    $sm = get_string_manager();
+    return [
+        'bolt' => get_string('icon_bolt', 'local_xpstore'),
+        'clock-o' => $sm->string_exists('icon_clock', 'local_xpstore')
+            ? get_string('icon_clock', 'local_xpstore') : 'Clock',
+        'file-text' => $sm->string_exists('icon_file', 'local_xpstore')
+            ? get_string('icon_file', 'local_xpstore') : 'Document',
+        'comments' => $sm->string_exists('icon_comments', 'local_xpstore')
+            ? get_string('icon_comments', 'local_xpstore') : 'Comments',
+        'star' => get_string('icon_star', 'local_xpstore'),
+        'unlock' => $sm->string_exists('icon_unlock', 'local_xpstore')
+            ? get_string('icon_unlock', 'local_xpstore') : 'Unlock',
+        'key' => $sm->string_exists('icon_key', 'local_xpstore')
+            ? get_string('icon_key', 'local_xpstore') : 'Key',
+        'trophy' => get_string('icon_trophy', 'local_xpstore'),
+        'medal' => get_string('icon_medal', 'local_xpstore'),
+        'award' => get_string('icon_award', 'local_xpstore'),
+        'money' => get_string('icon_money', 'local_xpstore'),
+        'diamond' => get_string('icon_diamond', 'local_xpstore'),
+        'gift' => get_string('icon_gift', 'local_xpstore'),
+        'shopping-cart' => get_string('icon_cart', 'local_xpstore'),
+        'shield' => get_string('icon_shield', 'local_xpstore'),
+        'gamepad' => get_string('icon_gamepad', 'local_xpstore'),
+        'heart' => get_string('icon_heart', 'local_xpstore'),
+        'ticket' => get_string('icon_ticket', 'local_xpstore'),
+        'magic' => get_string('icon_magic', 'local_xpstore'),
+        'rocket' => get_string('icon_rocket', 'local_xpstore'),
+        'graduation-cap' => get_string('icon_graduation', 'local_xpstore'),
+        'puzzle-piece' => get_string('icon_puzzle', 'local_xpstore'),
+        'music' => get_string('icon_music', 'local_xpstore'),
+        'camera' => get_string('icon_camera', 'local_xpstore'),
+        'globe' => get_string('icon_globe', 'local_xpstore'),
+        'book' => get_string('icon_book', 'local_xpstore'),
+    ];
 }

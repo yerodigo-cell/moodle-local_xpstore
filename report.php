@@ -48,10 +48,14 @@ $PAGE->set_title(get_string('audit', 'local_xpstore'));
 // Logic to reset the cycle.
 $action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'reset' && confirm_sesskey()) {
-    $resetsql = "DELETE g FROM {local_xpstore_gastos} g
-                 JOIN {course_modules} cm ON g.itemid = cm.id
-                 WHERE cm.course = ?";
-    $DB->execute($resetsql, [$courseid]);
+    $sql = "SELECT g.id FROM {local_xpstore_gastos} g
+            LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
+            LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+            WHERE cm.course = ? OR gi.courseid = ?";
+    $gastos = $DB->get_fieldset_sql($sql, [$courseid, $courseid]);
+    if (!empty($gastos)) {
+        $DB->delete_records_list('local_xpstore_gastos', 'id', $gastos);
+    }
     redirect($url, get_string('productdeleted', 'local_xpstore'));
 }
 
