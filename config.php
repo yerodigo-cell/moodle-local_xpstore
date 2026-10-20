@@ -64,8 +64,17 @@ if ($action === 'add' && confirm_sesskey()) {
     $limite = optional_param('limite', 0, PARAM_INT);
     $requisito = optional_param('requisito', 0, PARAM_INT);
     $hiddenwhenlocked = optional_param('hiddenwhenlocked', 0, PARAM_INT);
+    $minlevel = max(0, optional_param('minlevel', 0, PARAM_INT));
+    $hidebylevel = optional_param('hidebylevel', 1, PARAM_INT);
     $icono = optional_param('icono', '', PARAM_ALPHANUMEXT);
-    if ($icono === '') {
+    if (isset($_FILES['icono_file']) && $_FILES['icono_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $uploaderr = null;
+        $savedicon = local_xpstore_save_card_image($courseid, $_FILES['icono_file'], '', $uploaderr);
+        if ($savedicon === false) {
+            redirect($url, $uploaderr, null, \core\output\notification::NOTIFY_ERROR);
+        }
+        $icono = $savedicon;
+    } else if ($icono === '') {
         $icono = local_xpstore_get_default_card_icon($tipo);
     }
 
@@ -73,7 +82,7 @@ if ($action === 'add' && confirm_sesskey()) {
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
 
     $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:" .
-               "{$limite}:{$requisito}:{$hiddenwhenlocked}:{$icono}";
+               "{$limite}:{$requisito}:{$hiddenwhenlocked}:{$icono}:{$minlevel}:{$hidebylevel}";
     $updated = $currentconfig ? $currentconfig . ',' . $newitem : $newitem;
     set_config($catalogkey, $updated, 'local_xpstore');
 
@@ -117,14 +126,31 @@ if ($action === 'edit_save' && confirm_sesskey()) {
     $limite = optional_param('limite', 0, PARAM_INT);
     $requisito = optional_param('requisito', 0, PARAM_INT);
     $hiddenwhenlocked = optional_param('hiddenwhenlocked', 0, PARAM_INT);
+    $minlevel = max(0, optional_param('minlevel', 0, PARAM_INT));
+    $hidebylevel = optional_param('hidebylevel', 1, PARAM_INT);
+    $oldparts = explode(':', substr($olditem, 1));
+    $oldicon = isset($oldparts[8]) ? trim($oldparts[8]) : '';
+
     $icono = optional_param('icono', '', PARAM_ALPHANUMEXT);
-    if ($icono === '') {
-        $icono = local_xpstore_get_default_card_icon($tipo);
+    if (isset($_FILES['icono_file']) && $_FILES['icono_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $uploaderr = null;
+        $savedicon = local_xpstore_save_card_image($courseid, $_FILES['icono_file'], $oldicon, $uploaderr);
+        if ($savedicon === false) {
+            redirect($url, $uploaderr, null, \core\output\notification::NOTIFY_ERROR);
+        }
+        $icono = $savedicon;
+    } else {
+        if ($icono === '') {
+            $icono = local_xpstore_get_default_card_icon($tipo);
+        }
+        if (local_xpstore_is_custom_card_image($oldicon) && !local_xpstore_is_custom_card_image($icono)) {
+            local_xpstore_delete_card_image($courseid, $oldicon);
+        }
     }
 
     $categorialimpia = str_replace(':', '-', trim($categoria));
     $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:" .
-               "{$limite}:{$requisito}:{$hiddenwhenlocked}:{$icono}";
+               "{$limite}:{$requisito}:{$hiddenwhenlocked}:{$icono}:{$minlevel}:{$hidebylevel}";
 
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
     $items = explode(',', $currentconfig);
@@ -171,6 +197,11 @@ if ($action === 'delete' && confirm_sesskey()) {
     foreach ($items as $i) {
         if (trim($i) !== trim($itemtodelete)) {
             $newitems[] = $i;
+        } else {
+            $delparts = explode(':', substr(trim($i), 1));
+            if (!empty($delparts[8])) {
+                local_xpstore_delete_card_image($courseid, trim($delparts[8]));
+            }
         }
     }
 
@@ -187,6 +218,11 @@ if ($action === 'bulkdelete' && confirm_sesskey()) {
         foreach ($items as $i) {
             if (!in_array(trim($i), $itemstodelete)) {
                 $newitems[] = $i;
+            } else {
+                $delparts = explode(':', substr(trim($i), 1));
+                if (!empty($delparts[8])) {
+                    local_xpstore_delete_card_image($courseid, trim($delparts[8]));
+                }
             }
         }
         set_config($catalogkey, implode(',', $newitems), 'local_xpstore');
@@ -197,6 +233,8 @@ if ($action === 'bulkdelete' && confirm_sesskey()) {
 }
 
 if ($action === 'deleteall' && confirm_sesskey()) {
+    $fs = get_file_storage();
+    $fs->delete_area_files($context->id, 'local_xpstore', 'cardimage');
     set_config($catalogkey, '', 'local_xpstore');
     redirect($url, get_string('deletedall', 'local_xpstore'));
 }
@@ -246,7 +284,26 @@ if ($action === 'savesettings' && confirm_sesskey()) {
             }
 
             $itemkey = $tipochar . $parts[0] . '_' . $idx;
+            $oldcardicon = !empty($parts[8]) ? trim($parts[8]) : '';
             $cardiconval = optional_param('cardicon_' . $itemkey, null, PARAM_ALPHANUMEXT);
+            $fileinputname = 'cardiconfile_' . $itemkey;
+
+            if (isset($_FILES[$fileinputname]) && $_FILES[$fileinputname]['error'] !== UPLOAD_ERR_NO_FILE) {
+                $uploaderr = null;
+                $savedicon = local_xpstore_save_card_image($courseid, $_FILES[$fileinputname], $oldcardicon, $uploaderr);
+                if ($savedicon !== false) {
+                    $cardiconval = $savedicon;
+                } else {
+                    \core\notification::add($uploaderr, \core\output\notification::NOTIFY_ERROR);
+                }
+            } else if (
+                $cardiconval !== null && $cardiconval !== '' &&
+                !local_xpstore_is_custom_card_image($cardiconval) &&
+                local_xpstore_is_custom_card_image($oldcardicon)
+            ) {
+                local_xpstore_delete_card_image($courseid, $oldcardicon);
+            }
+
             if ($cardiconval !== null && $cardiconval !== '') {
                 for ($p = 0; $p <= 7; $p++) {
                     if (!isset($parts[$p])) {
@@ -280,6 +337,8 @@ $elimite = '0';
 $erequisito = 0;
 $ehiddenwhenlocked = 0;
 $eicono = 'bolt';
+$eminlevel = '0';
+$ehidebylevel = 1;
 $olditemval = '';
 
 if ($action === 'load_edit') {
@@ -304,6 +363,8 @@ if ($action === 'load_edit') {
         $erequisito = (int)($parts[6] ?? 0);
         $ehiddenwhenlocked = (int)($parts[7] ?? 0);
         $eicono = !empty($parts[8]) ? trim($parts[8]) : local_xpstore_get_default_card_icon($tipochar);
+        $eminlevel = isset($parts[9]) ? (string)(int)$parts[9] : '0';
+        $ehidebylevel = isset($parts[10]) ? (int)$parts[10] : 1;
         $olditemval = $itemtoedit;
         $isediting = true;
     }
@@ -448,7 +509,23 @@ $cardiconoptions = [];
 $catalogitems = [];
 $hasitems = false;
 
+$sm = get_string_manager();
+$strcustomimage = $sm->string_exists('customimage', 'local_xpstore')
+    ? get_string('customimage', 'local_xpstore') : 'Imagen personalizada';
+$struploadimage = $sm->string_exists('uploadimage', 'local_xpstore')
+    ? get_string('uploadimage', 'local_xpstore') : 'Subir imagen';
+$strmaximagesize = $sm->string_exists('maximagesize', 'local_xpstore')
+    ? get_string('maximagesize', 'local_xpstore') : 'Máx. 256 KB (PNG, JPG, GIF, WEBP)';
+$strerrorimagesize = $sm->string_exists('error_imagesize', 'local_xpstore')
+    ? get_string('error_imagesize', 'local_xpstore') : 'La imagen supera el tamaño máximo permitido de 256 KB.';
+
 $availableicons = local_xpstore_get_available_icons();
+$eiscustomimage = local_xpstore_is_custom_card_image($eicono);
+$eiconourl = $eiscustomimage ? local_xpstore_get_card_image_url($courseid, $eicono) : '';
+if ($eiscustomimage && !$eiconourl) {
+    $eicono = local_xpstore_get_default_card_icon($etipo ?: 'Q');
+    $eiscustomimage = false;
+}
 $formiconoptions = [];
 foreach ($availableicons as $icoval => $icolabel) {
     $formiconoptions[] = [
@@ -457,7 +534,7 @@ foreach ($availableicons as $icoval => $icolabel) {
         'selected' => ($eicono === $icoval),
     ];
 }
-$eiconolabel = $availableicons[$eicono] ?? $eicono;
+$eiconolabel = $eiscustomimage ? $strcustomimage : ($availableicons[$eicono] ?? $eicono);
 
 if (!empty($configraw)) {
     $hasitems = true;
@@ -519,7 +596,15 @@ if (!empty($configraw)) {
             $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
             $limiteactual = isset($parts[5]) ? (int)$parts[5] : 0;
             $requisito = isset($parts[6]) ? (int)$parts[6] : 0;
+            $minlevelactual = isset($parts[9]) ? (int)$parts[9] : 0;
+            $hidebylevelactual = isset($parts[10]) ? (int)$parts[10] : 1;
             $cardicon = !empty($parts[8]) ? trim($parts[8]) : local_xpstore_get_default_card_icon($tipo);
+            $iscustomimg = local_xpstore_is_custom_card_image($cardicon);
+            $cardimgurl = $iscustomimg ? local_xpstore_get_card_image_url($courseid, $cardicon) : '';
+            if ($iscustomimg && !$cardimgurl) {
+                $cardicon = local_xpstore_get_default_card_icon($tipo);
+                $iscustomimg = false;
+            }
 
             $iconhtml = '';
             $modinfo = get_fast_modinfo($courseid);
@@ -579,6 +664,8 @@ if (!empty($configraw)) {
                 'tipolower' => ($tipo === 'M' ? 'g' : strtolower($tipo)),
                 'labeltipo' => $labeltipo,
                 'currenticon' => $cardicon,
+                'is_custom_image' => $iscustomimg,
+                'icon_url' => $cardimgurl,
                 'icons' => $cardiconlist,
             ];
 
@@ -595,10 +682,15 @@ if (!empty($configraw)) {
                 'limiteactual' => $limiteactual,
                 'displayname' => $name ?: $realname,
                 'icon' => $cardicon,
+                'is_custom_image' => $iscustomimg,
+                'icon_url' => $cardimgurl,
                 'is_grade_boost' => ($tipo === 'G' || $tipo === 'M'),
                 'val' => $val,
                 'has_req' => ($requisito > 0),
                 'req_name' => $reqname,
+                'has_minlevel' => ($minlevelactual > 0),
+                'minlevel' => $minlevelactual,
+                'hidebylevel' => ($hidebylevelactual === 1),
                 'iframecode' => $iframecode,
                 'rawitem' => $item,
                 'editurl' => (new moodle_url($url, ['action' => 'load_edit', 'item' => $item]))->out(false),
@@ -681,6 +773,22 @@ $templatedata = array_merge([
     'str_showrestricted' => get_string('showrestricted', 'local_xpstore'),
     'str_hidecompletely' => get_string('hidecompletely', 'local_xpstore'),
 
+    'str_minlevel' => $sm->string_exists('minlevel', 'local_xpstore') ?
+        get_string('minlevel', 'local_xpstore') : 'Nivel mínimo (Level Up!)',
+    'str_minlevelzero' => $sm->string_exists('minlevelzero', 'local_xpstore') ?
+        get_string('minlevelzero', 'local_xpstore') : '0 = Cualquier nivel',
+    'str_minlevel_short' => $sm->string_exists('minlevel_short', 'local_xpstore') ?
+        get_string('minlevel_short', 'local_xpstore') : 'Nivel mín.',
+    'str_levelvisibility' => $sm->string_exists('levelvisibility', 'local_xpstore') ?
+        get_string('levelvisibility', 'local_xpstore') : 'Si no alcanza el nivel',
+    'str_hidecardbylevel' => $sm->string_exists('hidecardbylevel', 'local_xpstore') ?
+        get_string('hidecardbylevel', 'local_xpstore') : 'Ocultar tarjeta hasta alcanzar el nivel',
+    'str_showlockedbylevel' => $sm->string_exists('showlockedbylevel', 'local_xpstore') ?
+        get_string('showlockedbylevel', 'local_xpstore') : 'Mostrar bloqueada (Requiere Nivel X)',
+    'eminlevel' => $eminlevel,
+    'ehidebylevel' => ($ehidebylevel === 1),
+    'has_eminlevel' => ((int)$eminlevel > 0),
+
     'str_cost' => get_string('cost', 'local_xpstore'),
     'ecosto' => $ecosto,
 
@@ -697,8 +805,14 @@ $templatedata = array_merge([
     'str_cardicon' => $sm->string_exists('cardicon', 'local_xpstore') ?
         get_string('cardicon', 'local_xpstore') : 'Icono de la Tarjeta',
     'eicono' => $eicono,
+    'eis_custom_image' => $eiscustomimage,
+    'eiconourl' => $eiconourl,
     'eiconolabel' => $eiconolabel,
     'form_icon_options' => $formiconoptions,
+    'str_uploadimage' => $struploadimage,
+    'str_maximagesize' => $strmaximagesize,
+    'str_errorimagesize' => $strerrorimagesize,
+    'str_customimage' => $strcustomimage,
 
     'str_gradepoints' => get_string('gradepoints', 'local_xpstore'),
     'evalor' => $evalor,

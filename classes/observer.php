@@ -188,6 +188,48 @@ class observer {
                                 }
                             }
 
+                            // Copy custom card image file to the new course context if present.
+                            if (!empty($parts[8]) && strpos(trim($parts[8]), 'img_') === 0) {
+                                $imgitemid = (int)substr(trim($parts[8]), 4);
+                                if ($imgitemid > 0) {
+                                    $oldcontext = \context_course::instance($oldcourseid, IGNORE_MISSING);
+                                    $newcontext = \context_course::instance($newcourseid);
+                                    if ($oldcontext && $newcontext) {
+                                        $fs = get_file_storage();
+                                        $oldfiles = $fs->get_area_files(
+                                            $oldcontext->id,
+                                            'local_xpstore',
+                                            'cardimage',
+                                            $imgitemid,
+                                            'id DESC',
+                                            false
+                                        );
+                                        foreach ($oldfiles as $oldfile) {
+                                            if (
+                                                !$fs->file_exists(
+                                                    $newcontext->id,
+                                                    'local_xpstore',
+                                                    'cardimage',
+                                                    $imgitemid,
+                                                    $oldfile->get_filepath(),
+                                                    $oldfile->get_filename()
+                                                )
+                                            ) {
+                                                $filerecord = [
+                                                    'contextid' => $newcontext->id,
+                                                    'component' => 'local_xpstore',
+                                                    'filearea'  => 'cardimage',
+                                                    'itemid'    => $imgitemid,
+                                                    'filepath'  => $oldfile->get_filepath(),
+                                                    'filename'  => $oldfile->get_filename(),
+                                                ];
+                                                $fs->create_file_from_storedfile($filerecord, $oldfile);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             $newcatalogparts[] = $tipochar . implode(':', $parts);
 
                             // Replace cmid=OLD in all activities so individual widgets keep working.

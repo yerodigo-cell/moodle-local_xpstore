@@ -75,6 +75,8 @@ foreach ($items as $item) {
                     : get_string('defaultcategory', 'local_xpstore'),
                 'limite' => (int)($parts[5] ?? 0),
                 'requisito' => (int)($parts[6] ?? 0),
+                'minlevel' => (int)($parts[9] ?? 0),
+                'hidebylevel' => isset($parts[10]) ? (int)$parts[10] : 1,
                 'icon' => $customicon,
                 'n_real' => $realname,
             ];
@@ -93,6 +95,8 @@ foreach ($items as $item) {
                         : get_string('defaultcategory', 'local_xpstore'),
                     'limite' => (int)($parts[5] ?? 0),
                     'requisito' => (int)($parts[6] ?? 0),
+                    'minlevel' => (int)($parts[9] ?? 0),
+                    'hidebylevel' => isset($parts[10]) ? (int)$parts[10] : 1,
                     'icon' => $customicon,
                     'n_real' => $DB->get_field($modname, 'name', ['id' => $cm->instance]),
                 ];
@@ -132,11 +136,15 @@ if ($producto['requisito'] > 0) {
     }
 }
 
+$userlevel = local_xpstore_get_user_level($USER->id, $courseid);
+$nivelcumplido = ($producto['minlevel'] <= 0 || $userlevel >= $producto['minlevel']);
+$hiddenbylevel = (!$nivelcumplido && $producto['hidebylevel'] === 1);
+
 $action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'comprar' && confirm_sesskey()) {
     if ($limitealcanzado) {
         redirect(new moodle_url($url));
-    } else if (!$requisitocumplido) {
+    } else if (!$requisitocumplido || !$nivelcumplido) {
         redirect(new moodle_url($url, ['status' => 'error']));
     } else {
         if (local_xpstore_purchase($USER->id, $tiporeq, $cmidreq, $producto['costo'], $courseid)) {
@@ -154,7 +162,15 @@ $saldo = local_xpstore_get_balance($USER->id, $courseid);
 echo $OUTPUT->header();
 
 $icon = !empty($producto['icon']) ? $producto['icon'] : local_xpstore_get_default_card_icon($producto['tipo']);
+$iscustomimg = local_xpstore_is_custom_card_image($icon);
+$iconurl = $iscustomimg ? local_xpstore_get_card_image_url($courseid, $icon) : '';
+if ($iscustomimg && !$iconurl) {
+    $icon = local_xpstore_get_default_card_icon($producto['tipo']);
+    $iscustomimg = false;
+}
 $successicon = $icon;
+$successiscustomimg = $iscustomimg;
+$successiconurl = $iconurl;
 
 if (empty($producto['icon'])) {
     $caticonsraw = get_config('local_xpstore', 'cat_icons_course_' . $courseid);
@@ -162,6 +178,8 @@ if (empty($producto['icon'])) {
         $caticons = json_decode($caticonsraw, true);
         if (isset($producto['cat']) && isset($caticons[$producto['cat']])) {
             $successicon = $caticons[$producto['cat']];
+            $successiscustomimg = false;
+            $successiconurl = '';
         }
     }
 }
@@ -208,11 +226,16 @@ if ($statussuccess) {
     $strsuccessunlock = addslashes($strsuccessunlock);
 }
 
-$disabled = ($saldo < $producto['costo']) || (!$requisitocumplido);
+$disabled = ($saldo < $producto['costo']) || (!$requisitocumplido) || (!$nivelcumplido);
 
 $btntext = get_string('canjear', 'local_xpstore');
 if ($disabled) {
-    if (!$requisitocumplido) {
+    if (!$nivelcumplido) {
+        $sm = get_string_manager();
+        $btntext = $sm->string_exists('requires_level', 'local_xpstore') ?
+            get_string('requires_level', 'local_xpstore', $producto['minlevel']) :
+            ('Requiere Nivel ' . $producto['minlevel']);
+    } else if (!$requisitocumplido) {
         $sm = get_string_manager();
         $strreq = $sm->string_exists('requires', 'local_xpstore') ? get_string('requires', 'local_xpstore') : 'Requiere';
         $btntext = $reqname . ' ' . $strreq;
@@ -222,12 +245,15 @@ if ($disabled) {
 }
 
 $templatedata = [
+    'hidden_by_level' => $hiddenbylevel,
     'cpstore' => $cpstore,
     'cbstore' => $cbstore,
     'cistore' => $cistore,
     'saldo' => $saldo,
     'status_success' => $statussuccess,
     'icon' => $icon,
+    'is_custom_image' => $iscustomimg,
+    'icon_url' => $iconurl,
     'is_bonus' => $isbonus,
     'boost' => $producto['boost'],
     'is_special' => $isspecial,
@@ -242,7 +268,7 @@ $templatedata = [
     'actionurl' => $url->out(false),
     'sesskey' => sesskey(),
     'limitealcanzado' => $limitealcanzado,
-    'locked_by_req' => !$requisitocumplido,
+    'locked_by_req' => (!$requisitocumplido || !$nivelcumplido),
     'req_name' => $reqname,
     'disabled' => $disabled,
     'btntext' => $btntext,
@@ -256,6 +282,8 @@ $templatedata = [
         get_string('gotogradebook', 'local_xpstore') :
         get_string('gotoactivity', 'local_xpstore'),
     'success_icon' => $successicon,
+    'success_is_custom_image' => $successiscustomimg,
+    'success_icon_url' => $successiconurl,
     'str_success_unlock' => $strsuccessunlock,
     'str_congratulations' => get_string('congratulations', 'local_xpstore'),
     'str_redemptions_count' => get_string('redemptions_count', 'local_xpstore'),

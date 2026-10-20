@@ -36,6 +36,16 @@
         "category_iframe_options": [{"iframecat": "a", "currenticon": "star", "catname": "Cat"}]
     }
 }}
+{{#hidden_by_level}}
+<script>
+try {
+    if (window.frameElement) {
+        window.frameElement.style.display = 'none';
+    }
+} catch(e) {}
+</script>
+{{/hidden_by_level}}
+{{^hidden_by_level}}
 <div class="local_xpstore-container local_xpstore-embedded-container" style="--cp: {{cpstore}}; --cb: {{cbstore}}; --ci: {{cistore}}; --gradient: linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%); display: flex; justify-content: center; align-items: flex-start;">
 
     <div class="widget-card" style="width: 100%; max-width: 250px; margin: 0 auto;">
@@ -59,7 +69,12 @@
             
             {{^status_success}}
                 <div class="w-icon">
-                    <i class="fa fa-{{icon}}"></i>
+                    {{#is_custom_image}}
+                        <img src="{{icon_url}}" alt="{{displayname}}" class="xpstore-custom-card-img">
+                    {{/is_custom_image}}
+                    {{^is_custom_image}}
+                        <i class="fa fa-{{icon}}"></i>
+                    {{/is_custom_image}}
                 </div>
 
                 {{#is_bonus}}
@@ -128,6 +143,7 @@
         </div>
     </div>
 </div>
+{{/hidden_by_level}}
 
 {{#status_success}}
 {{#js}}
@@ -212,7 +228,7 @@
         overlay.style.alignItems = 'center';
         overlay.style.justifyContent = 'center';
         
-        overlay.innerHTML = '<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body"><div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{success_icon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{desturl}}" target="_top" class="btn-claim-reward">{{str_goto_dest}}</a></div></div></div></div>';
+        overlay.innerHTML = '<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body"><div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container">{{#success_is_custom_image}}<img src="{{success_icon_url}}" alt="" style="width: 72px; height: 72px; object-fit: contain;">{{/success_is_custom_image}}{{^success_is_custom_image}}<i class="fa fa-{{success_icon}}"></i>{{/success_is_custom_image}}<div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{desturl}}" target="_top" class="btn-claim-reward">{{str_goto_dest}}</a></div></div></div></div>';
         
         // Append to parent document body if inside iframe (widget), otherwise current document body
         var targetBody = document.body;

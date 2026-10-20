@@ -83,7 +83,12 @@
                         <div class="glass-shine"></div>
                         <div>
                             <div style="font-size: 20px; color: var(--ci); margin-bottom: 10px;">
-                                <i class="fa fa-{{icon}}"></i>
+                                {{#is_custom_image}}
+                                    <img src="{{icon_url}}" alt="{{displayname}}" class="xpstore-custom-card-img">
+                                {{/is_custom_image}}
+                                {{^is_custom_image}}
+                                    <i class="fa fa-{{icon}}"></i>
+                                {{/is_custom_image}}
                             </div>
 
                             {{#is_bonus}}
@@ -247,7 +252,7 @@
         overlay.style.alignItems = 'center';
         overlay.style.justifyContent = 'center';
         
-        overlay.innerHTML = '<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body"><div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container"><i class="fa fa-{{success_icon}}"></i><div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{redirecturl}}" class="btn-claim-reward">{{str_goto_dest}}</a></div></div></div></div>';
+        overlay.innerHTML = '<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body"><div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container">{{#success_is_custom_image}}<img src="{{success_icon_url}}" alt="" style="width: 72px; height: 72px; object-fit: contain;">{{/success_is_custom_image}}{{^success_is_custom_image}}<i class="fa fa-{{success_icon}}"></i>{{/success_is_custom_image}}<div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{redirecturl}}" class="btn-claim-reward">{{str_goto_dest}}</a></div></div></div></div>';
         
         // Append to parent document body if inside iframe (widget), otherwise current document body
         var targetBody = document.body;

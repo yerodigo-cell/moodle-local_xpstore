@@ -52,7 +52,7 @@
             {{/isediting}}
         </h5>
         
-        <form method="POST" action="{{url}}" class="row align-items-end">
+        <form method="POST" action="{{url}}" enctype="multipart/form-data" class="row align-items-end">
             <input type="hidden" name="sesskey" value="{{sesskey}}">
             <input type="hidden" name="action" value="{{#isediting}}edit_save{{/isediting}}{{^isediting}}add{{/isediting}}">
             {{#isediting}}
@@ -150,21 +150,29 @@
                 <div class="dropdown custom-select-dropdown w-100" style="position: relative;">
                     <button class="form-control form-control-sm text-left d-flex justify-content-between align-items-center bg-white" type="button" id="cardIconDropdownMenuButton" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border: 1px solid #ced4da; box-shadow: none;">
                         <span id="selected-card-icon-text" class="d-flex align-items-center text-truncate" style="max-width: 90%;">
-                            <i class="fa fa-{{eicono}} mr-2" id="form_card_icon_preview" style="color: {{ciactual}}; font-size: 16px; width: 20px; text-align: center;"></i>
+                            <img src="{{eiconourl}}" id="form_card_img_preview" class="mr-2" alt="" style="width: 22px; height: 22px; object-fit: contain; {{^eis_custom_image}}display: none;{{/eis_custom_image}}">
+                            <i class="fa fa-{{eicono}} mr-2" id="form_card_icon_preview" style="color: {{ciactual}}; font-size: 16px; width: 20px; text-align: center; {{#eis_custom_image}}display: none;{{/eis_custom_image}}"></i>
                             <span id="form_card_icon_label">{{eiconolabel}}</span>
                         </span>
                         <i class="fa fa-caret-down text-muted"></i>
                     </button>
-                    <div class="dropdown-menu p-2 shadow-sm" aria-labelledby="cardIconDropdownMenuButton" style="min-width: 220px; z-index: 1050;">
+                    <div class="dropdown-menu p-2 shadow-sm" aria-labelledby="cardIconDropdownMenuButton" style="min-width: 230px; z-index: 1050;">
                         <div class="d-flex flex-wrap" style="gap: 6px;">
                         {{#form_icon_options}}
-                            <button type="button" class="btn btn-light border form-icon-option-btn" data-icon="{{value}}" data-label="{{label}}" onclick="var inp = document.getElementById('product_icon_input'); inp.value = '{{value}}'; inp.setAttribute('data-user-selected', '1'); document.getElementById('form_card_icon_preview').className = 'fa fa-{{value}} mr-2'; document.getElementById('form_card_icon_label').textContent = '{{label}}';" style="width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; padding: 0;" title="{{label}}">
+                            <button type="button" class="btn btn-light border form-icon-option-btn" data-icon="{{value}}" data-label="{{label}}" onclick="var inp = document.getElementById('product_icon_input'); inp.value = '{{value}}'; inp.setAttribute('data-user-selected', '1'); var finp = document.getElementById('product_icon_file'); if (finp) finp.value = ''; var imgPrev = document.getElementById('form_card_img_preview'); if (imgPrev) imgPrev.style.display = 'none'; var icoPrev = document.getElementById('form_card_icon_preview'); if (icoPrev) { icoPrev.style.display = ''; icoPrev.className = 'fa fa-{{value}} mr-2'; } document.getElementById('form_card_icon_label').textContent = '{{label}}';" style="width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; padding: 0;" title="{{label}}">
                                 <i class="fa fa-{{value}}" style="color: {{ciactual}};"></i>
                             </button>
                         {{/form_icon_options}}
                         </div>
+                        <div class="mt-2 pt-2 border-top">
+                            <label for="product_icon_file" class="btn btn-sm btn-outline-primary w-100 mb-0 d-flex align-items-center justify-content-center" style="gap: 6px; cursor: pointer; font-weight: 600; font-size: 12px;" onclick="event.stopPropagation();">
+                                <i class="fa fa-upload"></i> {{str_uploadimage}}
+                            </label>
+                            <div class="text-muted text-center mt-1" style="font-size: 10px;">{{str_maximagesize}}</div>
+                        </div>
                     </div>
                     <input type="hidden" name="icono" id="product_icon_input" value="{{eicono}}" data-user-selected="{{#isediting}}1{{/isediting}}{{^isediting}}0{{/isediting}}">
+                    <input type="file" name="icono_file" id="product_icon_file" accept="image/png,image/jpeg,image/webp,image/gif" style="display: none;">
                 </div>
             </div>
 
@@ -226,6 +234,36 @@
                     <select name="hiddenwhenlocked" class="form-control form-control-sm" style="opacity:0; position:absolute; z-index:-1; width:0; height:0; top: 50%; left: 50%; pointer-events:none;">
                         <option value="0" {{^ehiddenwhenlocked}}selected{{/ehiddenwhenlocked}}>{{str_showrestricted}}</option>
                         <option value="1" {{#ehiddenwhenlocked}}selected{{/ehiddenwhenlocked}}>{{str_hidecompletely}}</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 mb-3">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_minlevel}}</label>
+                <input type="number" name="minlevel" id="minlevel_input" min="0" class="form-control form-control-sm bg-white" placeholder="{{str_minlevelzero}}" value="{{eminlevel}}" style="border: 1px solid #ced4da; box-shadow: none;">
+            </div>
+
+            <div id="hidebylevel_container" class="col-12 col-md-6 mb-3" style="{{^has_eminlevel}}display: none;{{/has_eminlevel}}">
+                <label class="small font-weight-bold mb-1 form-label-block">{{str_levelvisibility}}</label>
+                <div class="dropdown custom-select-dropdown w-100" style="position: relative;">
+                    <button class="form-control form-control-sm text-left d-flex justify-content-between align-items-center bg-white" type="button" id="hblDropdownMenuButton" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="border: 1px solid #ced4da; box-shadow: none;">
+                        <span id="selected-hbl-text" class="text-truncate" style="max-width: 90%;">
+                            {{#ehidebylevel}}<i class="fa fa-eye-slash mr-2"></i> <span>{{str_hidecardbylevel}}</span>{{/ehidebylevel}}
+                            {{^ehidebylevel}}<i class="fa fa-lock mr-2"></i> <span>{{str_showlockedbylevel}}</span>{{/ehidebylevel}}
+                        </span>
+                        <i class="fa fa-caret-down text-muted"></i>
+                    </button>
+                    <div class="dropdown-menu w-100 p-1 shadow-sm" aria-labelledby="hblDropdownMenuButton">
+                        <a class="dropdown-item py-2 text-truncate" href="#" onclick="document.querySelector('select[name=\'hidebylevel\']').value='1'; document.getElementById('selected-hbl-text').innerHTML=this.innerHTML; return false;">
+                            <i class="fa fa-eye-slash mr-2"></i> <span>{{str_hidecardbylevel}}</span>
+                        </a>
+                        <a class="dropdown-item py-2 text-truncate" href="#" onclick="document.querySelector('select[name=\'hidebylevel\']').value='0'; document.getElementById('selected-hbl-text').innerHTML=this.innerHTML; return false;">
+                            <i class="fa fa-lock mr-2"></i> <span>{{str_showlockedbylevel}}</span>
+                        </a>
+                    </div>
+                    <select name="hidebylevel" class="form-control form-control-sm" style="opacity:0; position:absolute; z-index:-1; width:0; height:0; top: 50%; left: 50%; pointer-events:none;">
+                        <option value="1" {{#ehidebylevel}}selected{{/ehidebylevel}}>{{str_hidecardbylevel}}</option>
+                        <option value="0" {{^ehidebylevel}}selected{{/ehidebylevel}}>{{str_showlockedbylevel}}</option>
                     </select>
                 </div>
             </div>
@@ -305,6 +343,13 @@
                                     <i class="fa fa-lock mr-1"></i> {{str_requires_short}}: {{req_name}}
                                 </div>
                             {{/has_req}}
+                            {{#has_minlevel}}
+                                <div class="mt-1 small font-weight-bold" style="color: #6a1b9a; font-size: 11px; white-space: nowrap;">
+                                    {{#hidebylevel}}<i class="fa fa-eye-slash mr-1"></i>{{/hidebylevel}}
+                                    {{^hidebylevel}}<i class="fa fa-lock mr-1"></i>{{/hidebylevel}}
+                                    {{str_minlevel_short}}: {{minlevel}}
+                                </div>
+                            {{/has_minlevel}}
                         </td>
                         <td>
                             <span class="badge-category">
@@ -322,7 +367,12 @@
                             {{/has_item_limit}}
                         </td>
                         <td>
-                            <i class="fa fa-{{icon}} mr-1" style="color: {{ciactual}}; width: 18px; text-align: center;"></i>
+                            {{#is_custom_image}}
+                                <img src="{{icon_url}}" alt="" class="mr-1" style="width: 22px; height: 22px; object-fit: contain; vertical-align: middle;">
+                            {{/is_custom_image}}
+                            {{^is_custom_image}}
+                                <i class="fa fa-{{icon}} mr-1" style="color: {{ciactual}}; width: 18px; text-align: center;"></i>
+                            {{/is_custom_image}}
                             <strong>{{displayname}}</strong> 
                             {{#is_grade_boost}} (+{{val}}) {{/is_grade_boost}}
                         </td>
@@ -441,7 +491,7 @@
     {{/tab_products}}
     
     {{#tab_settings}}
-            <form method="POST" action="{{url}}" class="xpstore-settings-form">
+            <form method="POST" action="{{url}}" enctype="multipart/form-data" class="xpstore-settings-form">
                 <input type="hidden" name="sesskey" value="{{sesskey}}">
                 <input type="hidden" name="action" value="savesettings">
 
@@ -496,18 +546,26 @@
                         </label>
                         <div class="dropdown w-100">
                             <button class="btn bg-white border dropdown-toggle w-100 text-left d-flex align-items-center justify-content-between" type="button" id="btn_card_{{itemkey}}" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="background: white; height: 32px; padding: 0 10px;">
-                                <i class="fa fa-{{currenticon}} card-icon-preview" id="preview_card_{{itemkey}}" style="color: {{ciactual}};"></i>
+                                <img src="{{icon_url}}" id="preview_card_img_{{itemkey}}" alt="" style="width: 22px; height: 22px; object-fit: contain; {{^is_custom_image}}display: none;{{/is_custom_image}}">
+                                <i class="fa fa-{{currenticon}} card-icon-preview" id="preview_card_{{itemkey}}" style="color: {{ciactual}}; {{#is_custom_image}}display: none;{{/is_custom_image}}"></i>
                             </button>
-                            <div class="dropdown-menu p-2 shadow-sm" aria-labelledby="btn_card_{{itemkey}}" style="min-width: 210px; z-index: 1050;">
+                            <div class="dropdown-menu p-2 shadow-sm" aria-labelledby="btn_card_{{itemkey}}" style="min-width: 220px; z-index: 1050;">
                                 <div class="d-flex flex-wrap" style="gap: 6px;">
                                 {{#icons}}
-                                    <button type="button" class="btn btn-light border" onclick="document.getElementById('preview_card_{{itemkey}}').className = 'fa fa-{{value}} card-icon-preview'; document.getElementById('input_card_{{itemkey}}').value = '{{value}}'; var mc = document.getElementById('preview_mockup_card_icon'); if (mc) mc.className = 'fa fa-{{value}}'; var mw = document.getElementById('preview_mockup_widget_icon'); if (mw) mw.className = 'fa fa-{{value}}';" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0;" title="{{label}}">
+                                    <button type="button" class="btn btn-light border" onclick="var imgPrev = document.getElementById('preview_card_img_{{itemkey}}'); if (imgPrev) imgPrev.style.display = 'none'; var icoPrev = document.getElementById('preview_card_{{itemkey}}'); if (icoPrev) { icoPrev.style.display = ''; icoPrev.className = 'fa fa-{{value}} card-icon-preview'; } var finp = document.getElementById('file_card_{{itemkey}}'); if (finp) finp.value = ''; document.getElementById('input_card_{{itemkey}}').value = '{{value}}'; var mcImg = document.getElementById('preview_mockup_card_img'); if (mcImg) mcImg.style.display = 'none'; var mc = document.getElementById('preview_mockup_card_icon'); if (mc) { mc.style.display = ''; mc.className = 'fa fa-{{value}}'; } var mwImg = document.getElementById('preview_mockup_widget_img'); if (mwImg) mwImg.style.display = 'none'; var mw = document.getElementById('preview_mockup_widget_icon'); if (mw) { mw.style.display = ''; mw.className = 'fa fa-{{value}}'; }" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0;" title="{{label}}">
                                         <i class="fa fa-{{value}} text-secondary"></i>
                                     </button>
                                 {{/icons}}
                                 </div>
+                                <div class="mt-2 pt-2 border-top">
+                                    <label for="file_card_{{itemkey}}" class="btn btn-sm btn-outline-primary w-100 mb-0 d-flex align-items-center justify-content-center" style="gap: 6px; cursor: pointer; font-weight: 600; font-size: 11px;" onclick="event.stopPropagation();">
+                                        <i class="fa fa-upload"></i> {{str_uploadimage}}
+                                    </label>
+                                    <div class="text-muted text-center mt-1" style="font-size: 10px;">{{str_maximagesize}}</div>
+                                </div>
                             </div>
                             <input type="hidden" name="cardicon_{{itemkey}}" id="input_card_{{itemkey}}" value="{{currenticon}}">
+                            <input type="file" name="cardiconfile_{{itemkey}}" id="file_card_{{itemkey}}" class="card-icon-file-input" data-itemkey="{{itemkey}}" accept="image/png,image/jpeg,image/webp,image/gif" style="display: none;">
                         </div>
                     </div>
                 {{/card_icon_options}}
@@ -711,6 +769,7 @@
                         <div class="glass-shine"></div>
                         <div>
                             <div style="font-size: 20px; color: var(--ci); margin-bottom: 8px;">
+                                <img src="" id="preview_mockup_card_img" class="xpstore-custom-card-img" alt="" style="display: none;">
                                 <i class="fa fa-file-text" id="preview_mockup_card_icon"></i>
                             </div>
                             <div class="font-weight-bold" style="font-size: 0.95rem; line-height: 1.2; margin-bottom: 4px;">
@@ -743,6 +802,7 @@
 
                         <div class="card-body">
                             <div class="w-icon">
+                                <img src="" id="preview_mockup_widget_img" class="xpstore-custom-card-img" alt="" style="display: none;">
                                 <i class="fa fa-star" id="preview_mockup_widget_icon"></i>
                             </div>
                             <div class="w-title">
@@ -807,13 +867,100 @@ require(['local_xpstore/config_page'], function(mod) {
                 var optBtn = document.querySelector('.form-icon-option-btn[data-icon="' + defIcon + '"]');
                 var defLabel = optBtn ? optBtn.getAttribute('data-label') : defIcon;
                 productIconInput.value = defIcon;
+                var imgPrev = document.getElementById('form_card_img_preview');
+                if (imgPrev) imgPrev.style.display = 'none';
                 var prev = document.getElementById('form_card_icon_preview');
-                if (prev) prev.className = 'fa fa-' + defIcon + ' mr-2';
+                if (prev) {
+                    prev.style.display = '';
+                    prev.className = 'fa fa-' + defIcon + ' mr-2';
+                }
                 var lbl = document.getElementById('form_card_icon_label');
                 if (lbl) lbl.textContent = defLabel;
             }
         });
     }
+
+    // Toggle hidebylevel dropdown when minlevel > 0
+    var minlevelInput = document.getElementById('minlevel_input');
+    var hidebylevelContainer = document.getElementById('hidebylevel_container');
+    if (minlevelInput && hidebylevelContainer) {
+        var toggleHideByLevel = function() {
+            var val = parseInt(minlevelInput.value, 10) || 0;
+            hidebylevelContainer.style.display = (val > 0) ? '' : 'none';
+        };
+        minlevelInput.addEventListener('input', toggleHideByLevel);
+        minlevelInput.addEventListener('change', toggleHideByLevel);
+    }
+
+    // Custom image upload validation (max 256 KB) and live preview in Product Form
+    var maxCardImgBytes = 256 * 1024;
+    var productIconFile = document.getElementById('product_icon_file');
+    if (productIconFile) {
+        productIconFile.addEventListener('change', function() {
+            var file = this.files && this.files[0];
+            if (!file) return;
+            if (file.size > maxCardImgBytes) {
+                alert('{{str_errorimagesize}}');
+                this.value = '';
+                return;
+            }
+            if (productIconInput) {
+                productIconInput.setAttribute('data-user-selected', '1');
+            }
+            var reader = new FileReader();
+            reader.onload = function(evt) {
+                var icoPrev = document.getElementById('form_card_icon_preview');
+                if (icoPrev) icoPrev.style.display = 'none';
+                var imgPrev = document.getElementById('form_card_img_preview');
+                if (imgPrev) {
+                    imgPrev.src = evt.target.result;
+                    imgPrev.style.display = '';
+                }
+                var lbl = document.getElementById('form_card_icon_label');
+                if (lbl) lbl.textContent = file.name;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    // Custom image upload validation (max 256 KB) and live preview in Settings Tab
+    document.querySelectorAll('.card-icon-file-input').forEach(function(fileInput) {
+        fileInput.addEventListener('change', function() {
+            var file = this.files && this.files[0];
+            if (!file) return;
+            if (file.size > maxCardImgBytes) {
+                alert('{{str_errorimagesize}}');
+                this.value = '';
+                return;
+            }
+            var itemkey = this.getAttribute('data-itemkey');
+            var reader = new FileReader();
+            reader.onload = function(evt) {
+                var icoPrev = document.getElementById('preview_card_' + itemkey);
+                if (icoPrev) icoPrev.style.display = 'none';
+                var imgPrev = document.getElementById('preview_card_img_' + itemkey);
+                if (imgPrev) {
+                    imgPrev.src = evt.target.result;
+                    imgPrev.style.display = '';
+                }
+                var mcIcon = document.getElementById('preview_mockup_card_icon');
+                if (mcIcon) mcIcon.style.display = 'none';
+                var mcImg = document.getElementById('preview_mockup_card_img');
+                if (mcImg) {
+                    mcImg.src = evt.target.result;
+                    mcImg.style.display = '';
+                }
+                var mwIcon = document.getElementById('preview_mockup_widget_icon');
+                if (mwIcon) mwIcon.style.display = 'none';
+                var mwImg = document.getElementById('preview_mockup_widget_img');
+                if (mwImg) {
+                    mwImg.src = evt.target.result;
+                    mwImg.style.display = '';
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    });
 
     // Predefined Palettes logic (placed here to avoid requiring Grunt AMD compilation)
     var paletteBtns = document.querySelectorAll('.palette-btn');

@@ -102,6 +102,37 @@ function local_xpstore_get_balance($userid, $courseid) {
 }
 
 /**
+ * Gets the current Level Up! (block_xp) level of a user in a course.
+ *
+ * @param int $userid The user ID.
+ * @param int $courseid The course ID.
+ * @return int The user's level (defaults to 1).
+ */
+function local_xpstore_get_user_level($userid, $courseid) {
+    global $DB;
+
+    if (class_exists('\block_xp\di')) {
+        try {
+            $world = \block_xp\di::get('course_world_factory')->get_world($courseid);
+            if ($world) {
+                $state = $world->get_store()->get_state($userid);
+                if ($state && method_exists($state, 'get_level')) {
+                    $levelobj = $state->get_level();
+                    if ($levelobj && method_exists($levelobj, 'get_level')) {
+                        return max(1, (int)$levelobj->get_level());
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Fallback to direct DB lookup below.
+        }
+    }
+
+    $lvl = $DB->get_field('block_xp', 'lvl', ['userid' => $userid, 'courseid' => $courseid]);
+    return $lvl ? max(1, (int)$lvl) : 1;
+}
+
+/**
  * Registers a purchase in the database.
  *
  * @param int $userid The user ID.
@@ -599,4 +630,167 @@ function local_xpstore_get_available_icons() {
         'globe' => get_string('icon_globe', 'local_xpstore'),
         'book' => get_string('icon_book', 'local_xpstore'),
     ];
+}
+
+/**
+ * Checks whether the given card icon value represents a custom uploaded image.
+ *
+ * @param string $icon The icon identifier stored in the catalog.
+ * @return bool True if it is a custom uploaded image identifier (img_<itemid>).
+ */
+function local_xpstore_is_custom_card_image($icon) {
+    return is_string($icon) && strpos($icon, 'img_') === 0 && (int)substr($icon, 4) > 0;
+}
+
+/**
+ * Resolves the Moodle pluginfile URL for a custom uploaded card image.
+ *
+ * @param int $courseid The course ID.
+ * @param string $icon The icon identifier (e.g. img_123456).
+ * @return string|null The image URL or null if not found.
+ */
+function local_xpstore_get_card_image_url($courseid, $icon) {
+    if (!local_xpstore_is_custom_card_image($icon)) {
+        return null;
+    }
+    $itemid = (int)substr($icon, 4);
+    $context = context_course::instance($courseid);
+    $fs = get_file_storage();
+    $files = $fs->get_area_files($context->id, 'local_xpstore', 'cardimage', $itemid, 'id DESC', false);
+    if (!empty($files)) {
+        $file = reset($files);
+        return moodle_url::make_pluginfile_url(
+            $file->get_contextid(),
+            $file->get_component(),
+            $file->get_filearea(),
+            $file->get_itemid(),
+            $file->get_filepath(),
+            $file->get_filename()
+        )->out(false);
+    }
+    return null;
+}
+
+/**
+ * Deletes a custom uploaded card image from Moodle file storage.
+ *
+ * @param int $courseid The course ID.
+ * @param string $icon The icon identifier (e.g. img_123456).
+ * @return void
+ */
+function local_xpstore_delete_card_image($courseid, $icon) {
+    if (!local_xpstore_is_custom_card_image($icon)) {
+        return;
+    }
+    $itemid = (int)substr($icon, 4);
+    $context = context_course::instance($courseid);
+    $fs = get_file_storage();
+    $fs->delete_area_files($context->id, 'local_xpstore', 'cardimage', $itemid);
+}
+
+/**
+ * Validates and saves an uploaded card image (max 256 KB) into Moodle file storage.
+ *
+ * @param int $courseid The course ID.
+ * @param array $uploadedfile The $_FILES entry for the uploaded image.
+ * @param string $existingicon Optional previous icon identifier to clean up if it was a custom image.
+ * @param string|null $errormsg Output error message if validation fails.
+ * @return string|false New icon identifier ('img_' . $itemid) on success, or false on failure.
+ */
+function local_xpstore_save_card_image($courseid, array $uploadedfile, $existingicon = '', &$errormsg = null) {
+    $maxbytes = 256 * 1024; // 256 KB.
+    $sm = get_string_manager();
+
+    if (
+        !isset($uploadedfile['error']) ||
+        $uploadedfile['error'] === UPLOAD_ERR_INI_SIZE ||
+        $uploadedfile['error'] === UPLOAD_ERR_FORM_SIZE ||
+        (isset($uploadedfile['size']) && $uploadedfile['size'] > $maxbytes)
+    ) {
+        $errormsg = $sm->string_exists('error_imagesize', 'local_xpstore')
+            ? get_string('error_imagesize', 'local_xpstore')
+            : 'La imagen supera el tamaño máximo permitido de 256 KB.';
+        return false;
+    }
+
+    if ($uploadedfile['error'] !== UPLOAD_ERR_OK || empty($uploadedfile['tmp_name']) || !is_uploaded_file($uploadedfile['tmp_name'])) {
+        $errormsg = get_string('error');
+        return false;
+    }
+
+    $imginfo = @getimagesize($uploadedfile['tmp_name']);
+    $allowedmimes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+    if ($imginfo === false || !in_array($imginfo['mime'], $allowedmimes, true)) {
+        $errormsg = $sm->string_exists('error_imagetype', 'local_xpstore')
+            ? get_string('error_imagetype', 'local_xpstore')
+            : 'Formato de imagen no válido (usa PNG, JPG, GIF o WEBP).';
+        return false;
+    }
+
+    // Delete old custom image if replacing one.
+    if (!empty($existingicon)) {
+        local_xpstore_delete_card_image($courseid, $existingicon);
+    }
+
+    $context = context_course::instance($courseid);
+    $fs = get_file_storage();
+
+    // Generate a unique 9-digit itemid to bust browser caches upon image replacement.
+    $itemid = (int)(substr((string)time(), -6) . mt_rand(100, 999));
+    while ($fs->get_area_files($context->id, 'local_xpstore', 'cardimage', $itemid, 'id', false)) {
+        $itemid = (int)(substr((string)time(), -6) . mt_rand(100, 999));
+    }
+
+    $filename = clean_param($uploadedfile['name'], PARAM_FILE);
+    if (empty($filename)) {
+        $filename = 'card_' . $itemid . '.png';
+    }
+
+    $filerecord = [
+        'contextid' => $context->id,
+        'component' => 'local_xpstore',
+        'filearea'  => 'cardimage',
+        'itemid'    => $itemid,
+        'filepath'  => '/',
+        'filename'  => $filename,
+    ];
+
+    $fs->create_file_from_pathname($filerecord, $uploadedfile['tmp_name']);
+    return 'img_' . $itemid;
+}
+
+/**
+ * Serves files from the local_xpstore file areas.
+ *
+ * @param stdClass $course The course object.
+ * @param stdClass $cm The course module object.
+ * @param context $context The context.
+ * @param string $filearea The name of the file area.
+ * @param array $args Extra arguments (itemid, path).
+ * @param bool $forcedownload Whether or not force download.
+ * @param array $options Additional options affecting the file serving.
+ * @return bool False if the file not found, just send the file otherwise and do not return anything.
+ */
+function local_xpstore_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options = []) {
+    if ($context->contextlevel != CONTEXT_COURSE) {
+        return false;
+    }
+
+    if ($filearea !== 'cardimage') {
+        return false;
+    }
+
+    require_login($course, false, $cm);
+
+    $itemid = (int)array_shift($args);
+    $filename = array_pop($args);
+    $filepath = $args ? '/' . implode('/', $args) . '/' : '/';
+
+    $fs = get_file_storage();
+    $file = $fs->get_file($context->id, 'local_xpstore', $filearea, $itemid, $filepath, $filename);
+    if (!$file || $file->is_directory()) {
+        return false;
+    }
+
+    send_stored_file($file, 86400, 0, $forcedownload, $options);
 }
