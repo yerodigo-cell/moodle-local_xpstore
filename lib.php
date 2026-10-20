@@ -111,6 +111,7 @@ function local_xpstore_get_balance($userid, $courseid) {
 function local_xpstore_get_user_level($userid, $courseid) {
     global $DB;
 
+    $lvl = null;
     if (class_exists('\block_xp\di')) {
         try {
             $world = \block_xp\di::get('course_world_factory')->get_world($courseid);
@@ -124,7 +125,7 @@ function local_xpstore_get_user_level($userid, $courseid) {
                 }
             }
         } catch (\Throwable $e) {
-            // Fallback to direct DB lookup below.
+            $lvl = null;
         }
     }
 
@@ -713,7 +714,11 @@ function local_xpstore_save_card_image($courseid, array $uploadedfile, $existing
         return false;
     }
 
-    if ($uploadedfile['error'] !== UPLOAD_ERR_OK || empty($uploadedfile['tmp_name']) || !is_uploaded_file($uploadedfile['tmp_name'])) {
+    if (
+        $uploadedfile['error'] !== UPLOAD_ERR_OK ||
+        empty($uploadedfile['tmp_name']) ||
+        !is_uploaded_file($uploadedfile['tmp_name'])
+    ) {
         $errormsg = get_string('error');
         return false;
     }

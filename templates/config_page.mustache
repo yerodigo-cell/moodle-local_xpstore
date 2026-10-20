@@ -868,14 +868,18 @@ require(['local_xpstore/config_page'], function(mod) {
                 var defLabel = optBtn ? optBtn.getAttribute('data-label') : defIcon;
                 productIconInput.value = defIcon;
                 var imgPrev = document.getElementById('form_card_img_preview');
-                if (imgPrev) imgPrev.style.display = 'none';
+                if (imgPrev) {
+                    imgPrev.style.display = 'none';
+                }
                 var prev = document.getElementById('form_card_icon_preview');
                 if (prev) {
                     prev.style.display = '';
                     prev.className = 'fa fa-' + defIcon + ' mr-2';
                 }
                 var lbl = document.getElementById('form_card_icon_label');
-                if (lbl) lbl.textContent = defLabel;
+                if (lbl) {
+                    lbl.textContent = defLabel;
+                }
             }
         });
     }
@@ -897,11 +901,13 @@ require(['local_xpstore/config_page'], function(mod) {
     var productIconFile = document.getElementById('product_icon_file');
     if (productIconFile) {
         productIconFile.addEventListener('change', function() {
-            var file = this.files && this.files[0];
-            if (!file) return;
+            var file = productIconFile.files && productIconFile.files[0];
+            if (!file) {
+                return;
+            }
             if (file.size > maxCardImgBytes) {
-                alert('{{str_errorimagesize}}');
-                this.value = '';
+                window.alert('{{str_errorimagesize}}');
+                productIconFile.value = '';
                 return;
             }
             if (productIconInput) {
@@ -910,14 +916,18 @@ require(['local_xpstore/config_page'], function(mod) {
             var reader = new FileReader();
             reader.onload = function(evt) {
                 var icoPrev = document.getElementById('form_card_icon_preview');
-                if (icoPrev) icoPrev.style.display = 'none';
+                if (icoPrev) {
+                    icoPrev.style.display = 'none';
+                }
                 var imgPrev = document.getElementById('form_card_img_preview');
                 if (imgPrev) {
                     imgPrev.src = evt.target.result;
                     imgPrev.style.display = '';
                 }
                 var lbl = document.getElementById('form_card_icon_label');
-                if (lbl) lbl.textContent = file.name;
+                if (lbl) {
+                    lbl.textContent = file.name;
+                }
             };
             reader.readAsDataURL(file);
         });
@@ -926,32 +936,40 @@ require(['local_xpstore/config_page'], function(mod) {
     // Custom image upload validation (max 256 KB) and live preview in Settings Tab
     document.querySelectorAll('.card-icon-file-input').forEach(function(fileInput) {
         fileInput.addEventListener('change', function() {
-            var file = this.files && this.files[0];
-            if (!file) return;
-            if (file.size > maxCardImgBytes) {
-                alert('{{str_errorimagesize}}');
-                this.value = '';
+            var file = fileInput.files && fileInput.files[0];
+            if (!file) {
                 return;
             }
-            var itemkey = this.getAttribute('data-itemkey');
+            if (file.size > maxCardImgBytes) {
+                window.alert('{{str_errorimagesize}}');
+                fileInput.value = '';
+                return;
+            }
+            var itemkey = fileInput.getAttribute('data-itemkey');
             var reader = new FileReader();
             reader.onload = function(evt) {
                 var icoPrev = document.getElementById('preview_card_' + itemkey);
-                if (icoPrev) icoPrev.style.display = 'none';
+                if (icoPrev) {
+                    icoPrev.style.display = 'none';
+                }
                 var imgPrev = document.getElementById('preview_card_img_' + itemkey);
                 if (imgPrev) {
                     imgPrev.src = evt.target.result;
                     imgPrev.style.display = '';
                 }
                 var mcIcon = document.getElementById('preview_mockup_card_icon');
-                if (mcIcon) mcIcon.style.display = 'none';
+                if (mcIcon) {
+                    mcIcon.style.display = 'none';
+                }
                 var mcImg = document.getElementById('preview_mockup_card_img');
                 if (mcImg) {
                     mcImg.src = evt.target.result;
                     mcImg.style.display = '';
                 }
                 var mwIcon = document.getElementById('preview_mockup_widget_icon');
-                if (mwIcon) mwIcon.style.display = 'none';
+                if (mwIcon) {
+                    mwIcon.style.display = 'none';
+                }
                 var mwImg = document.getElementById('preview_mockup_widget_img');
                 if (mwImg) {
                     mwImg.src = evt.target.result;
