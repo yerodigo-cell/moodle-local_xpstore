@@ -237,8 +237,9 @@ if ($disabled) {
             ('Requiere Nivel ' . $producto['minlevel']);
     } else if (!$requisitocumplido) {
         $sm = get_string_manager();
-        $strreq = $sm->string_exists('requires', 'local_xpstore') ? get_string('requires', 'local_xpstore') : 'Requiere';
-        $btntext = $reqname . ' ' . $strreq;
+        $strreq = $sm->string_exists('requires_short', 'local_xpstore') ?
+            get_string('requires_short', 'local_xpstore') : 'Requiere';
+        $btntext = $strreq . ' ' . $reqname;
     } else {
         $btntext = get_string('insuficiente', 'local_xpstore');
     }
