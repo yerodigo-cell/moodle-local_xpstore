@@ -21,7 +21,7 @@ The store allows teachers to configure different types of benefits based on stan
 * ⚡ **Extra Attempt:** Works with Quizzes. Students can spend XP to unlock an additional attempt for a specific quiz, even if it's already closed.
 * ⏳ **Extension:** Works only with Assignments. Students can redeem their points to get extra time (3 days) to submit a task.
 * 💬 **Forum (Legacy):** Works with Forums. Allows students to spend XP to unlock and interact in a specific forum even after its strict cut-off date has passed.
-* ⭐ **Bonus:** Adds extra points directly to any grade item within the Moodle gradebook. It is fully compatible with assignments, quizzes, forums, or any other gradable element.
+* ⭐ **Bonus:** Adds extra points directly to any grade item within the Moodle gradebook. It is fully compatible with assignments, quizzes, forums, manual grade items, or any other gradable element.
 * 🔓 **Special:** Unlocks exclusive content or access to VIP areas within the course. Upon purchase, the plugin automatically creates a dedicated Moodle group for the target activity and seamlessly assigns the student to it.
   * _Setup Tip:_ The teacher only needs to set up the reward in the store. The plugin handles the group creation and student enrollment automatically under the hood!
   * **_Important:_** Leave the label unchanged when editing this reward. Changing it will create more than one group, rendering the reward inaccessible to students.
