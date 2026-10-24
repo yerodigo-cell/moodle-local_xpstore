@@ -19,7 +19,7 @@
     </h2>
     <div style="display: flex; align-items: center; gap: 15px;">
         {{#show_reset_btn}}
-        <a href="{{reseturl}}" class="btn-reset" onclick="return confirm('{{str_confirmreset}}')" style="margin: 0; padding: 8px 16px;">
+        <a href="{{reseturl}}" class="btn-reset" data-xpstore-title="{{str_resetcycle}}" data-xpstore-confirm="{{str_confirmreset}}" onclick="event.preventDefault(); var el = this; require(['core/notification', 'core/str'], function(Notification, Str) { Str.get_strings([{key: 'confirm', component: 'core'}, {key: 'yes', component: 'core'}, {key: 'cancel', component: 'core'}]).then(function(s) { Notification.confirm(el.getAttribute('data-xpstore-title') || s[0], el.getAttribute('data-xpstore-confirm'), s[1], s[2], function() { window.location.href = el.href; }); }); }); return false;" style="margin: 0; padding: 8px 16px;">
             <i class="fa fa-trash"></i> {{str_resetcycle}}
         </a>
         {{/show_reset_btn}}

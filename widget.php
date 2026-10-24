@@ -61,9 +61,11 @@ foreach ($items as $item) {
 
     if (count($parts) >= 2 && (int)$parts[0] === $cmidreq && $tipochar === $tiporeq) {
         $customicon = !empty($parts[8]) ? trim($parts[8]) : '';
-        if ($tipochar === 'M') {
-            $realname = $DB->get_field('grade_items', 'itemname', ['id' => (int)$parts[0]])
-                ?: get_string('deletedactivity', 'local_xpstore');
+        if ($tipochar === 'M' || $tipochar === 'C') {
+            $realname = ($tipochar === 'C')
+                ? local_xpstore_get_course_grade_item_name((int)$parts[0])
+                : ($DB->get_field('grade_items', 'itemname', ['id' => (int)$parts[0]])
+                    ?: get_string('activitydeleted', 'local_xpstore'));
             $producto = [
                 'tipo' => $tipochar,
                 'cid' => (int)$parts[0],
@@ -188,7 +190,7 @@ $cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '
 $cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
 $cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: $cpstore;
 
-$isbonus = (($producto['tipo'] == 'G' || $producto['tipo'] == 'M') && $producto['boost'] != '0');
+$isbonus = (in_array($producto['tipo'], ['G', 'M', 'C']) && $producto['boost'] != '0');
 $isspecial = ($producto['tipo'] == 'S');
 $isunlock = ($producto['tipo'] == 'U');
 $statussuccess = ($status === 'success');
@@ -196,16 +198,18 @@ $statussuccess = ($status === 'success');
 $desturl = null;
 $strsuccessunlock = '';
 if ($statussuccess) {
-    $dest = ($producto['tipo'] == 'G' || $producto['tipo'] == 'M') ? '/grade/report/user/index.php' : '/course/view.php';
+    $dest = in_array($producto['tipo'], ['G', 'M', 'C']) ? '/grade/report/user/index.php' : '/course/view.php';
     $destmoodleurl = new moodle_url($dest, ['id' => $courseid]);
 
     $activityname = '';
     $modinfo = get_fast_modinfo($courseid);
-    if ($producto['tipo'] != 'G' && $producto['tipo'] != 'M') {
+    if (!in_array($producto['tipo'], ['G', 'M', 'C'])) {
         $destmoodleurl = $modinfo->cms[$producto['cid']]->url ?? $destmoodleurl;
     }
     if ($producto['tipo'] == 'M') {
         $activityname = $DB->get_field('grade_items', 'itemname', ['id' => $producto['cid']]) ?: '';
+    } else if ($producto['tipo'] == 'C') {
+        $activityname = local_xpstore_get_course_grade_item_name($producto['cid']);
     } else if (isset($modinfo->cms[$producto['cid']])) {
         $activityname = $modinfo->cms[$producto['cid']]->name;
     }
@@ -218,7 +222,7 @@ if ($statussuccess) {
     }
     $a->activity = $activityname ?: get_string('course', 'local_xpstore');
 
-    if ($producto['tipo'] == 'G' || $producto['tipo'] == 'M') {
+    if (in_array($producto['tipo'], ['G', 'M', 'C'])) {
         $strsuccessunlock = get_string('success_unlock_gradebook', 'local_xpstore', $a);
     } else {
         $strsuccessunlock = get_string('success_unlock_reward', 'local_xpstore', $a);
@@ -279,7 +283,7 @@ $templatedata = [
     'str_points' => get_string('points', 'local_xpstore'),
     'str_specialcontent' => get_string('specialcontent', 'local_xpstore'),
     'str_unlockcontent' => get_string('type_u', 'local_xpstore'),
-    'str_goto_dest' => ($producto['tipo'] == 'G' || $producto['tipo'] == 'M') ?
+    'str_goto_dest' => in_array($producto['tipo'], ['G', 'M', 'C']) ?
         get_string('gotogradebook', 'local_xpstore') :
         get_string('gotoactivity', 'local_xpstore'),
     'success_icon' => $successicon,

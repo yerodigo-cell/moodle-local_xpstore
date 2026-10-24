@@ -33,6 +33,7 @@ $courseid = required_param('id', PARAM_INT);
 $search = optional_param('search', '', PARAM_TEXT);
 $searchlabel = optional_param('searchlabel', '', PARAM_TEXT);
 $searchuser = optional_param('searchuser', '', PARAM_TEXT);
+$openuser = optional_param('openuser', 0, PARAM_INT);
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
@@ -48,28 +49,24 @@ $PAGE->set_title(get_string('audit', 'local_xpstore'));
 // Logic to reset the cycle.
 $action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'reset' && confirm_sesskey()) {
-    $sql = "SELECT g.id FROM {local_xpstore_gastos} g
-            LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
-            LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
-            WHERE cm.course = ? OR gi.courseid = ?";
-    $gastos = $DB->get_fieldset_sql($sql, [$courseid, $courseid]);
-    if (!empty($gastos)) {
-        $DB->delete_records_list('local_xpstore_gastos', 'id', $gastos);
-    }
+    local_xpstore_reset_purchases($courseid);
     redirect($url, get_string('productdeleted', 'local_xpstore'));
 }
 
 if ($action === 'resetuser' && confirm_sesskey()) {
     $userid = required_param('userid', PARAM_INT);
-    $sql = "SELECT g.id FROM {local_xpstore_gastos} g
-            LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
-            LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
-            WHERE (cm.course = ? OR gi.courseid = ?) AND g.userid = ?";
-    $gastos = $DB->get_fieldset_sql($sql, [$courseid, $courseid, $userid]);
-    if (!empty($gastos)) {
-        $DB->delete_records_list('local_xpstore_gastos', 'id', $gastos);
-    }
+    local_xpstore_reset_purchases($courseid, $userid);
     redirect($url, get_string('userreset', 'local_xpstore'));
+}
+
+if ($action === 'deletelog' && confirm_sesskey()) {
+    $gastoid = required_param('gastoid', PARAM_INT);
+    $affecteduser = local_xpstore_delete_single_purchase($courseid, $gastoid);
+    $redirectparams = ['id' => $courseid];
+    if ($affecteduser) {
+        $redirectparams['openuser'] = (int)$affecteduser;
+    }
+    redirect(new moodle_url('/local/xpstore/report.php', $redirectparams), get_string('purchasedeleted', 'local_xpstore'));
 }
 
 // Pre-load store categories to assign them to records.
@@ -140,6 +137,8 @@ $templatedata = array_merge([
     'str_redemptions' => get_string('redemptions', 'local_xpstore'),
     'str_confirmresetuser' => get_string('confirmresetuser', 'local_xpstore'),
     'str_resetuser' => get_string('resetuser', 'local_xpstore'),
+    'str_confirmdeletepurchase' => get_string('confirmdeletepurchase', 'local_xpstore'),
+    'str_deletepurchase' => get_string('deletepurchase', 'local_xpstore'),
     'has_users' => false,
     'users' => [],
 ], $navdata);
@@ -148,8 +147,8 @@ $sql = "SELECT g.*, u.firstname, u.lastname, u.picture, u.imagealt, u.email,
                cm.module, cm.instance, gi.itemname as gi_itemname
         FROM {local_xpstore_gastos} g
         JOIN {user} u ON g.userid = u.id
-        LEFT JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype != 'M'
-        LEFT JOIN {grade_items} gi ON gi.id = g.itemid AND g.itemtype = 'M'
+        LEFT JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype NOT IN ('M', 'C')
+        LEFT JOIN {grade_items} gi ON gi.id = g.itemid AND g.itemtype IN ('M', 'C')
         WHERE (cm.course = ? OR gi.courseid = ?)
         ORDER BY u.firstname ASC, g.timecreated DESC";
 
@@ -188,6 +187,7 @@ if ($logs) {
 
         $userdata = [
             'userid' => $userid,
+            'is_expanded' => ((int)$openuser === (int)$userid),
             'userpichtml' => $userpichtml,
             'userfullname' => $userfullname,
             'useremail' => $realuser->email,
@@ -202,6 +202,8 @@ if ($logs) {
         foreach ($userlogs as $log) {
             if ($log->itemtype === 'M') {
                 $activityname = $log->gi_itemname;
+            } else if ($log->itemtype === 'C') {
+                $activityname = local_xpstore_get_course_grade_item_name($log->itemid);
             } else {
                 $cm = $DB->get_record('course_modules', ['id' => $log->itemid]);
 
@@ -219,7 +221,7 @@ if ($logs) {
             $labeltipo = get_string_manager()->string_exists('type_' . $tipostr, 'local_xpstore')
                 ? get_string('type_' . $tipostr, 'local_xpstore')
                 : 'Legacy';
-            if ($log->itemtype === 'M') {
+            if ($log->itemtype === 'M' || $log->itemtype === 'C') {
                 $labeltipo = get_string('type_g', 'local_xpstore');
             }
 
@@ -235,7 +237,7 @@ if ($logs) {
                 ? $mapvalores[$tipocharupper][$log->itemid]
                 : '0';
 
-            if (($tipocharupper === 'G' || $tipocharupper === 'M') && $valornota !== '0') {
+            if (in_array($tipocharupper, ['G', 'M', 'C']) && $valornota !== '0') {
                 $valnum = floatval($valornota);
                 $suffix = ' (+' . $valnum . ' pts)';
                 $customlabel = $customlabel ? $customlabel . $suffix : $suffix;
@@ -257,7 +259,7 @@ if ($logs) {
             }
 
             $cmurl = '';
-            if ($tipostr === 'g' || $tipostr === 'm') {
+            if (in_array($tipostr, ['g', 'm', 'c'])) {
                 $cmurl = (new moodle_url(
                     '/grade/report/user/index.php',
                     ['id' => $courseid, 'userid' => $log->userid]
@@ -277,14 +279,21 @@ if ($logs) {
                                  '</a>';
             }
 
+            $deletelogurl = new moodle_url($url, [
+                'action' => 'deletelog',
+                'gastoid' => $log->id,
+                'sesskey' => sesskey(),
+            ]);
+
             $userdata['logs'][] = [
                 'activityhtml' => $activityhtml,
                 'customlabel' => htmlspecialchars($customlabel),
                 'categoriatexto' => htmlspecialchars($categoriatexto),
-                'tipostr' => ($log->itemtype === 'M') ? 'g' : $tipostr,
+                'tipostr' => in_array($log->itemtype, ['M', 'C']) ? 'g' : $tipostr,
                 'labeltipo' => $labeltipo,
                 'amount' => $log->amount,
                 'date' => userdate($log->timecreated, get_string('strftimedatetime', 'langconfig')),
+                'deleteurl' => $deletelogurl->out(false),
             ];
         }
 

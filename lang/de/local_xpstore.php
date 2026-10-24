@@ -63,6 +63,7 @@ $string['congratulations'] = 'Herzlichen Glückwunsch!';
 $string['copyalert'] = 'Code in die Zwischenablage kopiert! Gehe nun zu einem Textfeld oder einer Textseite in deinem Kurs, öffne den HTML-Editor (</>) und füge ihn ein.';
 $string['copysinglecard'] = 'Einzelne Karte kopieren';
 $string['cost'] = 'Kosten';
+$string['coursebonus_feedback'] = '+{$a} Punkte aus dem XP Store';
 $string['currentcatalog'] = 'Aktueller Katalog';
 $string['date'] = 'Datum';
 $string['defaultcategory'] = 'Hauptkatalog';

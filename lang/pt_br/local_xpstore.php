@@ -63,6 +63,7 @@ $string['congratulations'] = 'Parabéns!';
 $string['copyalert'] = 'Código copiado para a área de transferência! Agora vá para qualquer Rótulo ou Página no seu curso, abra o editor HTML (</>) e cole-o.';
 $string['copysinglecard'] = 'Copiar Cartão Único';
 $string['cost'] = 'Custo';
+$string['coursebonus_feedback'] = '+{$a} pontos da XP Store';
 $string['currentcatalog'] = 'Catálogo Atual';
 $string['date'] = 'Data';
 $string['defaultcategory'] = 'Catálogo Principal';

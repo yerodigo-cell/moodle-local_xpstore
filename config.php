@@ -55,6 +55,9 @@ if ($action === 'add' && confirm_sesskey()) {
     if ($tipo === 'G' && strpos($cmid, 'm') === 0) {
         $tipo = 'M';
         $cmid = substr($cmid, 1);
+    } else if ($tipo === 'G' && strpos($cmid, 'c') === 0) {
+        $tipo = 'C';
+        $cmid = substr($cmid, 1);
     }
     $cmid = (int)$cmid;
     $costo = required_param('costo', PARAM_INT);
@@ -116,6 +119,9 @@ if ($action === 'edit_save' && confirm_sesskey()) {
 
     if ($tipo === 'G' && strpos($cmid, 'm') === 0) {
         $tipo = 'M';
+        $cmid = substr($cmid, 1);
+    } else if ($tipo === 'G' && strpos($cmid, 'c') === 0) {
+        $tipo = 'C';
         $cmid = substr($cmid, 1);
     }
     $cmid = (int)$cmid;
@@ -183,6 +189,17 @@ if ($action === 'edit_save' && confirm_sesskey()) {
         // Auto-apply xpstore restriction to the updated activity.
         $productid = $tipo . $cmid;
         local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $hiddenwhenlocked);
+    } else if ($tipo === 'C') {
+        // Re-sync course final grade bonuses for users who already redeemed this item.
+        $affectedusers = $DB->get_fieldset_select(
+            'local_xpstore_gastos',
+            'DISTINCT userid',
+            'itemtype = ? AND itemid = ?',
+            ['C', $cmid]
+        );
+        foreach ($affectedusers as $uid) {
+            local_xpstore_sync_course_grade_bonus($courseid, $uid);
+        }
     }
 
     redirect($url, get_string('productupdated', 'local_xpstore'));
@@ -352,6 +369,9 @@ if ($action === 'load_edit') {
         if ($etipo === 'M') {
             $etipo = 'G';
             $ecmid = 'm' . $parts[0];
+        } else if ($etipo === 'C') {
+            $etipo = 'G';
+            $ecmid = 'c' . $parts[0];
         } else {
             $ecmid = (int)$parts[0];
         }
@@ -454,6 +474,24 @@ $getcmiconhtml = function ($cm) {
                'mask-repeat: no-repeat;"></span></span>';
     }
 };
+
+require_once($CFG->libdir . '/gradelib.php');
+$coursegradeitem = \grade_item::fetch_course_item($courseid);
+if ($coursegradeitem) {
+    $coursetotalname = local_xpstore_get_course_grade_item_name($coursegradeitem->id);
+    $courseiconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
+                      'display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; ' .
+                      'margin: 0 8px 0 0; padding: 0; vertical-align: middle; overflow: hidden; ' .
+                      'background-color: #f59e0b; color: #fff;">' .
+                      '<i class="fa fa-trophy" style="font-size: 14px; line-height: 1; margin: 0; padding: 0;"></i>' .
+                      '</span>';
+    $activityoptions[] = [
+        'id' => 'c' . $coursegradeitem->id,
+        'modname' => 'course',
+        'name' => $courseiconhtml . $coursetotalname,
+        'selected' => ('c' . $coursegradeitem->id == $ecmid),
+    ];
+}
 
 foreach ($modinfo->get_cms() as $cm) {
     if ($cm->has_view() && !in_array($cm->modname, ['label', 'resource', 'contentview', 'qbank'])) {
@@ -609,12 +647,12 @@ if (!empty($configraw)) {
             $iconhtml = '';
             $modinfo = get_fast_modinfo($courseid);
             $cms = $modinfo->get_cms();
-            if ($tipo !== 'M' && !isset($cms[$cid])) {
+            if ($tipo !== 'M' && $tipo !== 'C' && !isset($cms[$cid])) {
                 continue;
             }
             if ($tipo === 'M') {
                 $realname = $DB->get_field('grade_items', 'itemname', ['id' => $cid])
-                    ?: get_string('deletedactivity', 'local_xpstore');
+                    ?: get_string('activitydeleted', 'local_xpstore');
                 $labeltipo = get_string('type_g', 'local_xpstore');
                 try {
                     $iconurl = $OUTPUT->image_url('i/manual_item')->out();
@@ -628,6 +666,16 @@ if (!empty($configraw)) {
                 } catch (Exception $e) {
                     $iconhtml = '';
                 }
+            } else if ($tipo === 'C') {
+                $realname = local_xpstore_get_course_grade_item_name($cid);
+                $labeltipo = get_string('type_g', 'local_xpstore');
+                $iconhtml = '<span class="xpstore-icon-container" ' .
+                            'style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
+                            'display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; ' .
+                            'margin: 0 8px 0 0; padding: 0; vertical-align: middle; overflow: hidden; ' .
+                            'background-color: #f59e0b; color: #fff;">' .
+                            '<i class="fa fa-trophy" style="font-size: 14px; line-height: 1; margin: 0; padding: 0;"></i>' .
+                            '</span>';
             } else {
                 $cm = $cms[$cid];
                 $realname = $cm->name;
@@ -661,7 +709,7 @@ if (!empty($configraw)) {
                 'itemkey' => $tipo . $cid . '_' . $idx,
                 'cardlabel' => $name ?: $realname,
                 'realname' => $realname,
-                'tipolower' => ($tipo === 'M' ? 'g' : strtolower($tipo)),
+                'tipolower' => (in_array($tipo, ['M', 'C']) ? 'g' : strtolower($tipo)),
                 'labeltipo' => $labeltipo,
                 'currenticon' => $cardicon,
                 'is_custom_image' => $iscustomimg,
@@ -670,7 +718,7 @@ if (!empty($configraw)) {
             ];
 
             $catalogitems[] = [
-                'tipolower' => ($tipo === 'M' ? 'g' : strtolower($tipo)),
+                'tipolower' => (in_array($tipo, ['M', 'C']) ? 'g' : strtolower($tipo)),
                 'labeltipo' => $labeltipo,
                 'is_unlock' => ($tipo === 'U'),
                 'hiddenwhenlocked' => (isset($parts[7]) ? (int)$parts[7] : 0),
@@ -684,7 +732,7 @@ if (!empty($configraw)) {
                 'icon' => $cardicon,
                 'is_custom_image' => $iscustomimg,
                 'icon_url' => $cardimgurl,
-                'is_grade_boost' => ($tipo === 'G' || $tipo === 'M'),
+                'is_grade_boost' => in_array($tipo, ['G', 'M', 'C']),
                 'val' => $val,
                 'has_req' => ($requisito > 0),
                 'req_name' => $reqname,

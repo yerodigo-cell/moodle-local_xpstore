@@ -287,7 +287,7 @@
         </h5>
         {{#has_items}}
             <div class="d-flex gap-2 align-items-center">
-                <button type="button" class="btn btn-sm btn-outline-danger mr-2" id="btn-delete-selected" style="display: none;" onclick="if(confirm('{{str_confirmdelete}}')) { document.getElementById('bulk-delete-form').submit(); }">
+                <button type="button" class="btn btn-sm btn-outline-danger mr-2" id="btn-delete-selected" style="display: none;" data-xpstore-title="{{str_delete}}" data-xpstore-confirm="{{str_confirmdelete}}" onclick="event.preventDefault(); var el = this; require(['core/notification', 'core/str'], function(Notification, Str) { Str.get_strings([{key: 'confirm', component: 'core'}, {key: 'yes', component: 'core'}, {key: 'cancel', component: 'core'}]).then(function(s) { Notification.confirm(el.getAttribute('data-xpstore-title') || s[0], el.getAttribute('data-xpstore-confirm'), s[1], s[2], function() { document.getElementById('bulk-delete-form').submit(); }); }); }); return false;">
                     <i class="fa fa-trash"></i> {{str_delete}}
                 </button>
             </div>
@@ -383,7 +383,7 @@
                             <a href="{{editurl}}" class="btn btn-sm btn-outline-secondary mr-1 btn-outline-edit" title="{{str_edit}}">
                                 {{str_edit}}
                             </a>
-                            <a href="{{deleteurl}}" class="btn btn-sm text-danger" title="{{str_delete}}" onclick="return confirm('{{str_confirmdelete}}')">
+                            <a href="{{deleteurl}}" class="btn btn-sm text-danger" title="{{str_delete}}" data-xpstore-title="{{str_delete}}" data-xpstore-confirm="{{str_confirmdelete}}" onclick="event.preventDefault(); var el = this; require(['core/notification', 'core/str'], function(Notification, Str) { Str.get_strings([{key: 'confirm', component: 'core'}, {key: 'yes', component: 'core'}, {key: 'cancel', component: 'core'}]).then(function(s) { Notification.confirm(el.getAttribute('data-xpstore-title') || s[0], el.getAttribute('data-xpstore-confirm'), s[1], s[2], function() { window.location.href = el.href; }); }); }); return false;">
                                 <i class="fa fa-trash"></i>
                             </a>
                         </td>
@@ -830,7 +830,7 @@
         
         <div class="row mt-4">
             <div class="col-12 text-right" style="text-align: right;">
-                <a href="{{resetcolorsurl}}" class="btn btn-outline-secondary px-4 py-2 font-weight-bold btn-reset-colors" onclick="return confirm('{{str_confirmresetcolors}}')" style="margin-right: 10px; display: inline-block;">
+                <a href="{{resetcolorsurl}}" class="btn btn-outline-secondary px-4 py-2 font-weight-bold btn-reset-colors" data-xpstore-title="{{str_resetcolors}}" data-xpstore-confirm="{{str_confirmresetcolors}}" onclick="event.preventDefault(); var el = this; require(['core/notification', 'core/str'], function(Notification, Str) { Str.get_strings([{key: 'confirm', component: 'core'}, {key: 'yes', component: 'core'}, {key: 'cancel', component: 'core'}]).then(function(s) { Notification.confirm(el.getAttribute('data-xpstore-title') || s[0], el.getAttribute('data-xpstore-confirm'), s[1], s[2], function() { window.location.href = el.href; }); }); }); return false;" style="margin-right: 10px; display: inline-block;">
                     <i class="fa fa-undo"></i> {{str_resetcolors}}
                 </a>
                 <button type="submit" class="btn px-4 py-2 font-weight-bold btn-save-colors text-white" style="background: #184cac; display: inline-block;">

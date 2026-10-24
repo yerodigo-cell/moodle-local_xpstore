@@ -45,14 +45,7 @@ $PAGE->set_title(get_string('analytics', 'local_xpstore'));
 // Logic to reset the cycle.
 $action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'reset' && confirm_sesskey()) {
-    $sql = "SELECT g.id FROM {local_xpstore_gastos} g
-            LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
-            LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
-            WHERE cm.course = ? OR gi.courseid = ?";
-    $gastos = $DB->get_fieldset_sql($sql, [$courseid, $courseid]);
-    if (!empty($gastos)) {
-        $DB->delete_records_list('local_xpstore_gastos', 'id', $gastos);
-    }
+    local_xpstore_reset_purchases($courseid);
     redirect($url, get_string('productdeleted', 'local_xpstore'));
 }
 
@@ -81,22 +74,22 @@ foreach ($itemsraw as $item) {
 $totalpurchases = $DB->count_records_sql("
     SELECT COUNT(g.id)
     FROM {local_xpstore_gastos} g
-    LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
-    LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+    LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
+    LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
     WHERE cm.course = ? OR gi.courseid = ?", [$courseid, $courseid]);
 
 $totalxp = $DB->get_field_sql("
     SELECT SUM(g.amount)
     FROM {local_xpstore_gastos} g
-    LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
-    LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+    LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
+    LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
     WHERE cm.course = ? OR gi.courseid = ?", [$courseid, $courseid]) ?: 0;
 
 $engagedstudents = $DB->count_records_sql("
     SELECT COUNT(DISTINCT g.userid)
     FROM {local_xpstore_gastos} g
-    LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
-    LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+    LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
+    LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
     WHERE cm.course = ? OR gi.courseid = ?", [$courseid, $courseid]);
 
 // Course total students.
@@ -108,8 +101,8 @@ $engagementrate = $totalstudentsincourse > 0 ? round(($engagedstudents / $totals
 $sql = "SELECT CONCAT(g.itemtype, '_', g.itemid) as uniqueid, g.itemid, g.itemtype, " .
        "COUNT(g.id) as purchases, SUM(g.amount) as totalxp
         FROM {local_xpstore_gastos} g
-        LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype != 'M'
-        LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype = 'M'
+        LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
+        LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
         WHERE cm.course = ? OR gi.courseid = ?
         GROUP BY g.itemid, g.itemtype
         ORDER BY purchases DESC";
@@ -127,6 +120,8 @@ if ($itemsdata) {
     foreach ($itemsdata as $item) {
         if ($item->itemtype === 'M') {
             $activityname = $DB->get_field('grade_items', 'itemname', ['id' => $item->itemid]);
+        } else if ($item->itemtype === 'C') {
+            $activityname = local_xpstore_get_course_grade_item_name($item->itemid);
         } else {
             $cm = $DB->get_record('course_modules', ['id' => $item->itemid]);
             if ($cm) {

@@ -83,6 +83,21 @@ class observer {
             }
         }
 
+        // Also fix widget URLs inside course section summaries ({course_sections}.summary).
+        $sections = $DB->get_records('course_sections', ['course' => $newcourseid]);
+        foreach ($sections as $section) {
+            if (!empty($section->summary) && strpos($section->summary, '/local/xpstore/') !== false) {
+                if (!$oldcourseid && preg_match($pattern, $section->summary, $matches)) {
+                    $oldcourseid = (int)$matches[2];
+                }
+                $newsummary = preg_replace($pattern, $replacement, $section->summary);
+                if ($newsummary !== $section->summary) {
+                    $section->summary = $newsummary;
+                    $DB->update_record('course_sections', $section);
+                }
+            }
+        }
+
         // Fallback to Moodle event data if we still don't have the old course id.
         if (!$oldcourseid && isset($event->other['originalcourseid'])) {
             $oldcourseid = $event->other['originalcourseid'];
@@ -139,6 +154,15 @@ class observer {
                                 if ($newitemid) {
                                     $newcmid = $newitemid;
                                 }
+                            }
+                        } else if ($tipochar === 'C') {
+                            // Course total grade item.
+                            $newitemid = $DB->get_field('grade_items', 'id', [
+                                'courseid' => $newcourseid,
+                                'itemtype' => 'course',
+                            ]);
+                            if ($newitemid) {
+                                $newcmid = $newitemid;
                             }
                         } else {
                             // Find the old cm's name and modname.
@@ -299,6 +323,17 @@ class observer {
                                     }
                                 } // end if table exists
                             } // end foreach modnames
+
+                            $sections = $DB->get_records('course_sections', ['course' => $newcourseid]);
+                            foreach ($sections as $section) {
+                                if (!empty($section->summary) && strpos($section->summary, 'cmid=' . $oldcmid) !== false) {
+                                    $newsummary = preg_replace_callback($cmidpattern, $cmidreplacement, $section->summary);
+                                    if ($newsummary !== $section->summary) {
+                                        $section->summary = $newsummary;
+                                        $DB->update_record('course_sections', $section);
+                                    }
+                                }
+                            }
                         } // end if newcmid
                     } // end if count parts
                 } // end foreach items
@@ -307,6 +342,49 @@ class observer {
                     set_config('catalog_course_' . $newcourseid, $newcatalog, 'local_xpstore');
                 }
             }
+        }
+
+        rebuild_course_cache($newcourseid, true);
+    }
+
+    /**
+     * Re-applies accumulated course final grade bonus points whenever a user's grades
+     * are updated or recalculated so automatic course aggregation continues working.
+     *
+     * @param \core\event\user_graded $event The user graded event.
+     */
+    public static function user_graded(\core\event\user_graded $event) {
+        global $DB, $CFG;
+
+        $courseid = (int)$event->courseid;
+        $userid = (int)$event->relateduserid;
+        $gradeid = (int)$event->objectid;
+        if ($courseid <= 0 || $userid <= 0 || $gradeid <= 0) {
+            return;
+        }
+
+        $sql = "SELECT gi.*
+                  FROM {grade_grades} gg
+                  JOIN {grade_items} gi ON gi.id = gg.itemid
+                 WHERE gg.id = ?";
+        $gradeitem = $DB->get_record_sql($sql, [$gradeid]);
+        if (!$gradeitem) {
+            return;
+        }
+
+        if ($gradeitem->itemtype === 'course') {
+            if (!$DB->record_exists('local_xpstore_gastos', ['userid' => $userid, 'itemtype' => 'C'])) {
+                return;
+            }
+            require_once($CFG->dirroot . '/local/xpstore/lib.php');
+            local_xpstore_sync_course_grade_bonus($courseid, $userid, true);
+        } else if ($gradeitem->itemtype === 'mod' || $gradeitem->itemtype === 'manual') {
+            $exptype = ($gradeitem->itemtype === 'manual') ? 'M' : 'G';
+            if (!$DB->record_exists('local_xpstore_gastos', ['userid' => $userid, 'itemtype' => $exptype])) {
+                return;
+            }
+            require_once($CFG->dirroot . '/local/xpstore/lib.php');
+            local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, $userid, true);
         }
     }
 }

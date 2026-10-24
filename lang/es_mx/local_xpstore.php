@@ -67,6 +67,7 @@ $string['congratulations'] = '¡Felicidades!';
 $string['copyalert'] = '¡Código copiado al portapapeles! Ahora ve a cualquier Etiqueta o Página de tu curso, abre el editor HTML (</>) y pégalo.';
 $string['copysinglecard'] = 'Copiar Tarjeta Única';
 $string['cost'] = 'Costo';
+$string['coursebonus_feedback'] = '+{$a} puntos de XP Store';
 $string['currentcatalog'] = 'Catálogo Actual';
 $string['customimage'] = 'Imagen personalizada';
 $string['date'] = 'Fecha';

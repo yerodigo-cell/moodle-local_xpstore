@@ -63,6 +63,7 @@ $string['congratulations'] = 'Congratulazioni!';
 $string['copyalert'] = 'Codice copiato negli appunti! Ora vai a qualsiasi Etichetta o Pagina nel tuo corso, apri l\'editor HTML (</>) e incollalo.';
 $string['copysinglecard'] = 'Copia Singola Scheda';
 $string['cost'] = 'Costo';
+$string['coursebonus_feedback'] = '+{$a} punti da XP Store';
 $string['currentcatalog'] = 'Catalogo Attuale';
 $string['date'] = 'Data';
 $string['defaultcategory'] = 'Catalogo Principale';

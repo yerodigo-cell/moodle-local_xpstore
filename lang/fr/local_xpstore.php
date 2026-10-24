@@ -63,6 +63,7 @@ $string['congratulations'] = 'Félicitations !';
 $string['copyalert'] = 'Code copié dans le presse-papiers ! Allez maintenant à n\'importe quelle étiquette ou page de votre cours, ouvrez l\'éditeur HTML (</>) et collez-le.';
 $string['copysinglecard'] = 'Copier la carte unique';
 $string['cost'] = 'Coût';
+$string['coursebonus_feedback'] = '+{$a} points de XP Store';
 $string['currentcatalog'] = 'Catalogue actuel';
 $string['date'] = 'Date';
 $string['defaultcategory'] = 'Catalogue principal';

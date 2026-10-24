@@ -29,4 +29,8 @@ $observers = [
         'eventname'   => '\core\event\course_restored',
         'callback'    => 'local_xpstore\observer::course_restored',
     ],
+    [
+        'eventname'   => '\core\event\user_graded',
+        'callback'    => 'local_xpstore\observer::user_graded',
+    ],
 ];

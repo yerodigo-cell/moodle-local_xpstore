@@ -102,13 +102,13 @@
                         <i class="fa fa-money"></i>{{str_remainingbalance}}
                     </div>
                 </div>
-                <a href="{{userreseturl}}" class="btn-reset-user" onclick="event.stopPropagation(); return confirm('{{str_confirmresetuser}}');" style="color: #adb5bd; border: none; background: transparent; font-size: 1.1rem; padding: 6px 10px; border-radius: 6px; transition: all 0.2s; cursor: pointer; z-index: 2;" title="{{str_resetuser}}" onmouseover="this.style.color='#dc3545'; this.style.backgroundColor='#fff5f5';" onmouseout="this.style.color='#adb5bd'; this.style.backgroundColor='transparent';">
+                <a href="{{userreseturl}}" class="btn-reset-user" data-xpstore-title="{{str_resetuser}}" data-xpstore-confirm="{{str_confirmresetuser}}" onclick="event.preventDefault(); event.stopPropagation(); var el = this; require(['core/notification', 'core/str'], function(Notification, Str) { Str.get_strings([{key: 'confirm', component: 'core'}, {key: 'yes', component: 'core'}, {key: 'cancel', component: 'core'}]).then(function(s) { Notification.confirm(el.getAttribute('data-xpstore-title') || s[0], el.getAttribute('data-xpstore-confirm'), s[1], s[2], function() { window.location.href = el.href; }); }); }); return false;" style="color: #adb5bd; border: none; background: transparent; font-size: 1.1rem; padding: 6px 10px; border-radius: 6px; transition: all 0.2s; cursor: pointer; z-index: 2;" title="{{str_resetuser}}" onmouseover="this.style.color='#dc3545'; this.style.backgroundColor='#fff5f5';" onmouseout="this.style.color='#adb5bd'; this.style.backgroundColor='transparent';">
                     <i class="fa fa-trash"></i>
                 </a>
-                <i class="fa fa-chevron-down text-muted" id="icon-{{userid}}" style="margin-left: 10px;"></i>
+                <i class="fa {{#is_expanded}}fa-chevron-up{{/is_expanded}}{{^is_expanded}}fa-chevron-down{{/is_expanded}} text-muted" id="icon-{{userid}}" style="margin-left: 10px;"></i>
             </div>
             
-            <div class="card-body-logs" id="logs-{{userid}}">
+            <div class="card-body-logs {{#is_expanded}}expanded{{/is_expanded}}" id="logs-{{userid}}">
                 <div class="card-body-logs-inner">
                 <table class="table-logs">
                     <thead>
@@ -118,6 +118,7 @@
                             <th>{{str_type}}</th>
                             <th class="text-center">{{str_cost}}</th>
                             <th class="text-right">{{str_date}}</th>
+                            <th class="text-right" style="width: 48px;"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -146,6 +147,11 @@
                             </td>
                             <td class="text-right small text-muted">
                                 {{date}}
+                            </td>
+                            <td class="text-right" style="width: 48px;">
+                                <a href="{{deleteurl}}" class="btn-delete-log" data-xpstore-title="{{str_deletepurchase}}" data-xpstore-confirm="{{str_confirmdeletepurchase}}" onclick="event.preventDefault(); event.stopPropagation(); var el = this; require(['core/notification', 'core/str'], function(Notification, Str) { Str.get_strings([{key: 'confirm', component: 'core'}, {key: 'yes', component: 'core'}, {key: 'cancel', component: 'core'}]).then(function(s) { Notification.confirm(el.getAttribute('data-xpstore-title') || s[0], el.getAttribute('data-xpstore-confirm'), s[1], s[2], function() { window.location.href = el.href; }); }); }); return false;" style="color: #adb5bd; border: none; background: transparent; font-size: 0.95rem; padding: 4px 8px; border-radius: 6px; transition: all 0.2s; cursor: pointer; display: inline-block;" title="{{str_deletepurchase}}" onmouseover="this.style.color='#dc3545'; this.style.backgroundColor='#fff5f5';" onmouseout="this.style.color='#adb5bd'; this.style.backgroundColor='transparent';">
+                                    <i class="fa fa-trash"></i>
+                                </a>
                             </td>
                         </tr>
                         {{/logs}}

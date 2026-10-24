@@ -96,8 +96,8 @@ foreach ($itemsraw as $item) {
 
 $sql = "SELECT g.*, cm.module, cm.instance, gi.itemname as gi_itemname
         FROM {local_xpstore_gastos} g
-        LEFT JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype != 'M'
-        LEFT JOIN {grade_items} gi ON gi.id = g.itemid AND g.itemtype = 'M'
+        LEFT JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype NOT IN ('M', 'C')
+        LEFT JOIN {grade_items} gi ON gi.id = g.itemid AND g.itemtype IN ('M', 'C')
         WHERE g.userid = ?
         AND (cm.course = ? OR gi.courseid = ?)
         ORDER BY g.timecreated DESC";
@@ -112,6 +112,8 @@ if ($logs) {
         $totalgastado += $log->amount;
         if ($log->itemtype === 'M') {
             $activityname = $log->gi_itemname;
+        } else if ($log->itemtype === 'C') {
+            $activityname = local_xpstore_get_course_grade_item_name($log->itemid);
         } else {
             $modname = $DB->get_field('modules', 'name', ['id' => $log->module]);
             $activityname = $DB->get_field($modname, 'name', ['id' => $log->instance]);
@@ -123,11 +125,11 @@ if ($logs) {
             ? get_string('type_' . $tipostr, 'local_xpstore')
             : 'Legacy';
 
-        if ($log->itemtype === 'M') {
+        if ($log->itemtype === 'M' || $log->itemtype === 'C') {
             $labeltipo = get_string('type_g', 'local_xpstore');
         }
 
-        $isgrade = ($log->itemtype === 'G' || $log->itemtype === 'M');
+        $isgrade = in_array($log->itemtype, ['G', 'M', 'C']);
         $gradeurl = '';
         $cmurl = '';
 
@@ -148,7 +150,7 @@ if ($logs) {
             ? $mapvalores[$tipocharupper][$log->itemid]
             : '0';
 
-        if (($tipocharupper === 'G' || $tipocharupper === 'M') && $valornota !== '0') {
+        if (in_array($tipocharupper, ['G', 'M', 'C']) && $valornota !== '0') {
             $valnum = floatval($valornota);
             $suffix = ' (+' . $valnum . ' pts)';
             $customlabel = $customlabel ? $customlabel . $suffix : $suffix;
@@ -157,7 +159,7 @@ if ($logs) {
         $templatedata['logs'][] = [
             'activityname' => htmlspecialchars($activityname),
             'customlabel' => htmlspecialchars($customlabel),
-            'tipostr' => ($log->itemtype === 'M') ? 'g' : $tipostr,
+            'tipostr' => in_array($log->itemtype, ['M', 'C']) ? 'g' : $tipostr,
             'labeltipo' => $labeltipo,
             'amount' => $log->amount,
             'date' => userdate($log->timecreated, get_string('strftimedatetime', 'langconfig')),
