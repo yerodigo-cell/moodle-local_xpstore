@@ -69,6 +69,9 @@ if ($action === 'deletelog' && confirm_sesskey()) {
     redirect(new moodle_url('/local/xpstore/report.php', $redirectparams), get_string('purchasedeleted', 'local_xpstore'));
 }
 
+// Ensure any orphaned grade bonuses from previous resets are cleaned up.
+local_xpstore_cleanup_orphan_grade_bonuses($courseid);
+
 // Pre-load store categories to assign them to records.
 $configraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
 $itemsraw = array_filter(explode(',', $configraw));

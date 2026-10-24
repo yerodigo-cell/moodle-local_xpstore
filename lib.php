@@ -495,14 +495,22 @@ function local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, $userid, $fr
         $ovrkey = "item_ovr_{$gradeitem->id}_{$userid}";
         $savedbase = get_config('local_xpstore', $basekey);
 
-        // If this user has no bonus on this specific item and no previously saved bonus state to revert,
-        // do not touch this grade item at all!
-        if ($totalbonus <= 0 && ($fromobserver || $savedbase === false)) {
+        // If triggered from user_graded observer and user has no bonus on this item,
+        // do not touch this grade item at all.
+        if ($totalbonus <= 0 && $fromobserver) {
             $syncingitem[$lockkey] = false;
             return;
         }
 
         $grade = $DB->get_record('grade_grades', ['itemid' => $gradeitem->id, 'userid' => $userid]);
+        if (
+            $totalbonus <= 0 &&
+            $savedbase === false &&
+            (!$grade || empty($grade->feedback) || stripos($grade->feedback, 'points from XP Store') === false)
+        ) {
+            $syncingitem[$lockkey] = false;
+            return;
+        }
         $grademax = (float)$gradeitem->grademax;
         $grademin = (float)$gradeitem->grademin;
 
@@ -579,6 +587,12 @@ function local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, $userid, $fr
                     $origgrade = ($savedbase === 'null' || $savedbase === '') ? null : (float)$savedbase;
                 } else if ($modknown) {
                     $origgrade = $modgrade;
+                } else if (
+                    $grade->finalgrade !== null &&
+                    !empty($grade->feedback) &&
+                    preg_match('/\+?([0-9]+(?:\.[0-9]+)?)\s*points from XP Store/i', $grade->feedback, $m)
+                ) {
+                    $origgrade = max($grademin, (float)$grade->finalgrade - (float)$m[1]);
                 } else {
                     $origgrade = null;
                 }
@@ -832,6 +846,49 @@ function local_xpstore_reset_course_form_definition(&$mform) {
 }
 
 /**
+ * Scans grade_grades in a course and reverts any leftover XP Store bonus or feedback
+ * for items where the user no longer has active XP Store bonus purchases.
+ *
+ * @param int $courseid The course ID.
+ * @param int|null $userid Optional user ID filter.
+ * @return void
+ */
+function local_xpstore_cleanup_orphan_grade_bonuses($courseid, $userid = null) {
+    global $DB;
+
+    $like = $DB->sql_like('gg.feedback', '?', false);
+    $params = [(int)$courseid, '%points from XP Store%'];
+    $usersql = '';
+    if ($userid !== null) {
+        $usersql = ' AND gg.userid = ?';
+        $params[] = (int)$userid;
+    }
+
+    $sql = "SELECT gg.id AS gradeid, gg.userid, gi.*
+              FROM {grade_grades} gg
+              JOIN {grade_items} gi ON gi.id = gg.itemid
+             WHERE gi.courseid = ? AND {$like}{$usersql}";
+    $rows = $DB->get_records_sql($sql, $params);
+    if (empty($rows)) {
+        return;
+    }
+
+    foreach ($rows as $row) {
+        $uid = (int)$row->userid;
+        if ($row->itemtype === 'course') {
+            if (local_xpstore_get_user_course_bonus($courseid, $uid) <= 0) {
+                unset_config("course_bonus_{$courseid}_{$uid}", 'local_xpstore');
+                local_xpstore_sync_course_grade_bonus($courseid, $uid);
+            }
+        } else if ($row->itemtype === 'mod' || $row->itemtype === 'manual') {
+            if (local_xpstore_get_user_item_bonus($courseid, $row, $uid) <= 0) {
+                local_xpstore_sync_item_grade_bonus($courseid, $row, $uid, false);
+            }
+        }
+    }
+}
+
+/**
  * Resets purchases for a course (or a single user in a course) and restores any grades
  * and feedback modified by XP Store bonuses ('G', 'M', and 'C').
  *
@@ -862,6 +919,7 @@ function local_xpstore_reset_purchases($courseid, $userid = null) {
             unset_config("course_bonus_{$courseid}_{$userid}", 'local_xpstore');
             local_xpstore_sync_course_grade_bonus($courseid, $userid);
         }
+        local_xpstore_cleanup_orphan_grade_bonuses($courseid, $userid);
         return;
     }
 
@@ -928,7 +986,6 @@ function local_xpstore_reset_purchases($courseid, $userid = null) {
     $DB->delete_records_list('local_xpstore_gastos', 'id', $gastoids);
 
     require_once($CFG->libdir . '/gradelib.php');
-    $needsregrade = false;
 
     // Revert activity ('G') and manual item ('M') bonuses and feedback.
     foreach ($itembonuses as $ib) {
@@ -946,8 +1003,7 @@ function local_xpstore_reset_purchases($courseid, $userid = null) {
         }
 
         foreach ($gradeitems as $gradeitem) {
-            local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, (int)$ib['userid'], true);
-            $needsregrade = true;
+            local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, (int)$ib['userid'], false);
         }
     }
 
@@ -957,9 +1013,7 @@ function local_xpstore_reset_purchases($courseid, $userid = null) {
         local_xpstore_sync_course_grade_bonus($courseid, $uid);
     }
 
-    if ($needsregrade) {
-        grade_regrade_final_grades($courseid);
-    }
+    local_xpstore_cleanup_orphan_grade_bonuses($courseid, $userid);
     rebuild_course_cache($courseid, true);
 }
 
