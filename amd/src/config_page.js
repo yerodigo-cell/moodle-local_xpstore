@@ -66,12 +66,12 @@ define([], function() {
                             show = (optData.modname === 'forum');
                         } else if (selectedType === 'G') {
                             var gradables = [
-                                'course', 'quiz', 'assign', 'forum', 'workshop',
+                                'quiz', 'assign', 'forum', 'workshop',
                                 'scorm', 'lesson', 'h5pactivity', 'hvp', 'manual'
                             ];
                             show = gradables.indexOf(optData.modname) !== -1;
                         } else {
-                            show = (optData.modname !== 'manual' && optData.modname !== 'course');
+                            show = (optData.modname !== 'manual');
                         }
 
                         if (show) {

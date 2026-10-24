@@ -487,7 +487,7 @@ if ($coursegradeitem) {
                       '</span>';
     $activityoptions[] = [
         'id' => 'c' . $coursegradeitem->id,
-        'modname' => 'course',
+        'modname' => 'manual',
         'name' => $courseiconhtml . $coursetotalname,
         'selected' => ('c' . $coursegradeitem->id == $ecmid),
     ];
