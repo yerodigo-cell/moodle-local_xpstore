@@ -120,13 +120,18 @@ if ($logs) {
         }
 
         $tipostr = strtolower($log->itemtype);
+        $tipocharupper = strtoupper($tipostr);
 
-        $labeltipo = get_string_manager()->string_exists('type_' . $tipostr, 'local_xpstore')
-            ? get_string('type_' . $tipostr, 'local_xpstore')
-            : 'Legacy';
+        $studentlabel = local_xpstore_get_student_badge_label($tipocharupper);
+        $labeltipo = ($studentlabel !== '') ? $studentlabel : 'Legacy';
 
-        if ($log->itemtype === 'M' || $log->itemtype === 'C') {
-            $labeltipo = get_string('type_g', 'local_xpstore');
+        $badgeclass = $tipostr;
+        if (in_array($tipocharupper, ['M', 'C'], true)) {
+            $badgeclass = 'g';
+        } else if ($tipocharupper === 'S') {
+            $badgeclass = 'u';
+        } else if ($tipocharupper === 'F') {
+            $badgeclass = 'a';
         }
 
         $isgrade = in_array($log->itemtype, ['G', 'M', 'C']);
@@ -141,7 +146,6 @@ if ($logs) {
                 : (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
         }
 
-        $tipocharupper = strtoupper($tipostr);
         $customlabel = isset($mapcustomlabels[$tipocharupper][$log->itemid])
             ? $mapcustomlabels[$tipocharupper][$log->itemid]
             : '';
@@ -159,7 +163,7 @@ if ($logs) {
         $templatedata['logs'][] = [
             'activityname' => htmlspecialchars($activityname),
             'customlabel' => htmlspecialchars($customlabel),
-            'tipostr' => in_array($log->itemtype, ['M', 'C']) ? 'g' : $tipostr,
+            'tipostr' => $badgeclass,
             'labeltipo' => $labeltipo,
             'amount' => $log->amount,
             'date' => userdate($log->timecreated, get_string('strftimedatetime', 'langconfig')),

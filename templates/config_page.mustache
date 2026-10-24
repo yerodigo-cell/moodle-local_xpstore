@@ -239,7 +239,10 @@
             </div>
 
             <div class="col-12 col-md-6 mb-3">
-                <label class="small font-weight-bold mb-1 form-label-block">{{str_minlevel}}</label>
+                <label class="small font-weight-bold mb-1 form-label-flex">
+                    {{str_minlevel}}
+                    {{{help_minlevel}}}
+                </label>
                 <input type="number" name="minlevel" id="minlevel_input" min="0" class="form-control form-control-sm bg-white" placeholder="{{str_minlevelzero}}" value="{{eminlevel}}" style="border: 1px solid #ced4da; box-shadow: none;">
             </div>
 
@@ -768,14 +771,17 @@
                     <div class="p-card" style="margin: 0; height: 100%;">
                         <div class="glass-shine"></div>
                         <div>
-                            <div style="font-size: 20px; color: var(--ci); margin-bottom: 8px;">
-                                <img src="" id="preview_mockup_card_img" class="xpstore-custom-card-img" alt="" style="display: none;">
-                                <i class="fa fa-file-text" id="preview_mockup_card_icon"></i>
-                            </div>
-                            <div class="font-weight-bold" style="font-size: 0.95rem; line-height: 1.2; margin-bottom: 4px;">
+                            <div class="p-card-title">
                                 {{#str}} mockup_sampleitem, local_xpstore {{/str}}
                             </div>
-                            <div class="text-muted small mb-2" style="font-size: 0.75rem;">
+                            <div class="p-card-icon">
+                                <img src="" id="preview_mockup_card_img" class="xpstore-custom-card-img" alt="" style="display: none;">
+                                <i class="fa fa-file-text" id="preview_mockup_card_icon" aria-hidden="true"></i>
+                            </div>
+                            <div class="grade-badge grade-badge-secondary">
+                                {{#str}} badge_extension, local_xpstore {{/str}}
+                            </div>
+                            <div class="p-card-subtitle">
                                 {{#str}} mockup_shortdesc, local_xpstore {{/str}}
                             </div>
                         </div>
@@ -801,12 +807,15 @@
                         </div>
 
                         <div class="card-body">
-                            <div class="w-icon">
-                                <img src="" id="preview_mockup_widget_img" class="xpstore-custom-card-img" alt="" style="display: none;">
-                                <i class="fa fa-star" id="preview_mockup_widget_icon"></i>
-                            </div>
                             <div class="w-title">
                                 {{#str}} mockup_sampleitem, local_xpstore {{/str}}
+                            </div>
+                            <div class="w-icon">
+                                <img src="" id="preview_mockup_widget_img" class="xpstore-custom-card-img" alt="" style="display: none;">
+                                <i class="fa fa-star" id="preview_mockup_widget_icon" aria-hidden="true"></i>
+                            </div>
+                            <div class="w-badge w-badge-secondary">
+                                {{#str}} badge_unlock, local_xpstore {{/str}}
                             </div>
                             <div class="w-subtitle">
                                 {{#str}} mockup_shortdesc, local_xpstore {{/str}}

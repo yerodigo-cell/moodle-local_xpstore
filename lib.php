@@ -1542,6 +1542,34 @@ function local_xpstore_save_card_image($courseid, array $uploadedfile, $existing
 }
 
 /**
+ * Returns the student-facing badge label for a product type.
+ *
+ * @param string $tipo Product type character ('Q', 'A', 'F', 'G', 'M', 'C', 'S', 'U').
+ * @param string $boost Optional bonus points value for grade boost products.
+ * @return string Localized student-facing label.
+ */
+function local_xpstore_get_student_badge_label($tipo, $boost = '0') {
+    $tipo = strtoupper((string)$tipo);
+    $booststr = (string)$boost;
+    if (in_array($tipo, ['G', 'M', 'C'], true)) {
+        if ($booststr !== '' && $booststr !== '0') {
+            return '+' . $booststr . ' ' . get_string('points', 'local_xpstore');
+        }
+        return get_string('type_g', 'local_xpstore');
+    }
+    if ($tipo === 'S' || $tipo === 'U') {
+        return get_string('badge_unlock', 'local_xpstore');
+    }
+    if ($tipo === 'A' || $tipo === 'F') {
+        return get_string('badge_extension', 'local_xpstore');
+    }
+    if ($tipo === 'Q') {
+        return get_string('badge_extra_attempt', 'local_xpstore');
+    }
+    return '';
+}
+
+/**
  * Serves files from the local_xpstore file areas.
  *
  * @param stdClass $course The course object.

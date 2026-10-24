@@ -190,7 +190,7 @@ $cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '
 $cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
 $cistore = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: $cpstore;
 
-$isbonus = (in_array($producto['tipo'], ['G', 'M', 'C']) && $producto['boost'] != '0');
+$isbonus = in_array($producto['tipo'], ['G', 'M', 'C'], true);
 $isspecial = ($producto['tipo'] == 'S');
 $isunlock = ($producto['tipo'] == 'U');
 $statussuccess = ($status === 'success');
@@ -260,6 +260,7 @@ $templatedata = [
     'is_custom_image' => $iscustomimg,
     'icon_url' => $iconurl,
     'is_bonus' => $isbonus,
+    'badge_text' => local_xpstore_get_student_badge_label($producto['tipo'], $producto['boost']),
     'boost' => $producto['boost'],
     'is_special' => $isspecial,
     'is_unlock' => $isunlock,

@@ -82,37 +82,26 @@
                     <div class="p-card">
                         <div class="glass-shine"></div>
                         <div>
-                            <div style="font-size: 20px; color: var(--ci); margin-bottom: 10px;">
-                                {{#is_custom_image}}
-                                    <img src="{{icon_url}}" alt="{{displayname}}" class="xpstore-custom-card-img">
-                                {{/is_custom_image}}
-                                {{^is_custom_image}}
-                                    <i class="fa fa-{{icon}}"></i>
-                                {{/is_custom_image}}
-                            </div>
-
-                            {{#is_bonus}}
-                                <div class="grade-badge">
-                                    +{{boost}} {{str_points}}
-                                </div>
-                            {{/is_bonus}}
-
-                            {{#is_special}}
-                                <div class="grade-badge" style="background: var(--cb); color: white;">
-                                    {{str_specialcontent}}
-                                </div>
-                            {{/is_special}}
-
-                            {{#is_unlock}}
-                                <div class="grade-badge" style="background: var(--cb); color: white;">
-                                    {{str_unlockcontent}}
-                                </div>
-                            {{/is_unlock}}
-
-                            <div class="font-weight-bold" style="font-size: 1rem; line-height: 1.2; margin-bottom: 4px;">
+                            <div class="p-card-title">
                                 {{displayname}}
                             </div>
-                            <div class="text-muted small mb-2" style="font-size: 0.75rem;">
+
+                            <div class="p-card-icon">
+                                {{#is_custom_image}}
+                                    <img src="{{icon_url}}" alt="" class="xpstore-custom-card-img">
+                                {{/is_custom_image}}
+                                {{^is_custom_image}}
+                                    <i class="fa fa-{{icon}}" aria-hidden="true"></i>
+                                {{/is_custom_image}}
+                            </div>
+
+                            {{#badge_text}}
+                                <div class="grade-badge {{^is_bonus}}grade-badge-secondary{{/is_bonus}}">
+                                    {{badge_text}}
+                                </div>
+                            {{/badge_text}}
+
+                            <div class="p-card-subtitle">
                                 {{nreal}}
                             </div>
                         </div>

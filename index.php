@@ -197,7 +197,7 @@ foreach ($todoslosproductos as $item) {
             $comprasactuales = $DB->count_records('local_xpstore_gastos', $comprasparams);
             $limitealcanzado = ($limite > 0 && $comprasactuales >= $limite);
 
-            $isbonus = (in_array($tipochar, ['G', 'M', 'C']) && !empty($boost) && $boost != '0');
+            $isbonus = in_array($tipochar, ['G', 'M', 'C'], true);
             $isspecial = ($tipochar == 'S');
             $isunlock = ($tipochar == 'U');
 
@@ -255,6 +255,7 @@ foreach ($todoslosproductos as $item) {
                 'is_custom_image' => $iscustomimg,
                 'icon_url' => $iconurl,
                 'boost' => $boost,
+                'badge_text' => local_xpstore_get_student_badge_label($tipochar, $boost),
                 'is_bonus' => $isbonus,
                 'is_special' => $isspecial,
                 'is_unlock' => $isunlock,

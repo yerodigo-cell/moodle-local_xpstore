@@ -56,11 +56,11 @@ try {
 
         <div class="card-body">
             {{#status_success}}
-                <div class="w-icon" style="color: #28a745; animation: none;">
-                    <i class="fa fa-check-circle"></i>
-                </div>
                 <div class="w-title">
                     {{str_widgetunlocked}}
+                </div>
+                <div class="w-icon" style="color: #28a745; animation: none;">
+                    <i class="fa fa-check-circle" aria-hidden="true"></i>
                 </div>
                 <div class="w-subtitle">
                     {{str_widgetunlockeddesc}}
@@ -68,34 +68,25 @@ try {
             {{/status_success}}
             
             {{^status_success}}
-                <div class="w-icon">
-                    {{#is_custom_image}}
-                        <img src="{{icon_url}}" alt="{{displayname}}" class="xpstore-custom-card-img">
-                    {{/is_custom_image}}
-                    {{^is_custom_image}}
-                        <i class="fa fa-{{icon}}"></i>
-                    {{/is_custom_image}}
-                </div>
-
-                {{#is_bonus}}
-                    <div class="w-badge">
-                        +{{boost}} {{str_points}}
-                    </div>
-                {{/is_bonus}}
-                {{#is_special}}
-                    <div class="w-badge" style="background: var(--cb); color: white;">
-                        {{str_specialcontent}}
-                    </div>
-                {{/is_special}}
-                {{#is_unlock}}
-                    <div class="w-badge" style="background: var(--cb); color: white;">
-                        {{str_unlockcontent}}
-                    </div>
-                {{/is_unlock}}
-
                 <div class="w-title">
                     {{displayname}}
                 </div>
+
+                <div class="w-icon">
+                    {{#is_custom_image}}
+                        <img src="{{icon_url}}" alt="" class="xpstore-custom-card-img">
+                    {{/is_custom_image}}
+                    {{^is_custom_image}}
+                        <i class="fa fa-{{icon}}" aria-hidden="true"></i>
+                    {{/is_custom_image}}
+                </div>
+
+                {{#badge_text}}
+                    <div class="w-badge {{^is_bonus}}w-badge-secondary{{/is_bonus}}">
+                        {{badge_text}}
+                    </div>
+                {{/badge_text}}
+
                 <div class="w-subtitle">
                     {{n_real}}
                 </div>

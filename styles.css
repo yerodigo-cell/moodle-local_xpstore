@@ -542,6 +542,36 @@ body.pagelayout-embedded,
     border-color: #e0e0e0;
 }
 
+.local_xpstore-container .p-card-title {
+    font-weight: 800;
+    font-size: 1rem;
+    line-height: 1.22;
+    color: #222;
+    min-block-size: calc(2 * 1.22em);
+    display: grid;
+    align-content: safe center;
+    margin-block-end: 8px;
+    text-wrap: balance;
+}
+
+.local_xpstore-container .p-card-icon {
+    min-block-size: 44px;
+    display: flex;
+    align-items: safe center;
+    justify-content: safe center;
+    font-size: 30px;
+    color: var(--ci);
+    margin-block-end: 12px;
+}
+
+.local_xpstore-container .p-card-subtitle {
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: #6c757d;
+    margin-block-end: 10px;
+    text-wrap: balance;
+}
+
 .local_xpstore-container .grade-badge {
     background: #ffc107;
     color: #000;
@@ -551,6 +581,11 @@ body.pagelayout-embedded,
     font-size: 0.7rem;
     display: inline-block;
     margin-bottom: 6px;
+}
+
+.local_xpstore-container .grade-badge.grade-badge-secondary {
+    background: var(--cb);
+    color: #fff;
 }
 
 .local_xpstore-container .w-limit {
@@ -859,14 +894,18 @@ body.pagelayout-embedded,
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
+    align-items: safe center;
     text-align: center;
 }
 
 .local_xpstore-container .w-icon {
-    font-size: 24px;
+    min-block-size: 44px;
+    display: flex;
+    align-items: safe center;
+    justify-content: safe center;
+    font-size: 30px;
     color: var(--ci);
-    margin-bottom: 8px;
+    margin-block-end: 10px;
     animation: local_xpstore_pulse 2s infinite;
 }
 
@@ -874,8 +913,7 @@ body.pagelayout-embedded,
     width: 44px;
     height: 44px;
     object-fit: contain;
-    display: inline-block;
-    vertical-align: middle;
+    display: block;
 }
 
 @keyframes local_xpstore_pulse {
@@ -891,19 +929,36 @@ body.pagelayout-embedded,
 }
 
 .local_xpstore-container .w-title {
+    inline-size: 100%;
+    box-sizing: border-box;
     font-weight: 800;
     font-size: 0.95rem;
     color: #222;
-    line-height: 1.2;
-    margin-bottom: 4px;
-    padding: 0 10px;
+    line-height: 1.22;
+    margin-block-end: 10px;
+    padding-inline: 10px;
+    text-wrap: balance;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: clip;
 }
 
 .local_xpstore-container .w-subtitle {
+    inline-size: 100%;
+    box-sizing: border-box;
     font-size: 0.75rem;
-    color: #999;
-    margin-bottom: 12px;
-    padding: 0 10px;
+    line-height: 1.3;
+    color: #777;
+    margin-block-end: 0;
+    padding-inline: 10px;
+    text-wrap: balance;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-clamp: 2;
+    overflow: clip;
 }
 
 .local_xpstore-container .w-badge {
@@ -914,8 +969,13 @@ body.pagelayout-embedded,
     padding: 4px 10px;
     border-radius: 20px;
     display: inline-block;
-    margin-bottom: 8px;
+    margin-block-end: 5px;
     white-space: nowrap;
+}
+
+.local_xpstore-container .w-badge.w-badge-secondary {
+    background: var(--cb);
+    color: #fff;
 }
 
 .local_xpstore-container .widget-card .card-footer {

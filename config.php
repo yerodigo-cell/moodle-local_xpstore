@@ -823,6 +823,7 @@ $templatedata = array_merge([
 
     'str_minlevel' => $sm->string_exists('minlevel', 'local_xpstore') ?
         get_string('minlevel', 'local_xpstore') : 'Nivel mínimo (Level Up!)',
+    'help_minlevel' => $OUTPUT->help_icon('minlevel', 'local_xpstore'),
     'str_minlevelzero' => $sm->string_exists('minlevelzero', 'local_xpstore') ?
         get_string('minlevelzero', 'local_xpstore') : '0 = Cualquier nivel',
     'str_minlevel_short' => $sm->string_exists('minlevel_short', 'local_xpstore') ?
