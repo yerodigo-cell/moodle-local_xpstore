@@ -713,11 +713,13 @@ body.pagelayout-embedded,
     border-radius: 18px;
     text-align: center;
     border: 1px solid #eee;
-    height: 310px;
+    min-block-size: 310px;
+    block-size: auto;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    overflow: clip;
     transition: transform 0.3s ease;
     box-sizing: border-box;
     position: relative;
@@ -886,14 +888,16 @@ body.pagelayout-embedded,
     font-size: 0.75rem;
     font-weight: 800;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
 }
 
 .local_xpstore-container .widget-card .card-body {
-    padding: 10px 15px;
-    flex-grow: 1;
+    padding: 10px 15px 6px;
+    flex: 1 0 auto;
+    min-block-size: min-content;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: safe center;
     align-items: safe center;
     text-align: center;
 }
@@ -905,7 +909,7 @@ body.pagelayout-embedded,
     justify-content: safe center;
     font-size: 30px;
     color: var(--ci);
-    margin-block-end: 10px;
+    margin-block-end: 8px;
     animation: local_xpstore_pulse 2s infinite;
 }
 
@@ -935,7 +939,7 @@ body.pagelayout-embedded,
     font-size: 0.95rem;
     color: #222;
     line-height: 1.22;
-    margin-block-end: 10px;
+    margin-block-end: 7px;
     padding-inline: 10px;
     text-wrap: balance;
     display: -webkit-box;
@@ -979,9 +983,102 @@ body.pagelayout-embedded,
 }
 
 .local_xpstore-container .widget-card .card-footer {
-    padding: 12px 15px;
+    padding: 6px 15px 12px;
     background: transparent;
     border-top: none;
+    flex-shrink: 0;
+    z-index: 3;
+}
+
+.local_xpstore-container .widget-card .w-limit {
+    margin-block-end: 6px;
+}
+
+.local_xpstore-container .widget-card .btn-buy {
+    display: flex;
+    align-items: safe center;
+    justify-content: safe center;
+    gap: 5px;
+    min-inline-size: 0;
+    min-block-size: 36px;
+    padding: 7px 10px;
+    margin-top: 4px;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.local_xpstore-container .widget-card .btn-buy.btn-buy-locked {
+    font-size: 0.78rem;
+}
+
+.local_xpstore-container .widget-card .w-lock-icon {
+    color: #dc3545;
+    flex-shrink: 0;
+}
+
+.local_xpstore-container .widget-card .w-btn-label {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.local_xpstore-container .widget-card .w-btn-tooltip-wrap {
+    position: relative;
+    inline-size: 100%;
+}
+
+.local_xpstore-container .widget-card .w-btn-tooltip {
+    position: absolute;
+    inset-block-end: calc(100% + 6px);
+    inset-inline: 0;
+    background: rgba(24, 28, 40, 0.94);
+    color: #ffffff;
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1.35;
+    padding: 7px 10px;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+    white-space: normal;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
+    text-align: center;
+    z-index: 30;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(4px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+
+.local_xpstore-container .widget-card .w-btn-tooltip::before {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 100%;
+    block-size: 8px;
+}
+
+.local_xpstore-container .widget-card .w-btn-tooltip::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(24, 28, 40, 0.94) transparent transparent transparent;
+}
+
+.local_xpstore-container .widget-card .w-btn-tooltip-wrap:not(.tooltip-dismissed):hover .w-btn-tooltip,
+.local_xpstore-container .widget-card .w-btn-tooltip-wrap:not(.tooltip-dismissed):focus-within .w-btn-tooltip,
+.local_xpstore-container .widget-card .w-btn-tooltip-wrap.tooltip-visible .w-btn-tooltip {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
 }
 
 .local_xpstore-container .w-cost {

@@ -120,14 +120,27 @@ try {
 
                     {{#limitealcanzado}}
                         <button type="button" class="btn-buy btn-buy-disabled" onclick="var c = this.closest('.p-card') || this.closest('.widget-card'); c.classList.remove('shake-error'); void c.offsetWidth; c.classList.add('shake-error');">
-                            {{str_soldout}}
+                            <span class="w-btn-label">{{str_soldout}}</span>
                         </button>
                     {{/limitealcanzado}}
 
                     {{^limitealcanzado}}
-                        <button type="{{#disabled}}button{{/disabled}}{{^disabled}}submit{{/disabled}}" class="btn-buy {{#disabled}}btn-buy-disabled{{/disabled}}" {{#disabled}}onclick="var c = this.closest('.p-card') || this.closest('.widget-card'); c.classList.remove('shake-error'); void c.offsetWidth; c.classList.add('shake-error');"{{/disabled}}>
-                            {{#locked_by_req}}<i class="fa fa-lock mr-1" style="color: #dc3545;"></i>{{/locked_by_req}} {{btntext}}
-                        </button>
+                        {{#locked_by_req}}
+                            <div class="w-btn-tooltip-wrap">
+                                <button type="button" class="btn-buy btn-buy-disabled btn-buy-locked" aria-describedby="xpstore-widget-req-tip" onclick="var c = this.closest('.widget-card'); if (c) { c.classList.remove('shake-error'); void c.offsetWidth; c.classList.add('shake-error'); } var w = this.closest('.w-btn-tooltip-wrap'); if (w) { w.classList.remove('tooltip-dismissed'); w.classList.add('tooltip-visible'); clearTimeout(w._tipTimer); w._tipTimer = setTimeout(function() { w.classList.remove('tooltip-visible'); }, 3500); }">
+                                    <i class="fa fa-lock w-lock-icon" aria-hidden="true"></i>
+                                    <span class="w-btn-label">{{btntext}}</span>
+                                </button>
+                                <div class="w-btn-tooltip" id="xpstore-widget-req-tip" role="tooltip">
+                                    {{btntext}}
+                                </div>
+                            </div>
+                        {{/locked_by_req}}
+                        {{^locked_by_req}}
+                            <button type="{{#disabled}}button{{/disabled}}{{^disabled}}submit{{/disabled}}" class="btn-buy {{#disabled}}btn-buy-disabled{{/disabled}}" {{#disabled}}onclick="var c = this.closest('.p-card') || this.closest('.widget-card'); c.classList.remove('shake-error'); void c.offsetWidth; c.classList.add('shake-error');"{{/disabled}}>
+                                <span class="w-btn-label">{{btntext}}</span>
+                            </button>
+                        {{/locked_by_req}}
                     {{/limitealcanzado}}
                 </form>
             {{/status_success}}
@@ -245,6 +258,37 @@ try {
 <script>
 (function() {
     try {
+        var tipWrap = document.querySelector('.w-btn-tooltip-wrap');
+        if (tipWrap) {
+            tipWrap.addEventListener('mouseleave', function() {
+                tipWrap.classList.remove('tooltip-dismissed');
+            });
+            tipWrap.addEventListener('focusout', function(e) {
+                if (!tipWrap.contains(e.relatedTarget)) {
+                    tipWrap.classList.remove('tooltip-dismissed', 'tooltip-visible');
+                }
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    tipWrap.classList.add('tooltip-dismissed');
+                    tipWrap.classList.remove('tooltip-visible');
+                }
+            });
+            document.addEventListener('click', function(e) {
+                if (!tipWrap.contains(e.target)) {
+                    tipWrap.classList.remove('tooltip-visible');
+                }
+            });
+        }
+
+        var emb = document.querySelector('.local_xpstore-embedded-container');
+        if (emb && window.frameElement) {
+            var needed = Math.ceil(emb.getBoundingClientRect().height);
+            if (needed > 350) {
+                window.frameElement.style.setProperty('height', needed + 'px', 'important');
+            }
+        }
+
         if (window.BroadcastChannel) {
             var bc = new BroadcastChannel('xpstore_balance_sync');
             bc.onmessage = function(ev) {
