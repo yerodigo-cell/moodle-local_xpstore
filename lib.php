@@ -892,7 +892,7 @@ function local_xpstore_get_module_raw_grade($gradeitem, $userid, &$known = false
         $rec = !empty($records) ? reset($records) : null;
         return ($rec && $rec->grade !== null) ? (float)$rec->grade : null;
     } else if ($mod === 'forum' && (int)$gradeitem->itemnumber === 1) {
-        // itemnumber 1 is whole-forum grading ({forum_grades}); itemnumber 0 is ratings ({rating}).
+        // Itemnumber 1 is whole-forum grading ({forum_grades}); itemnumber 0 is ratings ({rating}).
         $known = true;
         $records = $DB->get_records_select(
             'forum_grades',

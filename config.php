@@ -48,14 +48,7 @@ $tab = optional_param('tab', '', PARAM_TEXT);
 
 $catalogkey = 'catalog_course_' . $courseid;
 
-/**
- * Validates that a target cmid/gradeitem belongs to the given course.
- *
- * @param int $courseid The course ID.
- * @param string $tipo Normalized product type ('Q','A','F','G','M','C','S','U').
- * @param int $cmid Target ID.
- * @return bool True if valid for this course.
- */
+// Validates that a target cmid/gradeitem belongs to the given course.
 $validatetarget = function (int $courseid, string $tipo, int $cmid) use ($DB): bool {
     if ($cmid <= 0) {
         return false;

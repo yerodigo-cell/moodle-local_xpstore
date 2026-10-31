@@ -817,8 +817,96 @@
 
 </div>
 {{#js}}
-require(['jquery', 'core/sortable_list', 'local_xpstore/config_page', 'core/notification'], function($, SortableList, mod, notification) {
+require([
+    'jquery',
+    'core/sortable_list',
+    'local_xpstore/config_page',
+    'core/notification'
+], function($, SortableList, mod, notification) {
+    var typeSelect = document.getElementById('type_select');
+    var activitySelect = document.getElementById('activity_select');
+    var allActivityOpts = [];
+    if (activitySelect) {
+        allActivityOpts = Array.from(activitySelect.querySelectorAll('option:not([disabled])')).map(function(opt) {
+            return {
+                value: opt.value,
+                text: opt.text,
+                modname: opt.getAttribute('data-modname'),
+                gradable: opt.getAttribute('data-gradable'),
+                html: opt.getAttribute('data-html') || opt.text
+            };
+        });
+    }
+
     mod.init();
+
+    // Sync bonusmode selector visibility and exact numeric-gradable options for Bonus ('G') type.
+    var syncBonusModeAndGradables = function() {
+        if (!typeSelect) {
+            return;
+        }
+        var isBonus = (typeSelect.value === 'G');
+        var bonusModeContainer = document.getElementById('bonusmode_container');
+        if (bonusModeContainer) {
+            bonusModeContainer.style.display = isBonus ? '' : 'none';
+        }
+        if (isBonus && activitySelect && allActivityOpts.length > 0) {
+            var currentVal = activitySelect.value;
+            while (activitySelect.options.length > 1) {
+                activitySelect.remove(1);
+            }
+            var customMenu = document.getElementById('activity_dropdown_menu');
+            if (customMenu) {
+                customMenu.innerHTML = '';
+            }
+            allActivityOpts.forEach(function(optData) {
+                if (optData.gradable !== '1') {
+                    return;
+                }
+                var newOpt = document.createElement('option');
+                newOpt.value = optData.value;
+                newOpt.text = optData.text;
+                newOpt.setAttribute('data-modname', optData.modname);
+                newOpt.setAttribute('data-gradable', '1');
+                if (optData.value === currentVal) {
+                    newOpt.selected = true;
+                }
+                activitySelect.appendChild(newOpt);
+                if (customMenu) {
+                    var link = document.createElement('a');
+                    link.className = 'dropdown-item py-2 text-truncate';
+                    link.href = '#';
+                    link.onclick = function(e) {
+                        e.preventDefault();
+                        activitySelect.value = optData.value;
+                        document.getElementById('selected-activity-text').innerHTML = optData.html;
+                        activitySelect.dispatchEvent(new Event('change'));
+                    };
+                    link.innerHTML = optData.html;
+                    customMenu.appendChild(link);
+                }
+            });
+            if (activitySelect.selectedIndex === -1) {
+                activitySelect.selectedIndex = 0;
+            }
+            var selOpt = allActivityOpts.find(function(o) {
+                return o.gradable === '1' && o.value === activitySelect.value;
+            });
+            var activityTextSpan = document.getElementById('selected-activity-text');
+            if (activityTextSpan) {
+                if (selOpt) {
+                    activityTextSpan.innerHTML = selOpt.html;
+                } else if (activitySelect.options.length > 0 && activitySelect.selectedIndex >= 0) {
+                    var fallbackOpt = activitySelect.options[activitySelect.selectedIndex];
+                    activityTextSpan.innerHTML = '<span class="text-muted">' + fallbackOpt.text + '</span>';
+                }
+            }
+        }
+    };
+    if (typeSelect) {
+        typeSelect.addEventListener('change', syncBonusModeAndGradables);
+        syncBonusModeAndGradables();
+    }
 
     var wrapper = document.querySelector('.local_xpstore-config-wrapper');
     var errorImgSizeMsg = wrapper ? (wrapper.getAttribute('data-error-imagesize') || '') : '';
@@ -905,7 +993,6 @@ require(['jquery', 'core/sortable_list', 'local_xpstore/config_page', 'core/noti
     });
 
     // Auto-select default card icon when product Type changes (if user hasn't manually picked one)
-    var typeSelect = document.getElementById('type_select');
     var productIconInput = document.getElementById('product_icon_input');
     if (typeSelect && productIconInput) {
         var defaultTypeIcons = {
