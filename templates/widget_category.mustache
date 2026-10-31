@@ -159,6 +159,30 @@
     {{/isempty}}
 </div>
 {{#status_success}}
+<template id="xpstore-celebration-template">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="epic-celebration-body">
+                    <div class="epic-icon-wrapper">
+                        <div class="epic-icon-container">
+                            {{#success_is_custom_image}}
+                                <img src="{{success_icon_url}}" alt="" style="width: 72px; height: 72px; object-fit: contain;">
+                            {{/success_is_custom_image}}
+                            {{^success_is_custom_image}}
+                                <i class="fa fa-{{success_icon}}"></i>
+                            {{/success_is_custom_image}}
+                            <div class="epic-sparkle"></div>
+                        </div>
+                    </div>
+                    <div class="epic-title">{{str_congratulations}}</div>
+                    <div class="epic-desc">{{{str_success_unlock}}}</div>
+                    <a href="{{redirecturl}}" target="_top" class="btn-claim-reward">{{str_goto_dest}}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
 {{#js}}
 
     (function() {
@@ -240,8 +264,13 @@
         overlay.style.display = 'flex';
         overlay.style.alignItems = 'center';
         overlay.style.justifyContent = 'center';
-        
-        overlay.innerHTML = '<div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body"><div class="epic-celebration-body"><div class="epic-icon-wrapper"><div class="epic-icon-container">{{#success_is_custom_image}}<img src="{{success_icon_url}}" alt="" style="width: 72px; height: 72px; object-fit: contain;">{{/success_is_custom_image}}{{^success_is_custom_image}}<i class="fa fa-{{success_icon}}"></i>{{/success_is_custom_image}}<div class="epic-sparkle"></div></div></div><div class="epic-title">{{str_congratulations}}</div><div class="epic-desc">{{{str_success_unlock}}}</div><a href="{{redirecturl}}" target="_top" class="btn-claim-reward">{{str_goto_dest}}</a></div></div></div></div>';
+
+        var tpl = document.getElementById('xpstore-celebration-template');
+        if (tpl && tpl.content) {
+            overlay.appendChild(tpl.content.cloneNode(true));
+        } else if (tpl) {
+            overlay.innerHTML = tpl.innerHTML;
+        }
         
         // Append to parent document body if inside iframe (widget), otherwise current document body
         var targetBody = document.body;
@@ -294,7 +323,7 @@
 (function() {
     try {
         if (window.BroadcastChannel) {
-            var bc = new BroadcastChannel('xpstore_balance_sync');
+            var bc = new BroadcastChannel('{{bcchannel}}');
             bc.onmessage = function(ev) {
                 if (ev.data && ev.data.type === 'update_balance' && ev.data.newBalance !== undefined) {
                     var els = document.querySelectorAll('.xp-balance-value');

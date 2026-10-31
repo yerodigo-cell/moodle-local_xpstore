@@ -33,7 +33,9 @@ $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
 require_login($course);
-require_capability('moodle/course:update', $context);
+if (!local_xpstore_can_manage($context)) {
+    throw new required_capability_exception($context, 'local/xpstore:manage', 'nopermissions', '');
+}
 
 $url = new moodle_url('/local/xpstore/config.php', ['id' => $courseid]);
 $PAGE->set_url($url);
@@ -46,30 +48,68 @@ $tab = optional_param('tab', '', PARAM_TEXT);
 
 $catalogkey = 'catalog_course_' . $courseid;
 
-
+/**
+ * Validates that a target cmid/gradeitem belongs to the given course.
+ *
+ * @param int $courseid The course ID.
+ * @param string $tipo Normalized product type ('Q','A','F','G','M','C','S','U').
+ * @param int $cmid Target ID.
+ * @return bool True if valid for this course.
+ */
+$validatetarget = function (int $courseid, string $tipo, int $cmid) use ($DB): bool {
+    if ($cmid <= 0) {
+        return false;
+    }
+    if ($tipo === 'M') {
+        return $DB->record_exists('grade_items', ['id' => $cmid, 'courseid' => $courseid, 'itemtype' => 'manual']);
+    }
+    if ($tipo === 'C') {
+        return $DB->record_exists('grade_items', ['id' => $cmid, 'courseid' => $courseid, 'itemtype' => 'course']);
+    }
+    if (in_array($tipo, ['Q', 'A', 'F', 'G', 'S', 'U'], true)) {
+        return $DB->record_exists('course_modules', ['id' => $cmid, 'course' => $courseid]);
+    }
+    return false;
+};
 
 if ($action === 'add' && confirm_sesskey()) {
-    $tipo = required_param('tipo', PARAM_ALPHA);
-    $cmid = required_param('cmid', PARAM_ALPHANUM);
+    $tipo = strtoupper(required_param('tipo', PARAM_ALPHA));
+    $cmidraw = required_param('cmid', PARAM_ALPHANUM);
 
-    if ($tipo === 'G' && strpos($cmid, 'm') === 0) {
+    if ($tipo === 'G' && stripos($cmidraw, 'm') === 0) {
         $tipo = 'M';
-        $cmid = substr($cmid, 1);
-    } else if ($tipo === 'G' && strpos($cmid, 'c') === 0) {
+        $cmidraw = substr($cmidraw, 1);
+    } else if ($tipo === 'G' && stripos($cmidraw, 'c') === 0) {
         $tipo = 'C';
-        $cmid = substr($cmid, 1);
+        $cmidraw = substr($cmidraw, 1);
     }
-    $cmid = (int)$cmid;
-    $costo = required_param('costo', PARAM_INT);
-    $nombre = required_param('nombre', PARAM_TEXT);
-    $valornota = optional_param('valor_nota', '0', PARAM_FLOAT);
-    $categoria = optional_param('categoria', '', PARAM_TEXT);
-    $limite = optional_param('limite', 0, PARAM_INT);
-    $requisito = optional_param('requisito', 0, PARAM_INT);
-    $hiddenwhenlocked = optional_param('hiddenwhenlocked', 0, PARAM_INT);
+    $cmid = (int)$cmidraw;
+
+    if (!$validatetarget($courseid, $tipo, $cmid)) {
+        redirect($url, get_string('error_transaction', 'local_xpstore'), null, \core\output\notification::NOTIFY_ERROR);
+    }
+
+    // Prevent duplicate (tipo, cmid) entries in the same course catalog.
+    $existingcatalog = local_xpstore_parse_catalog($courseid, true);
+    if (isset($existingcatalog[$tipo . $cmid])) {
+        redirect($url, get_string('duplicateproduct', 'local_xpstore'), null, \core\output\notification::NOTIFY_WARNING);
+    }
+
+    $costo = max(0, required_param('costo', PARAM_INT));
+    $nombre = trim(required_param('nombre', PARAM_TEXT));
+    $valornota = max(0.0, optional_param('valor_nota', 0.0, PARAM_FLOAT));
+    $bonusmode = (optional_param('bonusmode', 0, PARAM_INT) === 1) ? 1 : 0;
+    $categoria = trim(optional_param('categoria', '', PARAM_TEXT));
+    $limite = max(0, optional_param('limite', 0, PARAM_INT));
+    $requisito = max(0, optional_param('requisito', 0, PARAM_INT));
+    if ($requisito > 0 && !$DB->record_exists('course_modules', ['id' => $requisito, 'course' => $courseid])) {
+        $requisito = 0;
+    }
+    $hiddenwhenlocked = optional_param('hiddenwhenlocked', 0, PARAM_INT) ? 1 : 0;
     $minlevel = max(0, optional_param('minlevel', 0, PARAM_INT));
-    $hidebylevel = optional_param('hidebylevel', 1, PARAM_INT);
+    $hidebylevel = (optional_param('hidebylevel', 1, PARAM_INT) === 1) ? 1 : 0;
     $icono = optional_param('icono', '', PARAM_ALPHANUMEXT);
+
     if (isset($_FILES['icono_file']) && $_FILES['icono_file']['error'] !== UPLOAD_ERR_NO_FILE) {
         $uploaderr = null;
         $savedicon = local_xpstore_save_card_image($courseid, $_FILES['icono_file'], '', $uploaderr);
@@ -77,65 +117,94 @@ if ($action === 'add' && confirm_sesskey()) {
             redirect($url, $uploaderr, null, \core\output\notification::NOTIFY_ERROR);
         }
         $icono = $savedicon;
-    } else if ($icono === '') {
-        $icono = local_xpstore_get_default_card_icon($tipo);
+    } else {
+        $icono = local_xpstore_clean_icon($icono, local_xpstore_get_default_card_icon($tipo));
     }
 
-    $categorialimpia = str_replace(':', '-', trim($categoria));
-    $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
+    $newitem = local_xpstore_serialize_catalog_item([
+        'tipo' => $tipo,
+        'cmid' => $cmid,
+        'costo' => $costo,
+        'nombre' => $nombre,
+        'valornota' => $valornota,
+        'categoria' => $categoria,
+        'limite' => $limite,
+        'requisito' => $requisito,
+        'hiddenwhenlocked' => $hiddenwhenlocked,
+        'icono' => $icono,
+        'minlevel' => $minlevel,
+        'hidebylevel' => $hidebylevel,
+        'bonusmode' => $bonusmode,
+    ]);
 
-    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:" .
-               "{$limite}:{$requisito}:{$hiddenwhenlocked}:{$icono}:{$minlevel}:{$hidebylevel}";
-    $updated = $currentconfig ? $currentconfig . ',' . $newitem : $newitem;
+    $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
+    $updated = trim($currentconfig) !== '' ? $currentconfig . ',' . $newitem : $newitem;
     set_config($catalogkey, $updated, 'local_xpstore');
 
     if ($tipo === 'S') {
-        $groupparams = ['courseid' => $courseid, 'name' => $nombre];
-        $group = $DB->get_record('groups', $groupparams);
+        $groupname = ($nombre !== '') ? $nombre : 'VIP';
+        $group = $DB->get_record('groups', ['courseid' => $courseid, 'name' => $groupname]);
         if (!$group) {
             require_once($CFG->dirroot . '/group/lib.php');
             $newgroup = new stdClass();
             $newgroup->courseid = $courseid;
-            $newgroup->name = $nombre;
+            $newgroup->name = $groupname;
             $groupid = groups_create_group($newgroup);
         } else {
             $groupid = $group->id;
         }
-
-        // Auto-apply group restriction to the activity.
         local_xpstore_apply_special_restriction($cmid, $groupid, $courseid);
     } else if ($tipo === 'U') {
-        // Auto-apply xpstore restriction to the activity.
         $productid = $tipo . $cmid;
         local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $hiddenwhenlocked);
+    } else if ($tipo === 'F') {
+        local_xpstore_get_or_create_forum_role();
     }
+
     redirect($url, get_string('productadded', 'local_xpstore'));
 }
 
 if ($action === 'edit_save' && confirm_sesskey()) {
-    $olditem = required_param('old_item', PARAM_TEXT);
-    $tipo = required_param('tipo', PARAM_ALPHA);
-    $cmid = required_param('cmid', PARAM_ALPHANUM);
+    $olditem = required_param('old_item', PARAM_RAW);
+    $oldparsed = local_xpstore_parse_catalog_entry($olditem);
 
-    if ($tipo === 'G' && strpos($cmid, 'm') === 0) {
+    $tipo = strtoupper(required_param('tipo', PARAM_ALPHA));
+    $cmidraw = required_param('cmid', PARAM_ALPHANUM);
+
+    if ($tipo === 'G' && stripos($cmidraw, 'm') === 0) {
         $tipo = 'M';
-        $cmid = substr($cmid, 1);
-    } else if ($tipo === 'G' && strpos($cmid, 'c') === 0) {
+        $cmidraw = substr($cmidraw, 1);
+    } else if ($tipo === 'G' && stripos($cmidraw, 'c') === 0) {
         $tipo = 'C';
-        $cmid = substr($cmid, 1);
+        $cmidraw = substr($cmidraw, 1);
     }
-    $cmid = (int)$cmid;
-    $costo = required_param('costo', PARAM_INT);
-    $nombre = required_param('nombre', PARAM_TEXT);
-    $valornota = optional_param('valor_nota', '0', PARAM_FLOAT);
-    $categoria = optional_param('categoria', '', PARAM_TEXT);
-    $limite = optional_param('limite', 0, PARAM_INT);
-    $requisito = optional_param('requisito', 0, PARAM_INT);
-    $hiddenwhenlocked = optional_param('hiddenwhenlocked', 0, PARAM_INT);
+    $cmid = (int)$cmidraw;
+
+    if (!$validatetarget($courseid, $tipo, $cmid)) {
+        redirect($url, get_string('error_transaction', 'local_xpstore'), null, \core\output\notification::NOTIFY_ERROR);
+    }
+
+    $existinglist = local_xpstore_parse_catalog($courseid, false);
+    foreach ($existinglist as $entry) {
+        if ($entry['rawitem'] !== trim($olditem) && $entry['key'] === ($tipo . $cmid)) {
+            redirect($url, get_string('duplicateproduct', 'local_xpstore'), null, \core\output\notification::NOTIFY_WARNING);
+        }
+    }
+
+    $costo = max(0, required_param('costo', PARAM_INT));
+    $nombre = trim(required_param('nombre', PARAM_TEXT));
+    $valornota = max(0.0, optional_param('valor_nota', 0.0, PARAM_FLOAT));
+    $bonusmode = (optional_param('bonusmode', 0, PARAM_INT) === 1) ? 1 : 0;
+    $categoria = trim(optional_param('categoria', '', PARAM_TEXT));
+    $limite = max(0, optional_param('limite', 0, PARAM_INT));
+    $requisito = max(0, optional_param('requisito', 0, PARAM_INT));
+    if ($requisito > 0 && !$DB->record_exists('course_modules', ['id' => $requisito, 'course' => $courseid])) {
+        $requisito = 0;
+    }
+    $hiddenwhenlocked = optional_param('hiddenwhenlocked', 0, PARAM_INT) ? 1 : 0;
     $minlevel = max(0, optional_param('minlevel', 0, PARAM_INT));
-    $hidebylevel = optional_param('hidebylevel', 1, PARAM_INT);
-    $oldparts = explode(':', substr($olditem, 1));
-    $oldicon = isset($oldparts[8]) ? trim($oldparts[8]) : '';
+    $hidebylevel = (optional_param('hidebylevel', 1, PARAM_INT) === 1) ? 1 : 0;
+    $oldicon = $oldparsed ? $oldparsed['icono'] : '';
 
     $icono = optional_param('icono', '', PARAM_ALPHANUMEXT);
     if (isset($_FILES['icono_file']) && $_FILES['icono_file']['error'] !== UPLOAD_ERR_NO_FILE) {
@@ -146,20 +215,32 @@ if ($action === 'edit_save' && confirm_sesskey()) {
         }
         $icono = $savedicon;
     } else {
-        if ($icono === '') {
-            $icono = local_xpstore_get_default_card_icon($tipo);
-        }
+        $icono = local_xpstore_clean_icon($icono, local_xpstore_get_default_card_icon($tipo));
         if (local_xpstore_is_custom_card_image($oldicon) && !local_xpstore_is_custom_card_image($icono)) {
             local_xpstore_delete_card_image($courseid, $oldicon);
         }
     }
 
-    $categorialimpia = str_replace(':', '-', trim($categoria));
-    $newitem = "{$tipo}{$cmid}:{$costo}:{$nombre}:{$valornota}:{$categorialimpia}:" .
-               "{$limite}:{$requisito}:{$hiddenwhenlocked}:{$icono}:{$minlevel}:{$hidebylevel}";
+    $newitem = local_xpstore_serialize_catalog_item([
+        'tipo' => $tipo,
+        'cmid' => $cmid,
+        'costo' => $costo,
+        'nombre' => $nombre,
+        'valornota' => $valornota,
+        'categoria' => $categoria,
+        'limite' => $limite,
+        'requisito' => $requisito,
+        'hiddenwhenlocked' => $hiddenwhenlocked,
+        'icono' => $icono,
+        'minlevel' => $minlevel,
+        'hidebylevel' => $hidebylevel,
+        'bonusmode' => $bonusmode,
+    ]);
 
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
-    $items = explode(',', $currentconfig);
+    $items = array_filter(explode(',', $currentconfig), function ($v) {
+        return trim($v) !== '';
+    });
 
     foreach ($items as $key => $item) {
         if (trim($item) === trim($olditem)) {
@@ -171,34 +252,93 @@ if ($action === 'edit_save' && confirm_sesskey()) {
     set_config($catalogkey, implode(',', $items), 'local_xpstore');
 
     if ($tipo === 'S') {
-        $groupparams = ['courseid' => $courseid, 'name' => $nombre];
-        $group = $DB->get_record('groups', $groupparams);
+        require_once($CFG->dirroot . '/group/lib.php');
+        $groupname = ($nombre !== '') ? $nombre : 'VIP';
+        $oldgroupname = ($oldparsed && $oldparsed['tipo'] === 'S' && (int)$oldparsed['cmid'] === $cmid)
+            ? (($oldparsed['nombre'] !== '') ? $oldparsed['nombre'] : 'VIP')
+            : '';
+        $oldgroup = ($oldgroupname !== '' && $oldgroupname !== $groupname)
+            ? $DB->get_record('groups', ['courseid' => $courseid, 'name' => $oldgroupname])
+            : null;
+        $oldgroupid = $oldgroup ? (int)$oldgroup->id : 0;
+
+        $group = $DB->get_record('groups', ['courseid' => $courseid, 'name' => $groupname]);
         if (!$group) {
-            require_once($CFG->dirroot . '/group/lib.php');
             $newgroup = new stdClass();
             $newgroup->courseid = $courseid;
-            $newgroup->name = $nombre;
+            $newgroup->name = $groupname;
             $groupid = groups_create_group($newgroup);
         } else {
             $groupid = $group->id;
         }
 
-        // Auto-apply group restriction to the updated activity.
-        local_xpstore_apply_special_restriction($cmid, $groupid, $courseid);
+        // Migrate existing 'S' buyers into the renamed group and update stored rewardname.
+        $existingbuyers = $DB->get_records_select(
+            'local_xpstore_gastos',
+            'itemtype = ? AND itemid = ? AND (courseid = ? OR courseid = 0)',
+            ['S', $cmid, $courseid]
+        );
+        foreach ($existingbuyers as $b) {
+            if (!groups_is_member($groupid, (int)$b->userid)) {
+                groups_add_member($groupid, (int)$b->userid);
+            }
+            if ($oldgroup && $oldgroup->id != $groupid && groups_is_member($oldgroup->id, (int)$b->userid)) {
+                groups_remove_member($oldgroup->id, (int)$b->userid);
+            }
+            $b->rewardname = $groupname;
+            $b->courseid = $courseid;
+            $DB->update_record('local_xpstore_gastos', $b);
+        }
+
+        local_xpstore_apply_special_restriction($cmid, $groupid, $courseid, $oldgroupid);
     } else if ($tipo === 'U') {
-        // Auto-apply xpstore restriction to the updated activity.
         $productid = $tipo . $cmid;
         local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $hiddenwhenlocked);
-    } else if ($tipo === 'C') {
-        // Re-sync course final grade bonuses for users who already redeemed this item.
-        $affectedusers = $DB->get_fieldset_select(
+    } else if ($tipo === 'F') {
+        local_xpstore_get_or_create_forum_role();
+    } else if (in_array($tipo, ['G', 'M', 'C'], true)) {
+        // Update stored gradevalue/bonusmode on existing purchases of this bonus and re-sync grades.
+        $existingbonuses = $DB->get_records_select(
             'local_xpstore_gastos',
-            'DISTINCT userid',
-            'itemtype = ? AND itemid = ?',
-            ['C', $cmid]
+            'itemtype = ? AND itemid = ? AND (courseid = ? OR courseid = 0)',
+            [$tipo, $cmid, $courseid]
         );
-        foreach ($affectedusers as $uid) {
-            local_xpstore_sync_course_grade_bonus($courseid, $uid);
+        $affectedusers = [];
+        foreach ($existingbonuses as $eb) {
+            $eb->courseid = $courseid;
+            $eb->gradevalue = (float)$valornota;
+            $eb->bonusmode = $bonusmode;
+            if ($nombre !== '') {
+                $eb->rewardname = $nombre;
+            }
+            $DB->update_record('local_xpstore_gastos', $eb);
+            $affectedusers[(int)$eb->userid] = (int)$eb->userid;
+        }
+
+        if ($tipo === 'C') {
+            foreach ($affectedusers as $uid) {
+                local_xpstore_sync_course_grade_bonus($courseid, $uid, false);
+            }
+        } else if ($tipo === 'M') {
+            $gi = $DB->get_record('grade_items', ['id' => $cmid, 'courseid' => $courseid]);
+            if ($gi) {
+                foreach ($affectedusers as $uid) {
+                    local_xpstore_sync_item_grade_bonus($courseid, $gi, $uid, false);
+                }
+            }
+        } else if ($tipo === 'G') {
+            $cm = $DB->get_record('course_modules', ['id' => $cmid, 'course' => $courseid]);
+            if ($cm) {
+                $itemmodule = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+                $gradeitems = $itemmodule
+                    ? local_xpstore_get_mod_grade_items($courseid, $itemmodule, $cm->instance)
+                    : [];
+                foreach ($affectedusers as $uid) {
+                    foreach ($gradeitems as $gi) {
+                        local_xpstore_sync_item_grade_bonus($courseid, $gi, $uid, false);
+                    }
+                }
+            }
         }
     }
 
@@ -206,19 +346,23 @@ if ($action === 'edit_save' && confirm_sesskey()) {
 }
 
 if ($action === 'delete' && confirm_sesskey()) {
-    $itemtodelete = required_param('item', PARAM_TEXT);
+    $itemtodelete = required_param('item', PARAM_RAW);
     $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
 
-    $items = explode(',', $currentconfig);
+    $items = array_filter(explode(',', $currentconfig), function ($v) {
+        return trim($v) !== '';
+    });
     $newitems = [];
+    $deletedone = false;
     foreach ($items as $i) {
-        if (trim($i) !== trim($itemtodelete)) {
-            $newitems[] = $i;
-        } else {
-            $delparts = explode(':', substr(trim($i), 1));
-            if (!empty($delparts[8])) {
-                local_xpstore_delete_card_image($courseid, trim($delparts[8]));
+        if (!$deletedone && trim($i) === trim($itemtodelete)) {
+            $deletedone = true;
+            $parseddel = local_xpstore_parse_catalog_entry($i);
+            if ($parseddel && $parseddel['icono'] !== '') {
+                local_xpstore_delete_card_image($courseid, $parseddel['icono']);
             }
+        } else {
+            $newitems[] = trim($i);
         }
     }
 
@@ -227,18 +371,21 @@ if ($action === 'delete' && confirm_sesskey()) {
 }
 
 if ($action === 'bulkdelete' && confirm_sesskey()) {
-    $itemstodelete = optional_param_array('bulkdeleteitems', [], PARAM_TEXT);
+    $itemstodelete = optional_param_array('bulkdeleteitems', [], PARAM_RAW);
     if (!empty($itemstodelete)) {
+        $deleteset = array_map('trim', $itemstodelete);
         $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
-        $items = explode(',', $currentconfig);
+        $items = array_filter(explode(',', $currentconfig), function ($v) {
+            return trim($v) !== '';
+        });
         $newitems = [];
         foreach ($items as $i) {
-            if (!in_array(trim($i), $itemstodelete)) {
-                $newitems[] = $i;
+            if (!in_array(trim($i), $deleteset, true)) {
+                $newitems[] = trim($i);
             } else {
-                $delparts = explode(':', substr(trim($i), 1));
-                if (!empty($delparts[8])) {
-                    local_xpstore_delete_card_image($courseid, trim($delparts[8]));
+                $parseddel = local_xpstore_parse_catalog_entry($i);
+                if ($parseddel && $parseddel['icono'] !== '') {
+                    local_xpstore_delete_card_image($courseid, $parseddel['icono']);
                 }
             }
         }
@@ -257,10 +404,31 @@ if ($action === 'deleteall' && confirm_sesskey()) {
 }
 
 if ($action === 'reorder' && confirm_sesskey()) {
-    $rawitems = optional_param_array('rawitems', [], PARAM_TEXT);
+    $rawitems = optional_param_array('rawitems', [], PARAM_RAW);
     if (!empty($rawitems)) {
-        set_config($catalogkey, implode(',', $rawitems), 'local_xpstore');
+        $currentconfig = get_config('local_xpstore', $catalogkey) ?: '';
+        $existing = array_values(array_filter(array_map('trim', explode(',', $currentconfig))));
+        $remaining = $existing;
+        $reordered = [];
+
+        // Only accept exact items that already exist in this course's catalog.
+        foreach ($rawitems as $candidate) {
+            $cand = trim($candidate);
+            $pos = array_search($cand, $remaining, true);
+            if ($pos !== false) {
+                $reordered[] = $cand;
+                unset($remaining[$pos]);
+            }
+        }
+        foreach ($remaining as $leftover) {
+            $reordered[] = $leftover;
+        }
+
+        if (!empty($reordered)) {
+            set_config($catalogkey, implode(',', $reordered), 'local_xpstore');
+        }
     }
+    header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['success' => true]);
     die();
 }
@@ -275,10 +443,10 @@ if ($action === 'resetcolors' && confirm_sesskey()) {
 
 // Save all settings (colors and icons).
 if ($action === 'savesettings' && confirm_sesskey()) {
-    $cp = required_param('color_primary', PARAM_TEXT);
-    $cb = required_param('color_secondary', PARAM_TEXT);
-    $ci = required_param('color_icon', PARAM_TEXT);
-    $cc = required_param('color_cat_icon', PARAM_TEXT);
+    $cp = local_xpstore_clean_hex_color(required_param('color_primary', PARAM_TEXT), '#0056D2');
+    $cb = local_xpstore_clean_hex_color(required_param('color_secondary', PARAM_TEXT), '#00C9A7');
+    $ci = local_xpstore_clean_hex_color(required_param('color_icon', PARAM_TEXT), $cp);
+    $cc = local_xpstore_clean_hex_color(required_param('color_cat_icon', PARAM_TEXT), $cp);
 
     set_config('color_primary_course_' . $courseid, $cp, 'local_xpstore');
     set_config('color_secondary_course_' . $courseid, $cb, 'local_xpstore');
@@ -286,62 +454,69 @@ if ($action === 'savesettings' && confirm_sesskey()) {
     set_config('color_cat_icon_course_' . $courseid, $cc, 'local_xpstore');
 
     $caticons = [];
-    $configraw = get_config('local_xpstore', $catalogkey) ?: '';
-    $itemsraw = array_values(array_filter(explode(',', $configraw)));
+    $parsedlist = local_xpstore_parse_catalog($courseid, false);
     $updateditems = [];
-    foreach ($itemsraw as $idx => $it) {
-        $tipochar = substr($it, 0, 1);
-        $parts = explode(':', substr($it, 1));
-        if (count($parts) >= 2) {
-            $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
-            $inputname = 'caticon_' . md5($cat);
-            $iconval = optional_param($inputname, null, PARAM_TEXT);
-            if ($iconval !== null) {
-                $caticons[$cat] = $iconval;
-            }
 
-            $itemkey = $tipochar . $parts[0] . '_' . $idx;
-            $oldcardicon = !empty($parts[8]) ? trim($parts[8]) : '';
-            $cardiconval = optional_param('cardicon_' . $itemkey, null, PARAM_ALPHANUMEXT);
-            $fileinputname = 'cardiconfile_' . $itemkey;
-
-            if (isset($_FILES[$fileinputname]) && $_FILES[$fileinputname]['error'] !== UPLOAD_ERR_NO_FILE) {
-                $uploaderr = null;
-                $savedicon = local_xpstore_save_card_image($courseid, $_FILES[$fileinputname], $oldcardicon, $uploaderr);
-                if ($savedicon !== false) {
-                    $cardiconval = $savedicon;
-                } else {
-                    \core\notification::add($uploaderr, \core\output\notification::NOTIFY_ERROR);
-                }
-            } else if (
-                $cardiconval !== null && $cardiconval !== '' &&
-                !local_xpstore_is_custom_card_image($cardiconval) &&
-                local_xpstore_is_custom_card_image($oldcardicon)
-            ) {
-                local_xpstore_delete_card_image($courseid, $oldcardicon);
-            }
-
-            if ($cardiconval !== null && $cardiconval !== '') {
-                for ($p = 0; $p <= 7; $p++) {
-                    if (!isset($parts[$p])) {
-                        $parts[$p] = ($p === 2 || $p === 4) ? '' : '0';
-                    }
-                }
-                $parts[8] = $cardiconval;
-                $it = $tipochar . implode(':', $parts);
+    foreach ($parsedlist as $idx => $entry) {
+        $cat = ($entry['categoria'] !== '') ? $entry['categoria'] : get_string('defaultcategory', 'local_xpstore');
+        $inputname = 'caticon_' . md5($cat);
+        $iconval = optional_param($inputname, null, PARAM_ALPHANUMEXT);
+        if ($iconval !== null) {
+            $cleanedcaticon = local_xpstore_clean_icon($iconval, 'trophy');
+            if (!local_xpstore_is_custom_card_image($cleanedcaticon)) {
+                $caticons[$cat] = $cleanedcaticon;
             }
         }
-        $updateditems[] = $it;
+
+        $itemkey = $entry['tipo'] . $entry['cmid'] . '_' . $idx;
+        $oldcardicon = $entry['icono'];
+        $cardiconval = optional_param('cardicon_' . $itemkey, null, PARAM_ALPHANUMEXT);
+        $fileinputname = 'cardiconfile_' . $itemkey;
+
+        if (isset($_FILES[$fileinputname]) && $_FILES[$fileinputname]['error'] !== UPLOAD_ERR_NO_FILE) {
+            $uploaderr = null;
+            $savedicon = local_xpstore_save_card_image($courseid, $_FILES[$fileinputname], $oldcardicon, $uploaderr);
+            if ($savedicon !== false) {
+                $cardiconval = $savedicon;
+            } else {
+                \core\notification::add($uploaderr, \core\output\notification::NOTIFY_ERROR);
+            }
+        } else if (
+            $cardiconval !== null && $cardiconval !== '' &&
+            !local_xpstore_is_custom_card_image($cardiconval) &&
+            local_xpstore_is_custom_card_image($oldcardicon)
+        ) {
+            local_xpstore_delete_card_image($courseid, $oldcardicon);
+        }
+
+        if ($cardiconval !== null && $cardiconval !== '') {
+            $entry['icono'] = local_xpstore_clean_icon($cardiconval, $oldcardicon);
+        }
+
+        $updateditems[] = local_xpstore_serialize_catalog_item($entry);
     }
+
     set_config($catalogkey, implode(',', $updateditems), 'local_xpstore');
     set_config('cat_icons_course_' . $courseid, json_encode($caticons), 'local_xpstore');
     redirect(new moodle_url($url, ['tab' => 'settings']), get_string('changessaved'));
 }
 
-$cpactual = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
-$cbactual = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
-$ciactual = get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: $cpactual;
-$ccactual = get_config('local_xpstore', 'color_cat_icon_course_' . $courseid) ?: $cpactual;
+$cpactual = local_xpstore_clean_hex_color(
+    get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2',
+    '#0056D2'
+);
+$cbactual = local_xpstore_clean_hex_color(
+    get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7',
+    '#00C9A7'
+);
+$ciactual = local_xpstore_clean_hex_color(
+    get_config('local_xpstore', 'color_icon_course_' . $courseid) ?: $cpactual,
+    $cpactual
+);
+$ccactual = local_xpstore_clean_hex_color(
+    get_config('local_xpstore', 'color_cat_icon_course_' . $courseid) ?: $cpactual,
+    $cpactual
+);
 
 $isediting = false;
 $etipo = '';
@@ -350,6 +525,7 @@ $ecosto = '';
 $ecat = '';
 $enombre = '';
 $evalor = '0';
+$ebonusmode = 0;
 $elimite = '0';
 $erequisito = 0;
 $ehiddenwhenlocked = 0;
@@ -359,33 +535,35 @@ $ehidebylevel = 1;
 $olditemval = '';
 
 if ($action === 'load_edit') {
-    $itemtoedit = required_param('item', PARAM_TEXT);
-    $tipochar = substr($itemtoedit, 0, 1);
-    $rest = substr($itemtoedit, 1);
-    $parts = explode(':', $rest);
+    $itemtoedit = required_param('item', PARAM_RAW);
+    $parsededit = local_xpstore_parse_catalog_entry($itemtoedit);
 
-    if (count($parts) >= 2) {
+    if ($parsededit) {
+        $tipochar = $parsededit['tipo'];
         $etipo = $tipochar;
         if ($etipo === 'M') {
             $etipo = 'G';
-            $ecmid = 'm' . $parts[0];
+            $ecmid = 'm' . $parsededit['cmid'];
         } else if ($etipo === 'C') {
             $etipo = 'G';
-            $ecmid = 'c' . $parts[0];
+            $ecmid = 'c' . $parsededit['cmid'];
         } else {
-            $ecmid = (int)$parts[0];
+            $ecmid = (int)$parsededit['cmid'];
         }
-        $ecosto = $parts[1];
-        $enombre = $parts[2];
-        $evalor = $parts[3];
-        $ecat = $parts[4] ?? '';
-        $elimite = $parts[5] ?? '0';
-        $erequisito = (int)($parts[6] ?? 0);
-        $ehiddenwhenlocked = (int)($parts[7] ?? 0);
-        $eicono = !empty($parts[8]) ? trim($parts[8]) : local_xpstore_get_default_card_icon($tipochar);
-        $eminlevel = isset($parts[9]) ? (string)(int)$parts[9] : '0';
-        $ehidebylevel = isset($parts[10]) ? (int)$parts[10] : 1;
-        $olditemval = $itemtoedit;
+        $ecosto = (string)$parsededit['costo'];
+        $enombre = $parsededit['nombre'];
+        $evalor = $parsededit['valornota'];
+        $ebonusmode = (int)$parsededit['bonusmode'];
+        $ecat = $parsededit['categoria'];
+        $elimite = (string)$parsededit['limite'];
+        $erequisito = (int)$parsededit['requisito'];
+        $ehiddenwhenlocked = (int)$parsededit['hiddenwhenlocked'];
+        $eicono = ($parsededit['icono'] !== '')
+            ? $parsededit['icono']
+            : local_xpstore_get_default_card_icon($tipochar);
+        $eminlevel = (string)$parsededit['minlevel'];
+        $ehidebylevel = (int)$parsededit['hidebylevel'];
+        $olditemval = $parsededit['rawitem'];
         $isediting = true;
     }
 }
@@ -421,7 +599,7 @@ $getcmiconhtml = function ($cm) {
         return '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
                'display: inline-block; text-align: center; line-height: 28px; margin: 0 8px 0 0; padding: 0; ' .
                'vertical-align: middle; overflow: hidden;">' .
-               '<img src="' . $iconurl . '" alt="" style="vertical-align: middle; width: 24px; height: 24px;">' .
+               '<img src="' . s($iconurl) . '" alt="" style="vertical-align: middle; width: 24px; height: 24px;">' .
                '</span>';
     } else {
         $purpose = 'default';
@@ -468,16 +646,16 @@ $getcmiconhtml = function ($cm) {
                'vertical-align: middle; overflow: hidden;">' .
                '<span style="background-color: ' . $bgcolor . '; display: inline-block; ' .
                'vertical-align: middle; width: 26px; height: 26px; min-width: 26px; min-height: 26px; ' .
-               '-webkit-mask-image: url(' . $iconurl . '); -webkit-mask-size: 100%; ' .
+               '-webkit-mask-image: url(' . s($iconurl) . '); -webkit-mask-size: 100%; ' .
                '-webkit-mask-position: center; -webkit-mask-repeat: no-repeat; ' .
-               'mask-image: url(' . $iconurl . '); mask-size: 100%; mask-position: center; ' .
+               'mask-image: url(' . s($iconurl) . '); mask-size: 100%; mask-position: center; ' .
                'mask-repeat: no-repeat;"></span></span>';
     }
 };
 
 require_once($CFG->libdir . '/gradelib.php');
 $coursegradeitem = \grade_item::fetch_course_item($courseid);
-if ($coursegradeitem) {
+if ($coursegradeitem && (int)$coursegradeitem->gradetype === 1) {
     $coursetotalname = local_xpstore_get_course_grade_item_name($coursegradeitem->id);
     $courseiconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
                       'display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; ' .
@@ -488,20 +666,35 @@ if ($coursegradeitem) {
     $activityoptions[] = [
         'id' => 'c' . $coursegradeitem->id,
         'modname' => 'manual',
+        'gradable' => 1,
         'name' => $courseiconhtml . $coursetotalname,
         'selected' => ('c' . $coursegradeitem->id == $ecmid),
     ];
 }
 
+// Preload numeric-gradable mod items in a single query.
+$modvaluegradeitems = $DB->get_records_select(
+    'grade_items',
+    "courseid = ? AND itemtype = 'mod' AND gradetype = 1",
+    [$courseid],
+    '',
+    'id, itemmodule, iteminstance'
+);
+$gradablemodmap = [];
+foreach ($modvaluegradeitems as $mgi) {
+    $gradablemodmap[$mgi->itemmodule . '_' . (int)$mgi->iteminstance] = true;
+}
+
 foreach ($modinfo->get_cms() as $cm) {
     if ($cm->has_view() && !in_array($cm->modname, ['label', 'resource', 'contentview', 'qbank'])) {
         $iconhtml = $getcmiconhtml($cm);
-
         $namehtml = $iconhtml . $cm->get_formatted_name();
+        $isgradable = !empty($gradablemodmap[$cm->modname . '_' . (int)$cm->instance]) ? 1 : 0;
 
         $activityoptions[] = [
             'id' => $cm->id,
             'modname' => $cm->modname,
+            'gradable' => $isgradable,
             'name' => $namehtml,
             'selected' => ($cm->id == $ecmid),
         ];
@@ -515,37 +708,39 @@ foreach ($modinfo->get_cms() as $cm) {
 
 $manualitems = $DB->get_records('grade_items', ['courseid' => $courseid, 'itemtype' => 'manual']);
 foreach ($manualitems as $item) {
+    if ((int)$item->gradetype !== 1) {
+        continue;
+    }
     try {
         $iconurl = $OUTPUT->image_url('i/manual_item')->out();
     } catch (Exception $e) {
-        $iconurl = ''; // Fallback.
+        $iconurl = '';
     }
 
-    // In Moodle 4, i/manual_item is often black/grey, so we just show it directly.
     $iconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
                 'display: inline-block; text-align: center; line-height: 28px; margin: 0 8px 0 0; padding: 0; ' .
                 'vertical-align: middle; overflow: hidden;">' .
-                '<img src="' . $iconurl . '"  alt="" style="vertical-align: middle; width: 16px; height: 16px;">' .
+                '<img src="' . s($iconurl) . '" alt="" style="vertical-align: middle; width: 16px; height: 16px;">' .
                 '</span>';
-    // Remove the $manualprefix (e.g. "[GRADE ITEM] ").
-    $namehtml = $iconhtml . $item->itemname;
+    $namehtml = $iconhtml . format_string($item->itemname);
 
     $activityoptions[] = [
         'id' => 'm' . $item->id,
         'modname' => 'manual',
+        'gradable' => 1,
         'name' => $namehtml,
         'selected' => ('m' . $item->id == $ecmid),
     ];
 }
 
-$configraw = get_config('local_xpstore', $catalogkey) ?: '';
+$parsedcataloglist = local_xpstore_parse_catalog($courseid, false);
 $categoriasunicas = [];
 $hascategories = false;
 $categoryiconoptions = [];
 $categoryiframeoptions = [];
 $cardiconoptions = [];
 $catalogitems = [];
-$hasitems = false;
+$hasitems = !empty($parsedcataloglist);
 
 $sm = get_string_manager();
 $strcustomimage = $sm->string_exists('customimage', 'local_xpstore')
@@ -574,24 +769,24 @@ foreach ($availableicons as $icoval => $icolabel) {
 }
 $eiconolabel = $eiscustomimage ? $strcustomimage : ($availableicons[$eicono] ?? $eicono);
 
-if (!empty($configraw)) {
-    $hasitems = true;
-    $itemsraw = array_values(array_filter(explode(',', $configraw)));
+$cms = $modinfo->get_cms();
 
-    foreach ($itemsraw as $it) {
-        $parts = explode(':', substr($it, 1));
-        if (count($parts) >= 2) {
-            $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
-            $categoriasunicas[$cat] = $cat;
-        }
+if ($hasitems) {
+    foreach ($parsedcataloglist as $entry) {
+        $cat = ($entry['categoria'] !== '') ? $entry['categoria'] : get_string('defaultcategory', 'local_xpstore');
+        $categoriasunicas[$cat] = $cat;
     }
 
     if (!empty($categoriasunicas)) {
         $hascategories = true;
-        $savedicons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid), true) ?: [];
+        $savedicons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid) ?: '', true) ?: [];
 
         foreach ($categoriasunicas as $catname) {
-            $currenticon = isset($savedicons[$catname]) ? $savedicons[$catname] : 'trophy';
+            $rawicon = $savedicons[$catname] ?? 'trophy';
+            $currenticon = local_xpstore_clean_icon($rawicon, 'trophy');
+            if (local_xpstore_is_custom_card_image($currenticon)) {
+                $currenticon = 'trophy';
+            }
             $iconlist = [];
             foreach ($availableicons as $icoval => $icolabel) {
                 $iconlist[] = [
@@ -622,130 +817,142 @@ if (!empty($configraw)) {
         }
     }
 
-    foreach ($itemsraw as $idx => $item) {
-        $tipo = substr($item, 0, 1);
-        $rest = substr($item, 1);
-        $parts = explode(':', $rest);
-        if (count($parts) >= 2) {
-            $cid = $parts[0] ?? '';
-            $cost = $parts[1] ?? '';
-            $name = $parts[2] ?? '';
-            $val = $parts[3] ?? '0';
-            $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
-            $limiteactual = isset($parts[5]) ? (int)$parts[5] : 0;
-            $requisito = isset($parts[6]) ? (int)$parts[6] : 0;
-            $minlevelactual = isset($parts[9]) ? (int)$parts[9] : 0;
-            $hidebylevelactual = isset($parts[10]) ? (int)$parts[10] : 1;
-            $cardicon = !empty($parts[8]) ? trim($parts[8]) : local_xpstore_get_default_card_icon($tipo);
-            $iscustomimg = local_xpstore_is_custom_card_image($cardicon);
-            $cardimgurl = $iscustomimg ? local_xpstore_get_card_image_url($courseid, $cardicon) : '';
-            if ($iscustomimg && !$cardimgurl) {
-                $cardicon = local_xpstore_get_default_card_icon($tipo);
-                $iscustomimg = false;
-            }
+    foreach ($parsedcataloglist as $idx => $entry) {
+        $tipo = $entry['tipo'];
+        $cid = (int)$entry['cmid'];
+        $cost = (int)$entry['costo'];
+        $name = $entry['nombre'];
+        $val = $entry['valornota'];
+        $cat = ($entry['categoria'] !== '') ? $entry['categoria'] : get_string('defaultcategory', 'local_xpstore');
+        $limiteactual = (int)$entry['limite'];
+        $requisito = (int)$entry['requisito'];
+        $minlevelactual = (int)$entry['minlevel'];
+        $hidebylevelactual = (int)$entry['hidebylevel'];
+        $bonusmodeactual = (int)$entry['bonusmode'];
 
-            $iconhtml = '';
-            $modinfo = get_fast_modinfo($courseid);
-            $cms = $modinfo->get_cms();
-            if ($tipo !== 'M' && $tipo !== 'C' && !isset($cms[$cid])) {
+        $defaultcardicon = local_xpstore_get_default_card_icon($tipo);
+        $cardicon = ($entry['icono'] !== '') ? local_xpstore_clean_icon($entry['icono'], $defaultcardicon) : $defaultcardicon;
+        $iscustomimg = local_xpstore_is_custom_card_image($cardicon);
+        $cardimgurl = $iscustomimg ? local_xpstore_get_card_image_url($courseid, $cardicon) : '';
+        if ($iscustomimg && !$cardimgurl) {
+            $cardicon = $defaultcardicon;
+            $iscustomimg = false;
+        }
+
+        $iconhtml = '';
+        if ($tipo !== 'M' && $tipo !== 'C' && (!isset($cms[$cid]) || !empty($cms[$cid]->deletioninprogress))) {
+            continue;
+        }
+        if ($tipo === 'M') {
+            $gi = $DB->get_record('grade_items', ['id' => $cid, 'courseid' => $courseid, 'itemtype' => 'manual']);
+            if (!$gi) {
                 continue;
             }
-            if ($tipo === 'M') {
-                $realname = $DB->get_field('grade_items', 'itemname', ['id' => $cid])
-                    ?: get_string('activitydeleted', 'local_xpstore');
-                $labeltipo = get_string('type_g', 'local_xpstore');
-                try {
-                    $iconurl = $OUTPUT->image_url('i/manual_item')->out();
-                    $iconhtml = '<span class="xpstore-icon-container" ' .
-                                'style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
-                                'display: inline-block; text-align: center; line-height: 28px; ' .
-                                'margin: 0 8px 0 0; padding: 0; ' .
-                                'vertical-align: middle; overflow: hidden;">' .
-                                '<img src="' . $iconurl . '"  alt="" style="vertical-align: middle; width: 16px; height: 16px;">' .
-                                '</span>';
-                } catch (Exception $e) {
-                    $iconhtml = '';
-                }
-            } else if ($tipo === 'C') {
-                $realname = local_xpstore_get_course_grade_item_name($cid);
-                $labeltipo = get_string('type_g', 'local_xpstore');
+            $realname = format_string($gi->itemname);
+            $labeltipo = get_string('type_g', 'local_xpstore');
+            try {
+                $iconurl = $OUTPUT->image_url('i/manual_item')->out();
                 $iconhtml = '<span class="xpstore-icon-container" ' .
                             'style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
-                            'display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; ' .
-                            'margin: 0 8px 0 0; padding: 0; vertical-align: middle; overflow: hidden; ' .
-                            'background-color: #f59e0b; color: #fff;">' .
-                            '<i class="fa fa-trophy" style="font-size: 14px; line-height: 1; margin: 0; padding: 0;"></i>' .
+                            'display: inline-block; text-align: center; line-height: 28px; ' .
+                            'margin: 0 8px 0 0; padding: 0; ' .
+                            'vertical-align: middle; overflow: hidden;">' .
+                            '<img src="' . s($iconurl) . '" alt="" style="vertical-align: middle; width: 16px; height: 16px;">' .
                             '</span>';
+            } catch (Exception $e) {
+                $iconhtml = '';
+            }
+        } else if ($tipo === 'C') {
+            $gi = $DB->get_record('grade_items', ['id' => $cid, 'courseid' => $courseid, 'itemtype' => 'course']);
+            if (!$gi) {
+                continue;
+            }
+            $realname = local_xpstore_get_course_grade_item_name($cid);
+            $labeltipo = get_string('type_g', 'local_xpstore');
+            $iconhtml = '<span class="xpstore-icon-container" ' .
+                        'style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
+                        'display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; ' .
+                        'margin: 0 8px 0 0; padding: 0; vertical-align: middle; overflow: hidden; ' .
+                        'background-color: #f59e0b; color: #fff;">' .
+                        '<i class="fa fa-trophy" style="font-size: 14px; line-height: 1; margin: 0; padding: 0;"></i>' .
+                        '</span>';
+        } else {
+            $cm = $cms[$cid];
+            $realname = format_string($cm->name);
+            $labeltipo = get_string('type_' . strtolower($tipo), 'local_xpstore');
+            $iconhtml = $getcmiconhtml($cm);
+        }
+        $realnamehtml = $iconhtml . $realname;
+
+        $reqname = '';
+        if ($requisito > 0) {
+            if (isset($cms[$requisito]) && empty($cms[$requisito]->deletioninprogress)) {
+                $reqname = format_string($cms[$requisito]->name);
             } else {
-                $cm = $cms[$cid];
-                $realname = $cm->name;
-                $labeltipo = get_string('type_' . strtolower($tipo), 'local_xpstore');
-                $iconhtml = $getcmiconhtml($cm);
+                $reqname = get_string('activitydeleted', 'local_xpstore');
             }
-            $realnamehtml = $iconhtml . $realname;
+        }
 
-            $reqname = '';
-            if ($requisito > 0 && isset($cms[$requisito])) {
-                $reqname = $cms[$requisito]->name;
-            }
+        global $CFG;
+        $widgeturl = $CFG->wwwroot . "/local/xpstore/widget.php?id={$courseid}&tipo={$tipo}&cmid={$cid}";
+        $iframecode = '<iframe src="' . $widgeturl . '" ' .
+            'style="width: 280px !important; max-width: 100%; height: 350px !important; border: none; ' .
+            'overflow: hidden; border-radius: 15px; display: inline-block; margin: 10px;" ' .
+            'scrolling="no" allowtransparency="true"></iframe>';
 
-            global $CFG;
-            $widgeturl = $CFG->wwwroot . "/local/xpstore/widget.php?id={$courseid}&tipo={$tipo}&cmid={$cid}";
-            $iframecode = '<iframe src="' . $widgeturl . '" ' .
-                'style="width: 280px !important; max-width: 100%; height: 350px !important; border: none; ' .
-                'overflow: hidden; border-radius: 15px; display: inline-block; margin: 10px;" ' .
-                'scrolling="no" allowtransparency="true"></iframe>';
-
-            $cardiconlist = [];
-            foreach ($availableicons as $icoval => $icolabel) {
-                $cardiconlist[] = [
-                    'value' => $icoval,
-                    'label' => $icolabel,
-                    'selected' => ($cardicon === $icoval),
-                ];
-            }
-
-            $cardiconoptions[] = [
-                'itemkey' => $tipo . $cid . '_' . $idx,
-                'cardlabel' => $name ?: $realname,
-                'realname' => $realname,
-                'tipolower' => (in_array($tipo, ['M', 'C']) ? 'g' : strtolower($tipo)),
-                'labeltipo' => $labeltipo,
-                'currenticon' => $cardicon,
-                'is_custom_image' => $iscustomimg,
-                'icon_url' => $cardimgurl,
-                'icons' => $cardiconlist,
-            ];
-
-            $catalogitems[] = [
-                'tipolower' => (in_array($tipo, ['M', 'C']) ? 'g' : strtolower($tipo)),
-                'labeltipo' => $labeltipo,
-                'is_unlock' => ($tipo === 'U'),
-                'hiddenwhenlocked' => (isset($parts[7]) ? (int)$parts[7] : 0),
-                'cat' => $cat,
-                'realname' => $realname,
-                'realnamehtml' => $realnamehtml,
-                'cost' => $cost,
-                'has_item_limit' => ($limiteactual > 0),
-                'limiteactual' => $limiteactual,
-                'displayname' => $name ?: $realname,
-                'icon' => $cardicon,
-                'is_custom_image' => $iscustomimg,
-                'icon_url' => $cardimgurl,
-                'is_grade_boost' => in_array($tipo, ['G', 'M', 'C']),
-                'val' => $val,
-                'has_req' => ($requisito > 0),
-                'req_name' => $reqname,
-                'has_minlevel' => ($minlevelactual > 0),
-                'minlevel' => $minlevelactual,
-                'hidebylevel' => ($hidebylevelactual === 1),
-                'iframecode' => $iframecode,
-                'rawitem' => $item,
-                'editurl' => (new moodle_url($url, ['action' => 'load_edit', 'item' => $item]))->out(false),
-                'deleteurl' => (new moodle_url($url, ['action' => 'delete', 'sesskey' => sesskey(), 'item' => $item]))->out(false),
+        $cardiconlist = [];
+        foreach ($availableicons as $icoval => $icolabel) {
+            $cardiconlist[] = [
+                'value' => $icoval,
+                'label' => $icolabel,
+                'selected' => ($cardicon === $icoval),
             ];
         }
+
+        $cardiconoptions[] = [
+            'itemkey' => $tipo . $cid . '_' . $idx,
+            'cardlabel' => ($name !== '') ? $name : $realname,
+            'realname' => $realname,
+            'tipolower' => (in_array($tipo, ['M', 'C'], true) ? 'g' : strtolower($tipo)),
+            'labeltipo' => $labeltipo,
+            'currenticon' => $cardicon,
+            'is_custom_image' => $iscustomimg,
+            'icon_url' => $cardimgurl,
+            'icons' => $cardiconlist,
+        ];
+
+        $rawitem = $entry['rawitem'];
+        $catalogitems[] = [
+            'tipolower' => (in_array($tipo, ['M', 'C'], true) ? 'g' : strtolower($tipo)),
+            'labeltipo' => $labeltipo,
+            'is_unlock' => ($tipo === 'U'),
+            'hiddenwhenlocked' => (int)$entry['hiddenwhenlocked'],
+            'cat' => $cat,
+            'realname' => $realname,
+            'realnamehtml' => $realnamehtml,
+            'cost' => $cost,
+            'has_item_limit' => ($limiteactual > 0),
+            'limiteactual' => $limiteactual,
+            'displayname' => ($name !== '') ? $name : $realname,
+            'icon' => $cardicon,
+            'is_custom_image' => $iscustomimg,
+            'icon_url' => $cardimgurl,
+            'is_grade_boost' => in_array($tipo, ['G', 'M', 'C'], true),
+            'bonusmode_wait' => ($bonusmodeactual === 1),
+            'val' => $val,
+            'has_req' => ($requisito > 0),
+            'req_name' => $reqname,
+            'has_minlevel' => ($minlevelactual > 0),
+            'minlevel' => $minlevelactual,
+            'hidebylevel' => ($hidebylevelactual === 1),
+            'iframecode' => $iframecode,
+            'rawitem' => $rawitem,
+            'editurl' => (new moodle_url($url, ['action' => 'load_edit', 'item' => $rawitem]))->out(false),
+            'deleteurl' => (new moodle_url($url, ['action' => 'delete', 'sesskey' => sesskey(), 'item' => $rawitem]))->out(false),
+        ];
     }
+
+    $hasitems = !empty($catalogitems);
 }
 
 global $CFG;
@@ -762,25 +969,24 @@ $urlbalancew = $CFG->wwwroot . "/local/xpstore/widget_balance.php?id={$courseid}
 $iframebalance = '<iframe src="' . $urlbalancew . '" width="100%" height="180" ' .
     'style="border: none; overflow: hidden;" scrolling="no"></iframe>';
 
-
 $menuvisible = get_config('local_xpstore', 'show_menu_course_' . $courseid);
 if ($menuvisible === false) {
     $menuvisible = '0';
 }
 
-$activetab = ($tab === 'settings' || in_array($action, ['savesettings', 'resetcolors', 'togglemenu'])) ? 'settings' : 'products';
+$activetab = ($tab === 'settings' || in_array($action, ['savesettings', 'resetcolors', 'togglemenu'], true))
+    ? 'settings'
+    : 'products';
 
 $navdata = local_xpstore_get_navigation_data($courseid, $activetab);
 $navdata['isteacher'] = true;
-
-$sm = get_string_manager();
 
 $templatedata = array_merge([
     'str_configtitle' => get_string('configtitle', 'local_xpstore'),
     'url' => $url->out(false),
     'sesskey' => sesskey(),
     'menu_is_visible' => ($menuvisible === '1'),
-    'str_hide_menu_tooltip' => get_string('hide_menu_tooltip', 'local_xpstore'), // Needs translation if missing.
+    'str_hide_menu_tooltip' => get_string('hide_menu_tooltip', 'local_xpstore'),
     'str_show_menu_tooltip' => get_string('show_menu_tooltip', 'local_xpstore'),
     'str_menuvisible' => get_string('menuvisible', 'local_xpstore'),
     'str_menuhidden' => get_string('menuhidden', 'local_xpstore'),
@@ -865,6 +1071,11 @@ $templatedata = array_merge([
 
     'str_gradepoints' => get_string('gradepoints', 'local_xpstore'),
     'evalor' => $evalor,
+    'ebonusmode' => ($ebonusmode === 1),
+    'str_bonusmode' => get_string('bonusmode', 'local_xpstore'),
+    'help_bonusmode' => $OUTPUT->help_icon('bonusmode', 'local_xpstore'),
+    'str_bonusmode_immediate' => get_string('bonusmode_immediate', 'local_xpstore'),
+    'str_bonusmode_wait' => get_string('bonusmode_wait', 'local_xpstore'),
 
     'str_cancel' => get_string('cancel', 'local_xpstore'),
     'str_update' => get_string('update', 'local_xpstore'),
@@ -933,7 +1144,7 @@ $templatedata = array_merge([
 
 $PAGE->requires->js_call_amd('local_xpstore/copywidget', 'init', [
     get_string('copyalert', 'local_xpstore'),
-    'Error', // Simple string for error, or could use another string.
+    'Error',
 ]);
 
 echo $OUTPUT->header();

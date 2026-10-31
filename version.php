@@ -25,10 +25,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_xpstore';
-$plugin->version   = 2026102500;
+$plugin->version   = 2026103000;
 $plugin->requires  = 2024100700;
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = '3.0';
+$plugin->release   = '3.1';
 
 // Required dependencies for the plugin to work.
 $plugin->dependencies = [

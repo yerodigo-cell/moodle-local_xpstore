@@ -26,6 +26,7 @@
  * widget_history.php - Embedded button to navigate to history.
  */
 require_once(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/lib.php');
 
 global $PAGE, $OUTPUT, $DB;
 
@@ -48,8 +49,14 @@ echo $OUTPUT->header();
 $historyurl = new moodle_url('/local/xpstore/history.php', ['id' => $courseid]);
 
 // Query custom colors per course.
-$cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
-$cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
+$cpstore = local_xpstore_clean_hex_color(
+    get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2',
+    '#0056D2'
+);
+$cbstore = local_xpstore_clean_hex_color(
+    get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7',
+    '#00C9A7'
+);
 
 $templatedata = [
     'historyurl' => $historyurl->out(false),

@@ -1,69 +1,63 @@
 # XP Store - Gamification - By E.P. Studio
 
-A gamification plugin for Moodle that transforms the learning experience by allowing students to redeem their experience points (earned through `Level Up XP`) for rewards, grade boosts, or special content within each course.
+A gamification plugin for Moodle that transforms the learning experience by allowing students to redeem experience points (earned through `Level Up XP`) for rewards, grade boosts, or exclusive content within each course.
 
 _(**Note:** Independently developed, not affiliated with or endorsed by Level Up)._
 
 ## Key Features
 
-* **Independent Catalogs per Course:** Each course has its own isolated configuration, product catalog, and color palette.
-* **Prerequisites & Progression Requirements:** Decide if students need a particular `Level Up! XP` level or must complete another course activity before unlocking a reward. Control whether locked cards stay hidden or appear locked as motivation.
-* **Purchase Limits & Inventory Control:** Total control over how many times a student can acquire a specific item or benefit (or allow unlimited purchases).
-* **Visual Customization:** Manage store colores and icons.
-* **Reports & Audit Trail:** Comprehensive dashboard for teachers featuring a detailed redemption history per student, avatars, direct links to activities or the gradebook, and purchase rollback capabilities.
-* **Automatic Widget Generation:** Instant creation of Iframe codes from the configuration panel, ready to be copied and pasted without any coding.
-* **Embedded Widgets Ecosystem:** Specialized views ready to be integrated into lessons or labels via Iframes (Individual cards, full Categories, and a floating History button).
+* **Course-Specific Catalogs:** Each course maintains its own isolated configuration, reward catalog, and visual palette.
+* **Prerequisites & Unlocking Rules:** Require a minimum `Level Up! XP` level or completion of specific course activities before unlocking products. Choose whether locked items stay hidden or display locked with a padlock badge.
+* **Non-Overridden Grade Bonuses:** Award extra points directly to activities, manual items, or the **Course Final Grade** without locking grades as overridden—teachers can regrade normally while bonuses and user report feedback annotations are preserved.
+* **Inventory & Purchase Limits:** Full control over maximum redemptions per student (or unlimited purchases).
+* **Modern & Responsive UI:** Clean interface with Montserrat typography, unified student badges, and support for FontAwesome 6 icons or custom uploaded images.
+* **Course Branding:** Customize primary and secondary colors (with interactive gradients) or select from curated palettes.
+* **Reports & Audit Trail:** Detailed redemption history per student with direct activity links, avatars, and purchase rollback capabilities.
+* **Embedded Widgets Ecosystem:** Ready-to-copy iframe snippets for single cards, full categories, the complete store, and floating history launchers.
 
 ---
 
-### How Rewards Work (Benefit Types)
-The store allows teachers to configure different types of benefits based on standard Moodle modules or specific gamification mechanics. When a student buys an item, the plugin processes the transaction based on its specific type:
-* ⚡ **Extra Attempt:** Works with Quizzes. Students can spend XP to unlock an additional attempt for a specific quiz, even if it's already closed.
-* ⏳ **Extension:** Works only with Assignments. Students can redeem their points to get extra time (3 days) to submit a task.
-* 💬 **Forum (Legacy):** Works with Forums. Allows students to spend XP to unlock and interact in a specific forum even after its strict cut-off date has passed.
-* ⭐ **Bonus:** Adds extra points directly to any grade item within the Moodle gradebook (assignments, quizzes, forums, manual grade items, or course total).
-  * _Seamless Teacher Regrading:_ Bonuses are applied dynamically without locking grades as `overridden`. Teachers can freely grade, edit, or regrade submissions at any time—the plugin automatically preserves the student's earned bonus on top of the base grade.
-  * _User Report Feedback Annotation:_ A clear annotation (e.g. `+0.5 points (XP Store)`) is automatically included in the student's Gradebook User Report feedback, coexisting harmoniously with any instructor comments, rubrics, or grading guides.
-* 🔓 **VIP Group:** Unlocks exclusive content or access to VIP areas within the course. Upon purchase, the plugin automatically creates a dedicated Moodle group for the target activity and seamlessly assigns the student to it.
-  * _Setup Tip:_ The teacher only needs to set up the reward in the store. The plugin handles the group creation and student enrollment automatically under the hood!
-  * **_Important:_** Leave the label unchanged when editing this reward. Changing it will create more than one group, rendering the reward inaccessible to students.
-* 🔑 **Unlock:** Works with the XP Availability plugin. Students can spend XP to unlock access to specific course modules or activities. Requires the [XP Store Availability](https://marketplace.moodle.com/plugins/4040) plugin to be installed.
+### Reward Types & How Benefits Work
+
+* ⚡ **Extra Attempt:** Works with Quizzes. Students spend XP to unlock an additional quiz attempt, even if the quiz is closed.
+* ⏳ **Extension:** Works with Assignments. Students redeem XP for a 3-day deadline extension.
+* 💬 **Forum (Legacy):** Works with Forums. Grants access to post in restricted or cut-off forums.
+* ⭐ **Bonus:** Adds extra points directly to any grade item in the Moodle gradebook:
+  * _Course Final Grade & Activities:_ Fully compatible with assignments, quizzes, forums, manual items, and the Course Total (Final Grade).
+  * _Seamless Regrading:_ Bonuses update dynamically without marking grades as `overridden`. Teachers can freely regrade at any time; the student's bonus remains intact on top of the base grade.
+  * _Transparent User Report Feedback:_ Automatically annotates the student's Gradebook User Report (e.g., `+0.5 points (XP Store)`) without overwriting teacher comments.
+* 🔓 **VIP Group:** Unlocks exclusive content or access to VIP course areas. Automatically creates a dedicated Moodle group and enrolls the student upon purchase.
+  * _Setup Tip:_ Do not rename the label after creation to avoid creating duplicate groups.
+* 🔑 **Unlock:** Restricts access to course activities until purchased via XP. Requires the companion [XP Store Availability](https://marketplace.moodle.com/plugins/4040) plugin.
 
 ---
 
 ## Store Configuration
 
-Before using the store, ensure the `Level Up XP` block is added to your course. Once the block is active, a direct link to the store will automatically appear in the main course navigation menu (which can be toggled on or off).
+Ensure the `Level Up XP` block is added to your course. A direct link to the store will appear in the course navigation menu (can be toggled on/off).
 
-### What You Can Configure
+### Configurable Options
 
 #### 1. Reward & Product Settings
-* **Prerequisites & Unlocking Rules:**
-  * **Level Requirements (Level Up! XP):** Decide if students need to reach a particular level (e.g., Level 5) before they can redeem a reward.
-  * **Locked Card Visibility:** Choose what happens when a student has not reached the required level: either keep the card completely hidden until unlocked, or show it locked with a padlock badge to motivate progress.
-  * **Activity Completion Prerequisite:** Require students to complete another course activity (assignment, quiz, SCORM, etc.) before the reward becomes purchasable.
-* **Pricing & Redemption Limits:** Set flexible XP costs and specify maximum purchase limits per student (or enter `0` for unlimited redemptions).
-* **Target Activity & Benefit Mapping:** Link rewards directly to quizzes, assignments, forums, gradebook items, VIP groups, or restricted modules.
-* **Visual Identity & Custom Images:** Choose from a set of built-in FontAwesome icons or upload custom image assets (PNG, JPG, WEBP up to 256 KB) for each product card.
-* **Categories & Custom Labels:** Organize products under custom category tabs and specify clear, engaging reward titles.
+* **Level & Activity Prerequisites:** Set minimum Level Up! XP levels, choose locked card visibility (hidden vs. locked with padlock badge), or require another activity to be completed first.
+* **Pricing & Limits:** Define XP costs and set maximum purchases per student (`0` for unlimited).
+* **Target Mapping:** Link rewards to quizzes, assignments, forums, grade items, Course Final Grade, or VIP groups.
+* **Custom Icons & Images:** Pick built-in FontAwesome icons or upload custom image files (PNG, JPG, WEBP up to 256 KB).
+* **Categories & Labels:** Group rewards into custom category tabs with personalized titles.
 
 #### 2. Course-Level & Visual Settings
-* **UI Color Palette & Branding:** Customize primary and secondary colors (including interactive gradients and badge styling), or pick from the predefined palettes.
-* **Course Menu Visibility:** Toggle whether the store direct link appears in the student course navigation menu or remains hidden to direct students toward embedded widgets.
-* **Category Tab Icons:** Assign distinctive FontAwesome icons to each category tab in the catalog.
-* **Widget Generator:** Instantly generate ready-to-use `iframe` embed snippets for full store catalogs, single categories, individual reward cards, or the floating history launcher.
-* **Purchase Management & Audit Log:** Review comprehensive student redemption history and reset or rollback transactions when necessary.
+* **Color Palette & Branding:** Set custom primary/secondary colors (gradients, badges, and icon colors) or choose from preset palettes.
+* **Menu Visibility:** Show or hide the store link in the course navigation menu.
+* **Widget Generator:** Instantly copy pre-configured iframe codes for embedding into course pages or labels.
+* **Purchase Management:** Review student redemption history and reset or rollback transactions when needed.
 
 ---
 
 ## Widget Usage (iframes)
 
-💡 **Tip:** The course configuration panel includes a tool that automatically generates the exact Iframe code for each widget, ready to be copied and pasted into your lessons.
+The configuration panel automatically generates copy-paste iframe snippets for easy embedding:
 
-1. **Main Store Widget:** Displays all available categories and reward cards.
-
-2. **Full Category Widget:** Displays all cards corresponding to a specific category, with a fluid and centered design.
-
-3. **Individual Card Widget:** Displays a single product or reward available for direct purchase.
-
-4. **Floating History Button:** A clean and minimalist shortcut for students to review their previous redemptions.
+1. **Main Store Widget:** Displays the complete catalog with category tabs.
+2. **Category Widget:** Displays all rewards belonging to a specific category.
+3. **Individual Card Widget:** Compact card for a single product with built-in tooltips and single-line button alignment.
+4. **Floating History Button:** Minimalist launcher for students to check their redemption history.

@@ -34,6 +34,7 @@ define([], function() {
                         value: opt.value,
                         text: opt.text,
                         modname: opt.getAttribute('data-modname'),
+                        gradable: opt.getAttribute('data-gradable'),
                         html: opt.getAttribute('data-html') || opt.text,
                         selected: opt.selected
                     };
@@ -65,11 +66,15 @@ define([], function() {
                         } else if (selectedType === 'F') {
                             show = (optData.modname === 'forum');
                         } else if (selectedType === 'G') {
-                            var gradables = [
-                                'quiz', 'assign', 'forum', 'workshop',
-                                'scorm', 'lesson', 'h5pactivity', 'hvp', 'manual'
-                            ];
-                            show = gradables.indexOf(optData.modname) !== -1;
+                            if (optData.gradable !== null && optData.gradable !== '') {
+                                show = (optData.gradable === '1');
+                            } else {
+                                var gradables = [
+                                    'quiz', 'assign', 'forum', 'workshop',
+                                    'scorm', 'lesson', 'h5pactivity', 'hvp', 'manual'
+                                ];
+                                show = gradables.indexOf(optData.modname) !== -1;
+                            }
                         } else {
                             show = (optData.modname !== 'manual');
                         }
@@ -79,6 +84,9 @@ define([], function() {
                             newOption.value = optData.value;
                             newOption.text = optData.text;
                             newOption.setAttribute('data-modname', optData.modname);
+                            if (optData.gradable !== null) {
+                                newOption.setAttribute('data-gradable', optData.gradable);
+                            }
                             if (optData.value === currentSelectedValue) {
                                 newOption.selected = true;
                             }
@@ -104,6 +112,10 @@ define([], function() {
                     var bonusContainer = document.getElementById('bonus_container');
                     if (bonusContainer) {
                         bonusContainer.style.display = (selectedType === 'G') ? '' : 'none';
+                    }
+                    var bonusModeContainer = document.getElementById('bonusmode_container');
+                    if (bonusModeContainer) {
+                        bonusModeContainer.style.display = (selectedType === 'G') ? '' : 'none';
                     }
 
                     // Handle Hidden when locked field visibility

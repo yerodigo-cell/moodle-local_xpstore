@@ -45,14 +45,21 @@ $PAGE->set_pagelayout('embedded');
 echo $OUTPUT->header();
 
 // Query custom colors per course.
-$cpstore = get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2';
-$cbstore = get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7';
+$cpstore = local_xpstore_clean_hex_color(
+    get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2',
+    '#0056D2'
+);
+$cbstore = local_xpstore_clean_hex_color(
+    get_config('local_xpstore', 'color_secondary_course_' . $courseid) ?: '#00C9A7',
+    '#00C9A7'
+);
 
 $saldo = local_xpstore_get_balance($USER->id, $courseid);
 
 $templatedata = [
     'cpstore' => $cpstore,
     'cbstore' => $cbstore,
+    'bcchannel' => local_xpstore_get_broadcast_channel($courseid, $USER->id),
     'saldo' => $saldo,
     'str_balance' => get_string('balance', 'local_xpstore'),
 ];

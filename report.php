@@ -38,7 +38,9 @@ $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
 require_login($course);
-require_capability('moodle/course:update', $context);
+if (!local_xpstore_can_manage($context)) {
+    require_capability('local/xpstore:manage', $context);
+}
 
 $url = new moodle_url('/local/xpstore/report.php', ['id' => $courseid]);
 $PAGE->set_url($url);
@@ -72,31 +74,8 @@ if ($action === 'deletelog' && confirm_sesskey()) {
 // Ensure any orphaned grade bonuses from previous resets are cleaned up.
 local_xpstore_cleanup_orphan_grade_bonuses($courseid);
 
-// Pre-load store categories to assign them to records.
-$configraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
-$itemsraw = array_filter(explode(',', $configraw));
-$mapcategorias = [];
-$mapcustomlabels = [];
-$mapvalores = [];
-
-foreach ($itemsraw as $item) {
-    $tipochar = strtoupper(substr($item, 0, 1));
-    $rest = substr($item, 1);
-    $parts = explode(':', $rest);
-    if (count($parts) >= 2) {
-        $cid = $parts[0] ?? '';
-        $customname = $parts[2] ?? '';
-        $valornota = $parts[3] ?? '0';
-        $cat = !empty($parts[4]) ? trim($parts[4]) : get_string('defaultcategory', 'local_xpstore');
-        $mapcategorias[$tipochar][$cid] = $cat;
-        if ($customname !== '') {
-            $mapcustomlabels[$tipochar][$cid] = $customname;
-        }
-        if ($valornota !== '0') {
-            $mapvalores[$tipochar][$cid] = $valornota;
-        }
-    }
-}
+// Pre-load parsed store catalog to resolve categories, labels, and fallback bonus values.
+$catalogmap = local_xpstore_parse_catalog($courseid, true);
 
 // Load course module info for links.
 $modinfo = get_fast_modinfo($courseid);
@@ -147,15 +126,15 @@ $templatedata = array_merge([
 ], $navdata);
 
 $sql = "SELECT g.*, u.firstname, u.lastname, u.picture, u.imagealt, u.email,
-               cm.module, cm.instance, gi.itemname as gi_itemname
-        FROM {local_xpstore_gastos} g
-        JOIN {user} u ON g.userid = u.id
-        LEFT JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype NOT IN ('M', 'C')
-        LEFT JOIN {grade_items} gi ON gi.id = g.itemid AND g.itemtype IN ('M', 'C')
-        WHERE (cm.course = ? OR gi.courseid = ?)
-        ORDER BY u.firstname ASC, g.timecreated DESC";
+               cm.module, cm.instance, gi.itemname AS gi_itemname
+          FROM {local_xpstore_gastos} g
+          JOIN {user} u ON g.userid = u.id
+     LEFT JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype NOT IN ('M', 'C')
+     LEFT JOIN {grade_items} gi ON gi.id = g.itemid AND g.itemtype IN ('M', 'C')
+         WHERE (g.courseid = ? OR (g.courseid = 0 AND (cm.course = ? OR gi.courseid = ?)))
+      ORDER BY u.firstname ASC, g.timecreated DESC, g.id DESC";
 
-$logs = $DB->get_records_sql($sql, [$courseid, $courseid]);
+$logs = $DB->get_records_sql($sql, [$courseid, $courseid, $courseid]);
 $grouped = [];
 
 if ($logs) {
@@ -166,7 +145,10 @@ if ($logs) {
 
     foreach ($grouped as $userid => $userlogs) {
         $realuser = core_user::get_user($userid);
-        $userfullname = $realuser->firstname . ' ' . $realuser->lastname;
+        if (!$realuser) {
+            continue;
+        }
+        $userfullname = fullname($realuser);
 
         if (
             $searchuser !== '' &&
@@ -181,7 +163,7 @@ if ($logs) {
 
         $totalgastado = 0;
         foreach ($userlogs as $log) {
-            $totalgastado += $log->amount;
+            $totalgastado += max(0, (int)$log->amount);
         }
 
         $saldodisponible = local_xpstore_get_balance($userid, $courseid);
@@ -203,47 +185,71 @@ if ($logs) {
         ];
 
         foreach ($userlogs as $log) {
+            $isdeletedactivity = false;
             if ($log->itemtype === 'M') {
-                $activityname = $log->gi_itemname;
-            } else if ($log->itemtype === 'C') {
-                $activityname = local_xpstore_get_course_grade_item_name($log->itemid);
-            } else {
-                $cm = $DB->get_record('course_modules', ['id' => $log->itemid]);
-
-                if ($cm) {
-                    $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
-                    $activityname = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
+                if (!empty($log->gi_itemname)) {
+                    $activityname = $log->gi_itemname;
                 } else {
                     $activityname = get_string('activitydeleted', 'local_xpstore');
+                    $isdeletedactivity = true;
+                }
+            } else if ($log->itemtype === 'C') {
+                if ($DB->record_exists('grade_items', ['id' => $log->itemid])) {
+                    $activityname = local_xpstore_get_course_grade_item_name($log->itemid);
+                } else {
+                    $activityname = get_string('activitydeleted', 'local_xpstore');
+                    $isdeletedactivity = true;
+                }
+            } else {
+                $activityname = '';
+                if (!empty($log->module)) {
+                    $modname = $DB->get_field('modules', 'name', ['id' => $log->module]);
+                    if (!empty($modname) && $DB->get_manager()->table_exists($modname)) {
+                        $instname = $DB->get_field($modname, 'name', ['id' => $log->instance]);
+                        if ($instname !== false && $instname !== '') {
+                            $activityname = $instname;
+                        }
+                    }
+                }
+                if ($activityname === '') {
+                    $activityname = get_string('activitydeleted', 'local_xpstore');
+                    $isdeletedactivity = true;
                 }
             }
 
             $tipostr = strtolower($log->itemtype);
             $tipocharupper = strtoupper($tipostr);
+            $itemkey = $tipocharupper . (int)$log->itemid;
+            $catentry = $catalogmap[$itemkey] ?? null;
 
             $labeltipo = get_string_manager()->string_exists('type_' . $tipostr, 'local_xpstore')
                 ? get_string('type_' . $tipostr, 'local_xpstore')
                 : 'Legacy';
-            if ($log->itemtype === 'M' || $log->itemtype === 'C') {
+            if ($tipocharupper === 'M' || $tipocharupper === 'C') {
                 $labeltipo = get_string('type_g', 'local_xpstore');
             }
 
-            $categoriatexto = isset($mapcategorias[$tipocharupper][$log->itemid])
-                ? $mapcategorias[$tipocharupper][$log->itemid]
+            $categoriatexto = $catentry
+                ? (($catentry['categoria'] !== '') ? $catentry['categoria'] : get_string('defaultcategory', 'local_xpstore'))
                 : '-';
 
-            $customlabel = isset($mapcustomlabels[$tipocharupper][$log->itemid])
-                ? $mapcustomlabels[$tipocharupper][$log->itemid]
-                : '';
+            $customlabel = '';
+            if (isset($log->rewardname) && trim((string)$log->rewardname) !== '') {
+                $customlabel = trim((string)$log->rewardname);
+            } else if ($catentry && $catentry['nombre'] !== '') {
+                $customlabel = $catentry['nombre'];
+            }
 
-            $valornota = isset($mapvalores[$tipocharupper][$log->itemid])
-                ? $mapvalores[$tipocharupper][$log->itemid]
-                : '0';
+            $valnum = 0.0;
+            if (isset($log->gradevalue) && $log->gradevalue !== null && (float)$log->gradevalue > 0) {
+                $valnum = (float)$log->gradevalue;
+            } else if ($catentry && (float)$catentry['valornota'] > 0) {
+                $valnum = (float)$catentry['valornota'];
+            }
 
-            if (in_array($tipocharupper, ['G', 'M', 'C']) && $valornota !== '0') {
-                $valnum = floatval($valornota);
+            if (in_array($tipocharupper, ['G', 'M', 'C'], true) && $valnum > 0) {
                 $suffix = ' (+' . $valnum . ' pts)';
-                $customlabel = $customlabel ? $customlabel . $suffix : $suffix;
+                $customlabel = ($customlabel !== '') ? ($customlabel . $suffix) : trim($suffix);
             }
 
             if (
@@ -262,18 +268,18 @@ if ($logs) {
             }
 
             $cmurl = '';
-            if (in_array($tipostr, ['g', 'm', 'c'])) {
+            if (in_array($tipostr, ['g', 'm', 'c'], true)) {
                 $cmurl = (new moodle_url(
                     '/grade/report/user/index.php',
                     ['id' => $courseid, 'userid' => $log->userid]
                 ))->out(false);
-            } else if (isset($modinfo->cms[$log->itemid])) {
+            } else if (!$isdeletedactivity && isset($modinfo->cms[$log->itemid])) {
                 $cmurl = $modinfo->cms[$log->itemid]->url ? $modinfo->cms[$log->itemid]->url->out(false) : '';
             }
 
-            $activityhtml = htmlspecialchars($activityname);
-            if (!empty($cmurl) && $activityname !== 'Actividad / Recurso eliminado') {
-                $activityhtml = '<a href="' . $cmurl . '" target="_blank" ' .
+            $activityhtml = format_string($activityname, true, ['context' => $context]);
+            if (!empty($cmurl) && !$isdeletedactivity) {
+                $activityhtml = '<a href="' . s($cmurl) . '" target="_blank" ' .
                                  'style="color: #0056D2; text-decoration: none; transition: 0.2s;" ' .
                                  'onmouseover="this.style.color=\'#00C9A7\'" ' .
                                  'onmouseout="this.style.color=\'#0056D2\'">' .
@@ -288,13 +294,24 @@ if ($logs) {
                 'sesskey' => sesskey(),
             ]);
 
+            $cleancustomlabel = ($customlabel !== '') ? html_entity_decode(
+                format_string($customlabel, true, ['context' => $context]),
+                ENT_QUOTES | ENT_HTML5,
+                'UTF-8'
+            ) : '';
+            $cleancategoria = html_entity_decode(
+                format_string($categoriatexto, true, ['context' => $context]),
+                ENT_QUOTES | ENT_HTML5,
+                'UTF-8'
+            );
+
             $userdata['logs'][] = [
                 'activityhtml' => $activityhtml,
-                'customlabel' => htmlspecialchars($customlabel),
-                'categoriatexto' => htmlspecialchars($categoriatexto),
-                'tipostr' => in_array($log->itemtype, ['M', 'C']) ? 'g' : $tipostr,
+                'customlabel' => $cleancustomlabel,
+                'categoriatexto' => $cleancategoria,
+                'tipostr' => in_array($tipocharupper, ['M', 'C'], true) ? 'g' : $tipostr,
                 'labeltipo' => $labeltipo,
-                'amount' => $log->amount,
+                'amount' => max(0, (int)$log->amount),
                 'date' => userdate($log->timecreated, get_string('strftimedatetime', 'langconfig')),
                 'deleteurl' => $deletelogurl->out(false),
             ];

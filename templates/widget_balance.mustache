@@ -48,7 +48,7 @@
 (function() {
     try {
         if (window.BroadcastChannel) {
-            var bc = new BroadcastChannel('xpstore_balance_sync');
+            var bc = new BroadcastChannel('{{bcchannel}}');
             bc.onmessage = function(ev) {
                 if (ev.data && ev.data.type === 'update_balance' && ev.data.newBalance !== undefined) {
                     var els = document.querySelectorAll('.xp-balance-value');
