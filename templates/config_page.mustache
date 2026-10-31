@@ -953,7 +953,8 @@ require([
                         movedRow.style.backgroundColor = '';
                     }, 1000);
                 }
-            });
+                return true;
+            }).catch(notification.exception);
         });
     }
 
