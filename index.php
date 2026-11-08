@@ -25,6 +25,7 @@
 /**
  * index.php - Premium version.
  */
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
@@ -40,6 +41,10 @@ if ($courseid <= 0) {
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 require_login($course);
+
+if (function_exists('local_xpstore_cleanup_expired_forum_roles')) {
+    local_xpstore_cleanup_expired_forum_roles($courseid, $USER->id);
+}
 
 $url = new moodle_url('/local/xpstore/index.php', ['id' => $courseid]);
 $historyurl = new moodle_url('/local/xpstore/history.php', ['id' => $courseid]);
@@ -61,6 +66,46 @@ if ($action === 'togglemenu' && confirm_sesskey()) {
     redirect($url);
 }
 
+if ($action === 'togglestore' && confirm_sesskey()) {
+    if (!local_xpstore_can_manage($context)) {
+        throw new required_capability_exception($context, 'local/xpstore:manage', 'nopermissions', '');
+    }
+    $access = local_xpstore_get_store_access_state($courseid);
+    if ($access['closed']) {
+        set_config('store_closed_course_' . $courseid, '0', 'local_xpstore');
+        if ($access['deadline_passed']) {
+            set_config('store_deadline_course_' . $courseid, 0, 'local_xpstore');
+        }
+    } else {
+        set_config('store_closed_course_' . $courseid, '1', 'local_xpstore');
+    }
+    redirect($url);
+}
+
+if ($action === 'savedeadline' && confirm_sesskey()) {
+    if (!local_xpstore_can_manage($context)) {
+        throw new required_capability_exception($context, 'local/xpstore:manage', 'nopermissions', '');
+    }
+    $cleardeadline = optional_param('clear_deadline', 0, PARAM_INT);
+    $deadlinestr = trim(optional_param('store_deadline', '', PARAM_TEXT));
+    if ($cleardeadline || $deadlinestr === '') {
+        set_config('store_deadline_course_' . $courseid, 0, 'local_xpstore');
+    } else {
+        try {
+            $tz = \core_date::get_user_timezone_object();
+            $dt = new \DateTime($deadlinestr, $tz);
+            $ts = $dt->getTimestamp();
+            set_config('store_deadline_course_' . $courseid, max(0, $ts), 'local_xpstore');
+            if ($ts > time()) {
+                set_config('store_closed_course_' . $courseid, '0', 'local_xpstore');
+            }
+        } catch (\Throwable $e) {
+            set_config('store_deadline_course_' . $courseid, 0, 'local_xpstore');
+        }
+    }
+    redirect($url);
+}
+
 $menuvisible = get_config('local_xpstore', 'show_menu_course_' . $courseid);
 if ($menuvisible === false) {
     $menuvisible = '0';
@@ -74,8 +119,8 @@ $PAGE->set_title(get_string('storetitle', 'local_xpstore') . ' - ' . $course->sh
 if ($action === 'comprar' && confirm_sesskey()) {
     $cmid = required_param('cmid', PARAM_INT);
     $tipo = required_param('tipo', PARAM_ALPHA);
-
     $result = local_xpstore_process_redemption($course, $USER->id, $tipo, $cmid);
+
     if (!empty($result['success'])) {
         redirect(new moodle_url(
             $url,
@@ -84,7 +129,9 @@ if ($action === 'comprar' && confirm_sesskey()) {
     } else if (($result['code'] ?? '') === 'limit') {
         redirect(new moodle_url($url, ['status' => 'limit']));
     } else if (($result['code'] ?? '') === 'req_failed') {
-        redirect(new moodle_url($url, ['status' => 'req_failed']));
+        $errmsg = !empty($result['message']) ? $result['message'] : get_string('error_prereq', 'local_xpstore');
+        \core\notification::add($errmsg, \core\output\notification::NOTIFY_WARNING);
+        redirect($url);
     } else {
         redirect(new moodle_url($url, ['status' => 'error']));
     }
@@ -93,13 +140,14 @@ if ($action === 'comprar' && confirm_sesskey()) {
 $status = optional_param('status', '', PARAM_ALPHANUMEXT);
 $boughtcmid = optional_param('cmid', 0, PARAM_INT);
 $tipocompra = strtoupper(optional_param('tipo_compra', '', PARAM_ALPHA));
-
 $saldo = local_xpstore_get_balance($USER->id, $courseid);
 $userlevel = local_xpstore_get_user_level($USER->id, $courseid);
 $catalog = local_xpstore_parse_catalog($courseid);
 $isteacher = local_xpstore_can_manage($context) || is_siteadmin();
 $modinfo = get_fast_modinfo($courseid);
 $cms = $modinfo->get_cms();
+$storeaccess = local_xpstore_get_store_access_state($courseid);
+$storeclosed = !empty($storeaccess['closed']);
 
 $cpstore = local_xpstore_clean_hex_color(
     get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2',
@@ -119,7 +167,6 @@ $ccstore = local_xpstore_clean_hex_color(
 );
 
 $caticons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid) ?: '', true) ?: [];
-
 $completion = null;
 $storecategories = [];
 
@@ -174,11 +221,9 @@ foreach ($catalog as $item) {
         [$USER->id, $cid, $tipochar, $courseid]
     );
     $limitealcanzado = ($limite > 0 && $comprasactuales >= $limite);
-
     $isbonus = in_array($tipochar, ['G', 'M', 'C'], true);
     $isspecial = ($tipochar === 'S');
     $isunlock = ($tipochar === 'U');
-
     $boughtthis = ($status === 'success' && $boughtcmid === $cid && $tipocompra === $tipochar);
     $gotogradebook = ($boughtthis && $isbonus);
 
@@ -189,10 +234,11 @@ foreach ($catalog as $item) {
             ? $modinfo->cms[$cid]->url->out(false)
             : (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
     }
-    $gradebookurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
 
+    $gradebookurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
     $requisitocumplido = true;
     $reqname = '';
+
     if ($requisito > 0) {
         if (isset($cms[$requisito]) && empty($cms[$requisito]->deletioninprogress)) {
             if ($completion === null) {
@@ -213,10 +259,23 @@ foreach ($catalog as $item) {
         }
     }
 
-    $disabled = ($saldo < $costo) || (!$requisitocumplido) || (!$nivelcumplido);
+    $stateallowed = true;
+    $statebtnlabel = '';
+    if (in_array($tipochar, ['A', 'F', 'R'], true) && isset($cm) && function_exists('local_xpstore_check_activity_redemption_state')) {
+        $statecheck = local_xpstore_check_activity_redemption_state($courseid, $USER->id, $tipochar, $cm);
+        if (!$statecheck['allowed']) {
+            $stateallowed = false;
+            $statebtnlabel = $statecheck['message'];
+        }
+    }
+
+    $disabled = $storeclosed || ($saldo < $costo) || (!$requisitocumplido) || (!$nivelcumplido) || (!$stateallowed);
     $btntext = get_string('canjear', 'local_xpstore');
+
     if ($disabled) {
-        if (!$nivelcumplido) {
+        if ($storeclosed) {
+            $btntext = $storeaccess['btn_label'];
+        } else if (!$nivelcumplido) {
             $sm = get_string_manager();
             $btntext = $sm->string_exists('requires_level', 'local_xpstore')
                 ? get_string('requires_level', 'local_xpstore', $minlevel)
@@ -227,6 +286,8 @@ foreach ($catalog as $item) {
                 ? get_string('requires_short', 'local_xpstore')
                 : 'Requiere';
             $btntext = $strreq . ' ' . $reqname;
+        } else if (!$stateallowed) {
+            $btntext = $statebtnlabel;
         } else {
             $btntext = get_string('insuficiente', 'local_xpstore');
         }
@@ -250,8 +311,8 @@ foreach ($catalog as $item) {
         'has_limit' => ($limite > 0),
         'comprasactuales' => $comprasactuales,
         'limitealcanzado' => $limitealcanzado,
-        'locked_by_req' => (!$requisitocumplido || !$nivelcumplido),
-        'req_name' => $reqname,
+        'locked_by_req' => ($storeclosed || !$requisitocumplido || !$nivelcumplido || !$stateallowed),
+        'req_name' => $storeclosed ? $storeaccess['btn_label'] : ($reqname ?: $statebtnlabel),
         'bought_this' => $boughtthis,
         'gotogradebook' => $gotogradebook,
         'cmurl' => $cmurl,
@@ -277,7 +338,6 @@ foreach ($storecategories as $nombreseccion => $productos) {
     if (local_xpstore_is_custom_card_image($caticon)) {
         $caticon = 'trophy';
     }
-
     $formattedcategories[] = [
         'nombreseccion' => $nombreseccion,
         'caticon' => $caticon,
@@ -297,7 +357,6 @@ if ($status === 'success') {
     $itemname = '';
     $activityname = '';
     $boughtkey = $tipocompra . $boughtcmid;
-
     if (isset($catalog[$boughtkey])) {
         $catitem = $catalog[$boughtkey];
         $itemcat = ($catitem['categoria'] !== '') ? $catitem['categoria'] : get_string('defaultcategory', 'local_xpstore');

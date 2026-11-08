@@ -1,5 +1,4 @@
 /* stylelint-disable */
-
 /* local_xpstore styles */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap');
 
@@ -54,14 +53,10 @@ body.pagelayout-embedded,
     -ms-overflow-style: none !important;  /* IE and Edge */
     scrollbar-width: none !important;  /* Firefox */
 }
-
 .pagelayout-embedded::-webkit-scrollbar,
 .pagelayout-embedded *::-webkit-scrollbar {
     display: none !important;
 }
-
-/* Allow scrolling on category if needed, but usually we just hide the main body scroll
-   and let the container scroll if we want, or just hide it */
 
 /* History Widget */
 .local_xpstore-embedded-container.history-widget {
@@ -226,25 +221,35 @@ body.pagelayout-embedded,
     background: #e0f2f1;
     color: #00897b;
 }
+
 .local_xpstore-container .bg-a {
     background: #e3f2fd;
     color: #1e88e5;
 }
+
 .local_xpstore-container .bg-g {
     background: #fff8e1;
     color: #f57f17;
 }
+
 .local_xpstore-container .bg-s {
     background: #e0f7fa;
     color: #00acc1;
 }
+
 .local_xpstore-container .bg-f {
     background: #f3e8ff;
     color: #7e22ce;
 }
+
 .local_xpstore-container .bg-u {
     background: #eef2ff;
     color: #4f46e5;
+}
+
+.local_xpstore-container .bg-r {
+    background: #fce7f3;
+    color: #be185d;
 }
 
 .local_xpstore-container .form-control-sm {
@@ -514,7 +519,6 @@ body.pagelayout-embedded,
 .local_xpstore-container .icon-widget-title {
     color: #00838f;
 }
-
 .local_xpstore-container .form-box-colors {
     background: #e8f4f8;
     border-color: #bde0eb;
@@ -849,8 +853,8 @@ body.pagelayout-embedded,
 .local_xpstore-container .p-card:nth-child(11) { animation-delay: 0.55s; }
 .local_xpstore-container .p-card:nth-child(12) { animation-delay: 0.60s; }
 .local_xpstore-container .p-card:nth-child(n+13) { animation-delay: 0.65s; }
-.local_xpstore-container .widget-card { animation-delay: 0.10s; }
 
+.local_xpstore-container .widget-card { animation-delay: 0.10s; }
 
 /* Glass Shine Effect on hover */
 .local_xpstore-container .glass-shine {
@@ -1571,18 +1575,22 @@ body.pagelayout-embedded,
     background: #e0f2f1;
     color: #00897b;
 }
+
 .bg-a {
     background: #e3f2fd;
     color: #1e88e5;
 }
+
 .bg-g {
     background: #fff8e1;
     color: #f57f17;
 }
+
 .bg-s {
     background: #e0f7fa;
     color: #00acc1;
 }
+
 .bg-f {
     background: #f3e8ff;
     color: #7e22ce;
@@ -1593,7 +1601,10 @@ body.pagelayout-embedded,
     color: #4f46e5;
 }
 
-
+.bg-r {
+    background: #fce7f3;
+    color: #be185d;
+}
 
 @media (max-width: 768px) {
     .local_xpstore-config-wrapper {
@@ -1626,7 +1637,6 @@ body.pagelayout-embedded,
 .epic-celebration-modal .modal-content {
     outline: 0 !important;
 }
-
 .epic-celebration-modal .modal-content {
     background: linear-gradient(135deg, #fad0ff 0%, #cbfbfe 100%);
     color: #333;
@@ -1636,19 +1646,15 @@ body.pagelayout-embedded,
     box-shadow: 0 15px 40px rgba(0,0,0,0.15) !important;
     overflow: hidden;
 }
-
 .epic-celebration-modal .modal-header {
     display: none;
 }
-
 .epic-celebration-modal .modal-body {
     padding: 50px 40px;
 }
-
 .epic-celebration-modal .modal-footer {
     display: none;
 }
-
 .epic-icon-wrapper {
     position: relative;
     z-index: 1;
@@ -1661,12 +1667,10 @@ body.pagelayout-embedded,
     padding: 4px;
     animation: epicIconPopIn 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s both;
 }
-
 @keyframes epicIconPopIn {
     0% { transform: scale(0) translateY(40px); opacity: 0; }
     100% { transform: scale(1) translateY(0); opacity: 1; }
 }
-
 .epic-icon-wrapper::before {
     content: '';
     position: absolute;
@@ -1677,7 +1681,6 @@ body.pagelayout-embedded,
     filter: blur(14px);
     opacity: 0.9;
 }
-
 .epic-icon-container {
     position: relative;
     z-index: 2;
@@ -1691,7 +1694,6 @@ body.pagelayout-embedded,
     font-size: 55px;
     color: #ffda44;
 }
-
 .epic-sparkle {
     position: absolute;
     top: 20px;
@@ -1700,7 +1702,6 @@ body.pagelayout-embedded,
     height: 36px;
     animation: epicSparkleAnim 1s ease-in-out infinite alternate;
 }
-
 .epic-sparkle::after {
     content: '';
     position: absolute;
@@ -1708,12 +1709,10 @@ body.pagelayout-embedded,
     background: #ffffff;
     clip-path: path('M18 0 Q18 18 36 18 Q18 18 18 36 Q18 18 0 18 Q18 18 18 0 Z');
 }
-
 @keyframes epicSparkleAnim {
     0% { transform: scale(0.7); opacity: 0.8; }
     100% { transform: scale(1.1); opacity: 1; }
 }
-
 .epic-title {
     font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
     font-size: 3rem;
@@ -1722,19 +1721,16 @@ body.pagelayout-embedded,
     margin-bottom: 15px;
     letter-spacing: -1.5px;
 }
-
 .epic-desc {
     font-size: 1.15rem;
     color: #444;
     line-height: 1.5;
     margin-bottom: 30px;
 }
-
 .epic-desc b {
     color: #222;
     font-weight: 700;
 }
-
 .btn-claim-reward {
     background: #2ea043;
     color: white;
@@ -1747,7 +1743,6 @@ body.pagelayout-embedded,
     text-decoration: none;
     display: inline-block;
 }
-
 .btn-claim-reward:hover {
     background: #238636;
     color: white;
@@ -1831,7 +1826,6 @@ body.pagelayout-embedded,
     background: #fafafa;
     transition: border-color 0.2s;
 }
-
 .local_xpstore-container .search-input {
     background: transparent !important;
     box-shadow: none !important;
@@ -1841,13 +1835,11 @@ body.pagelayout-embedded,
     outline: none;
     padding-left: 5px;
 }
-
 .local_xpstore-container .search-divider {
     width: 1px;
     height: 24px;
     background: #dcdcdc;
 }
-
 .local_xpstore-container .search-btn {
     border-radius: 8px;
     font-weight: 600;
@@ -1874,40 +1866,32 @@ body.pagelayout-embedded,
     margin-left: auto;
     margin-right: 20px;
 }
-
 .local_xpstore-container .stat-item {
     font-size: 0.95rem;
     font-weight: 700;
 }
-
 .local_xpstore-container .stat-redemptions {
     color: #444;
 }
-
 .local_xpstore-container .stat-redemptions span {
     font-weight: 600;
     color: #888;
     font-size: 0.85rem;
 }
-
 .local_xpstore-container .stat-spent {
     color: #f57c00;
 }
-
 .local_xpstore-container .stat-spent i {
     font-size: 0.8rem;
     margin-right: 3px;
 }
-
 .local_xpstore-container .stat-balance {
     color: #2E7D32;
 }
-
 .local_xpstore-container .stat-balance i {
     font-size: 0.8rem;
     margin-right: 3px;
 }
-
 .local_xpstore-container .u-stats-divider {
     width: 1px;
     height: 20px;

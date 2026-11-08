@@ -25,6 +25,7 @@
 /**
  * history.php - Historial del Estudiante
  */
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
@@ -33,8 +34,11 @@ global $USER, $PAGE, $OUTPUT, $DB;
 $courseid = required_param('id', PARAM_INT);
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
-
 require_login($course);
+
+if (function_exists('local_xpstore_cleanup_expired_forum_roles')) {
+    local_xpstore_cleanup_expired_forum_roles($courseid, $USER->id);
+}
 
 $url = new moodle_url('/local/xpstore/history.php', ['id' => $courseid]);
 $PAGE->set_url($url);
@@ -189,6 +193,7 @@ if ($logs) {
             'cmurl' => $cmurl,
         ];
     }
+
     $templatedata['str_totalspent'] = get_string('totalspent', 'local_xpstore', $totalgastado);
     $saldodisponible = local_xpstore_get_balance($USER->id, $courseid);
     $templatedata['str_remainingbalance'] = get_string('remainingbalance', 'local_xpstore', $saldodisponible);

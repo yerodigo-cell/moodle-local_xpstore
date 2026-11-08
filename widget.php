@@ -25,6 +25,7 @@
 /**
  * widget.php - Embedded individual product widget.
  */
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
@@ -37,6 +38,10 @@ $tiporeq = strtoupper(required_param('tipo', PARAM_ALPHA));
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 require_login($course);
+
+if (function_exists('local_xpstore_cleanup_expired_forum_roles')) {
+    local_xpstore_cleanup_expired_forum_roles($courseid, $USER->id);
+}
 
 $urlparams = [
     'id' => $courseid,
@@ -52,12 +57,14 @@ $PAGE->set_pagelayout('embedded');
 $catalog = local_xpstore_parse_catalog($courseid);
 $catkey = $tiporeq . $cmidreq;
 $producto = null;
+
 $modinfo = get_fast_modinfo($courseid);
 $cms = $modinfo->get_cms();
 
 if (isset($catalog[$catkey])) {
     $catitem = $catalog[$catkey];
     $customicon = $catitem['icono'];
+
     if ($tiporeq === 'M') {
         $gi = $DB->get_record('grade_items', ['id' => $cmidreq, 'courseid' => $courseid, 'itemtype' => 'manual']);
         if ($gi) {
@@ -127,8 +134,10 @@ if (!$producto) {
 }
 
 $action = optional_param('action', '', PARAM_ALPHA);
+
 if ($action === 'comprar' && confirm_sesskey()) {
     $result = local_xpstore_process_redemption($course, $USER->id, $tiporeq, $cmidreq);
+
     if (!empty($result['success'])) {
         redirect(new moodle_url($url, ['status' => 'success']));
     } else if (($result['code'] ?? '') === 'limit') {
@@ -167,6 +176,19 @@ if ($producto['requisito'] > 0) {
 $userlevel = local_xpstore_get_user_level($USER->id, $courseid);
 $nivelcumplido = ($producto['minlevel'] <= 0 || $userlevel >= $producto['minlevel']);
 $hiddenbylevel = (!$nivelcumplido && $producto['hidebylevel'] === 1);
+
+$storeaccess = local_xpstore_get_store_access_state($courseid);
+$storeclosed = !empty($storeaccess['closed']);
+
+$stateallowed = true;
+$statebtnlabel = '';
+if (in_array($producto['tipo'], ['A', 'F', 'R'], true) && isset($cm) && function_exists('local_xpstore_check_activity_redemption_state')) {
+    $statecheck = local_xpstore_check_activity_redemption_state($courseid, $USER->id, $producto['tipo'], $cm);
+    if (!$statecheck['allowed']) {
+        $stateallowed = false;
+        $statebtnlabel = $statecheck['message'];
+    }
+}
 
 $status = optional_param('status', '', PARAM_ALPHA);
 $saldo = local_xpstore_get_balance($USER->id, $courseid);
@@ -217,13 +239,12 @@ $isbonus = in_array($producto['tipo'], ['G', 'M', 'C'], true);
 $isspecial = ($producto['tipo'] === 'S');
 $isunlock = ($producto['tipo'] === 'U');
 $statussuccess = ($status === 'success');
-
 $desturl = null;
 $strsuccessunlock = '';
+
 if ($statussuccess) {
     $dest = $isbonus ? '/grade/report/user/index.php' : '/course/view.php';
     $destmoodleurl = new moodle_url($dest, ['id' => $courseid]);
-
     if (!$isbonus && isset($cms[$producto['cid']]) && $cms[$producto['cid']]->url) {
         $destmoodleurl = $cms[$producto['cid']]->url;
     }
@@ -238,7 +259,6 @@ if ($statussuccess) {
     $a = new stdClass();
     $a->reward = s($rewardlabel);
     $a->activity = s($activityname);
-
     if ($isbonus) {
         $strsuccessunlock = get_string('success_unlock_gradebook', 'local_xpstore', $a);
     } else {
@@ -246,11 +266,13 @@ if ($statussuccess) {
     }
 }
 
-$disabled = ($saldo < $producto['costo']) || (!$requisitocumplido) || (!$nivelcumplido);
-
+$disabled = $storeclosed || ($saldo < $producto['costo']) || (!$requisitocumplido) || (!$nivelcumplido) || (!$stateallowed);
 $btntext = get_string('canjear', 'local_xpstore');
+
 if ($disabled) {
-    if (!$nivelcumplido) {
+    if ($storeclosed) {
+        $btntext = $storeaccess['btn_label'];
+    } else if (!$nivelcumplido) {
         $sm = get_string_manager();
         $btntext = $sm->string_exists('requires_level', 'local_xpstore')
             ? get_string('requires_level', 'local_xpstore', $producto['minlevel'])
@@ -261,6 +283,8 @@ if ($disabled) {
             ? get_string('requires_short', 'local_xpstore')
             : 'Requiere';
         $btntext = $strreq . ' ' . $reqname;
+    } else if (!$stateallowed) {
+        $btntext = $statebtnlabel;
     } else {
         $btntext = get_string('insuficiente', 'local_xpstore');
     }
@@ -292,8 +316,8 @@ $templatedata = [
     'actionurl' => $url->out(false),
     'sesskey' => sesskey(),
     'limitealcanzado' => $limitealcanzado,
-    'locked_by_req' => (!$requisitocumplido || !$nivelcumplido),
-    'req_name' => $reqname,
+    'locked_by_req' => ($storeclosed || !$requisitocumplido || !$nivelcumplido || !$stateallowed),
+    'req_name' => $storeclosed ? $storeaccess['btn_label'] : ($reqname ?: $statebtnlabel),
     'disabled' => $disabled,
     'btntext' => $btntext,
     'str_balance' => get_string('balance', 'local_xpstore'),
@@ -315,5 +339,4 @@ $templatedata = [
 ];
 
 echo $OUTPUT->render_from_template('local_xpstore/widget', $templatedata);
-
 echo $OUTPUT->footer();

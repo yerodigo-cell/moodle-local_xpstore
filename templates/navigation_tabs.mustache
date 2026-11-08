@@ -1,6 +1,6 @@
 {{!
     @template local_xpstore/navigation_tabs
-    
+
     Navigation tabs for the XP store.
 
     Example context (json):
@@ -13,16 +13,65 @@
     }
 }}
 {{#isteacher}}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+<div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
     <h2 style="font-weight: 800; margin: 0; background: linear-gradient(135deg, #0056d2 0%, #00c9a7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">
         <i class="fa fa-star" style="margin-right: 8px;"></i> XP Store
     </h2>
-    <div style="display: flex; align-items: center; gap: 15px;">
+    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
         {{#show_reset_btn}}
         <a href="{{reseturl}}" class="btn-reset" data-xpstore-title="{{str_resetcycle}}" data-xpstore-confirm="{{str_confirmreset}}" onclick="event.preventDefault(); var el = this; require(['core/notification', 'core/str'], function(Notification, Str) { Str.get_strings([{key: 'confirm', component: 'core'}, {key: 'yes', component: 'core'}, {key: 'cancel', component: 'core'}]).then(function(s) { Notification.confirm(el.getAttribute('data-xpstore-title') || s[0], el.getAttribute('data-xpstore-confirm'), s[1], s[2], function() { window.location.href = el.href; }); }); }); return false;" style="margin: 0; padding: 8px 16px;">
             <i class="fa fa-trash"></i> {{str_resetcycle}}
         </a>
         {{/show_reset_btn}}
+
+        {{#show_store_controls}}
+        <div style="display: flex; align-items: center; gap: 6px;">
+            <form method="POST" action="{{storecontrolurl}}" style="margin: 0;">
+                <input type="hidden" name="sesskey" value="{{sesskey}}">
+                <input type="hidden" name="action" value="togglestore">
+                {{#store_is_closed}}
+                    <button type="submit" class="btn btn-danger" style="padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 6px rgba(220, 53, 69, 0.2); border: none;" title="{{str_store_toggle_open_tooltip}}">
+                        <i class="fa fa-lock"></i> {{str_store_closed_btn}}
+                    </button>
+                {{/store_is_closed}}
+                {{^store_is_closed}}
+                    <button type="submit" class="btn btn-success" style="padding: 8px 14px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2); border: none;" title="{{str_store_toggle_close_tooltip}}">
+                        <i class="fa fa-unlock"></i> {{str_store_open_btn}}
+                    </button>
+                {{/store_is_closed}}
+            </form>
+
+            <div class="dropdown" style="position: relative;">
+                <button type="button" class="btn {{#has_store_deadline}}btn-warning{{/has_store_deadline}}{{^has_store_deadline}}btn-outline-secondary{{/has_store_deadline}} dropdown-toggle" data-toggle="dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding: 8px 12px; border-radius: 8px; font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;" title="{{str_store_deadline}}">
+                    <i class="fa fa-calendar-check-o"></i>
+                    {{#has_store_deadline}}
+                        <span>{{store_deadline_formatted}}</span>
+                    {{/has_store_deadline}}
+                    {{^has_store_deadline}}
+                        <span>{{str_store_deadline_short}}</span>
+                    {{/has_store_deadline}}
+                </button>
+                <div class="dropdown-menu dropdown-menu-right p-3 shadow" style="min-width: 260px; z-index: 1060; border-radius: 10px;" onclick="event.stopPropagation();">
+                    <form method="POST" action="{{storecontrolurl}}" style="margin: 0;">
+                        <input type="hidden" name="sesskey" value="{{sesskey}}">
+                        <input type="hidden" name="action" value="savedeadline">
+                        <label class="small font-weight-bold mb-1 d-block text-dark">
+                            <i class="fa fa-clock-o mr-1"></i> {{str_store_deadline}}
+                        </label>
+                        <input type="datetime-local" name="store_deadline" value="{{store_deadline_iso}}" class="form-control form-control-sm mb-2 bg-white" style="border: 1px solid #ced4da;">
+                        <div class="d-flex justify-content-between align-items-center mt-2" style="gap: 6px;">
+                            <button type="submit" name="clear_deadline" value="1" class="btn btn-sm btn-outline-secondary" style="font-size: 0.8rem;">
+                                {{str_store_deadline_clear}}
+                            </button>
+                            <button type="submit" class="btn btn-sm btn-primary font-weight-bold" style="font-size: 0.8rem;">
+                                <i class="fa fa-check"></i> OK
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {{/show_store_controls}}
 
         {{#show_toggle_menu_btn}}
         <div style="display: flex; align-items: center; gap: 8px;">
@@ -30,13 +79,13 @@
                 <input type="hidden" name="sesskey" value="{{sesskey}}">
                 <input type="hidden" name="action" value="togglemenu">
                 {{#menu_is_visible}}
-                    <button type="submit" class="btn btn-success" style="padding: 8px 20px; border-radius: 8px; font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2); border: none;" title="{{str_hide_menu_tooltip}}">
-                        <i class="fa fa-eye" style="font-size: 1.1rem;"></i> {{str_menuvisible}}
+                    <button type="submit" class="btn btn-success" style="padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2); border: none;" title="{{str_hide_menu_tooltip}}">
+                        <i class="fa fa-eye" style="font-size: 1rem;"></i> {{str_menuvisible}}
                     </button>
                 {{/menu_is_visible}}
                 {{^menu_is_visible}}
-                    <button type="submit" class="btn btn-secondary" style="padding: 8px 20px; border-radius: 8px; font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(108, 117, 125, 0.2); border: none;" title="{{str_show_menu_tooltip}}">
-                        <i class="fa fa-eye-slash" style="font-size: 1.1rem;"></i> {{str_menuhidden}}
+                    <button type="submit" class="btn btn-secondary" style="padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(108, 117, 125, 0.2); border: none;" title="{{str_show_menu_tooltip}}">
+                        <i class="fa fa-eye-slash" style="font-size: 1rem;"></i> {{str_menuhidden}}
                     </button>
                 {{/menu_is_visible}}
             </form>
@@ -47,7 +96,6 @@
         {{/show_toggle_menu_btn}}
     </div>
 </div>
-
 <div style="border-bottom: 1px solid #dee2e6; margin-bottom: 15px;">
     <ul class="nav nav-tabs" style="margin-bottom: -1px; border-bottom: none;">
         <li class="nav-item">
@@ -77,7 +125,4 @@
         </li>
     </ul>
 </div>
-
-
-
 {{/isteacher}}

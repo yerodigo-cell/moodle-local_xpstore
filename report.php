@@ -34,10 +34,11 @@ $search = optional_param('search', '', PARAM_TEXT);
 $searchlabel = optional_param('searchlabel', '', PARAM_TEXT);
 $searchuser = optional_param('searchuser', '', PARAM_TEXT);
 $openuser = optional_param('openuser', 0, PARAM_INT);
+
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
-
 require_login($course);
+
 if (!local_xpstore_can_manage($context)) {
     require_capability('local/xpstore:manage', $context);
 }
@@ -50,6 +51,7 @@ $PAGE->set_title(get_string('audit', 'local_xpstore'));
 
 // Logic to reset the cycle.
 $action = optional_param('action', '', PARAM_ALPHA);
+
 if ($action === 'reset' && confirm_sesskey()) {
     local_xpstore_reset_purchases($courseid);
     redirect($url, get_string('productdeleted', 'local_xpstore'));
@@ -71,8 +73,11 @@ if ($action === 'deletelog' && confirm_sesskey()) {
     redirect(new moodle_url('/local/xpstore/report.php', $redirectparams), get_string('purchasedeleted', 'local_xpstore'));
 }
 
-// Ensure any orphaned grade bonuses from previous resets are cleaned up.
+// Ensure any orphaned grade bonuses from previous resets and expired forum roles are cleaned up.
 local_xpstore_cleanup_orphan_grade_bonuses($courseid);
+if (function_exists('local_xpstore_cleanup_expired_forum_roles')) {
+    local_xpstore_cleanup_expired_forum_roles($courseid);
+}
 
 // Pre-load parsed store catalog to resolve categories, labels, and fallback bonus values.
 $catalogmap = local_xpstore_parse_catalog($courseid, true);
@@ -135,10 +140,11 @@ $sql = "SELECT g.*, u.firstname, u.lastname, u.picture, u.imagealt, u.email,
       ORDER BY u.firstname ASC, g.timecreated DESC, g.id DESC";
 
 $logs = $DB->get_records_sql($sql, [$courseid, $courseid, $courseid]);
-$grouped = [];
 
+$grouped = [];
 if ($logs) {
     $templatedata['has_users'] = true;
+
     foreach ($logs as $log) {
         $grouped[$log->userid][] = $log;
     }
@@ -165,7 +171,6 @@ if ($logs) {
         foreach ($userlogs as $log) {
             $totalgastado += max(0, (int)$log->amount);
         }
-
         $saldodisponible = local_xpstore_get_balance($userid, $courseid);
 
         $reseturl = new moodle_url($url, ['action' => 'resetuser', 'userid' => $userid, 'sesskey' => sesskey()]);
@@ -186,6 +191,7 @@ if ($logs) {
 
         foreach ($userlogs as $log) {
             $isdeletedactivity = false;
+
             if ($log->itemtype === 'M') {
                 if (!empty($log->gi_itemname)) {
                     $activityname = $log->gi_itemname;
@@ -331,4 +337,5 @@ if ($logs) {
 $PAGE->requires->js_call_amd('local_xpstore/report', 'init', []);
 
 echo $OUTPUT->render_from_template('local_xpstore/report_page', $templatedata);
+
 echo $OUTPUT->footer();

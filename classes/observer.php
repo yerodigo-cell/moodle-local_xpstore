@@ -24,6 +24,7 @@ namespace local_xpstore;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class observer {
+
     /**
      * Checks whether the user performing a course restore is authorized to copy
      * local_xpstore configuration and custom images from the source course on this site.
@@ -122,7 +123,6 @@ class observer {
      */
     public static function course_restored(\core\event\course_restored $event) {
         global $DB, $CFG;
-
         require_once($CFG->dirroot . '/local/xpstore/lib.php');
         require_once($CFG->dirroot . '/group/lib.php');
 
@@ -224,6 +224,10 @@ class observer {
                 }
             }
 
+            // Ensure cloned/restored course starts with redemptions open and no expired deadline from previous term.
+            set_config('store_closed_course_' . $newcourseid, '0', 'local_xpstore');
+            set_config('store_deadline_course_' . $newcourseid, 0, 'local_xpstore');
+
             // 2. Copy and map the catalog entries (preserving all 12 fields including bonusmode).
             $oldentries = local_xpstore_parse_catalog($oldcourseid, false);
             if (!empty($oldentries)) {
@@ -237,7 +241,6 @@ class observer {
                     'sortorder ASC, id ASC'
                 );
                 $usedmanualids = [];
-
                 $newcatalogparts = [];
                 $seenproductkeys = [];
 
@@ -280,7 +283,6 @@ class observer {
                             continue;
                         }
                         $seenproductkeys[$productkey] = true;
-
                         $entry['cmid'] = $newcmid;
 
                         // Map prerequisite CMID using the 1-to-1 CM map.
@@ -352,6 +354,8 @@ class observer {
                                     $oldgroupid > 0 ? $oldgroupid : 0
                                 );
                             }
+                        } else if ($tipochar === 'F' || $tipochar === 'R') {
+                            local_xpstore_get_or_create_forum_role();
                         }
 
                         $newcatalogparts[] = local_xpstore_serialize_catalog_item($entry);
@@ -360,7 +364,7 @@ class observer {
                         $qtipo = preg_quote($tipochar, '/');
                         $qold = preg_quote((string)$oldcmid, '/');
                         $cmidpattern = '/([?&]|&amp;)(tipo=' . $qtipo . '([&]|&amp;)cmid=' . $qold .
-                                '|cmid=' . $qold . '([&]|&amp;)tipo=' . $qtipo . ')([&"\']|&amp;)/';
+                            '|cmid=' . $qold . '([&]|&amp;)tipo=' . $qtipo . ')([&"\']|&amp;)/';
                         $cmidreplacement = function ($matches) use ($tipochar, $newcmid) {
                             $amp = isset($matches[3]) && $matches[3] ? $matches[3] : (isset($matches[4]) ? $matches[4] : '&');
                             return $matches[1] . 'tipo=' . $tipochar . $amp . 'cmid=' . $newcmid . $matches[5];
@@ -394,7 +398,6 @@ class observer {
                                 $records = $DB->get_records($modname, ['course' => $newcourseid]);
                                 foreach ($records as $record) {
                                     $updated = false;
-
                                     if (isset($record->intro) && strpos($record->intro, 'cmid=' . $oldcmid) !== false) {
                                         $newintro = preg_replace_callback($cmidpattern, $cmidreplacement, $record->intro);
                                         if ($newintro !== $record->intro) {
@@ -402,7 +405,6 @@ class observer {
                                             $updated = true;
                                         }
                                     }
-
                                     if (isset($record->content) && strpos($record->content, 'cmid=' . $oldcmid) !== false) {
                                         $newcontent = preg_replace_callback(
                                             $cmidpattern,
@@ -414,7 +416,6 @@ class observer {
                                             $updated = true;
                                         }
                                     }
-
                                     if ($updated) {
                                         $DB->update_record($modname, $record);
                                     }
@@ -453,12 +454,12 @@ class observer {
      */
     public static function user_graded(\core\event\user_graded $event) {
         global $DB, $CFG;
-
         static $processingitems = [];
 
         $courseid = (int)$event->courseid;
         $userid = (int)$event->relateduserid;
         $gradeid = (int)$event->objectid;
+
         if ($courseid <= 0 || $userid <= 0 || $gradeid <= 0) {
             return;
         }
@@ -488,6 +489,7 @@ class observer {
                 'itemid' => (int)$gradeitem->id,
                 'userid' => $userid,
             ]);
+
             if ($hascoursebonus) {
                 local_xpstore_sync_course_grade_bonus($courseid, $userid, true, false);
             }
@@ -511,6 +513,7 @@ class observer {
                     'itemid' => (int)$gradeitem->id,
                     'userid' => $userid,
                 ]);
+
                 if ($hasitembonus) {
                     local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, $userid, true);
                 }
@@ -530,6 +533,7 @@ class observer {
                         'itemid' => (int)$courseitem->id,
                         'userid' => $userid,
                     ]);
+
                     if ($hascoursebonus) {
                         local_xpstore_regrade_course_with_bonus($courseid, $userid);
                     }

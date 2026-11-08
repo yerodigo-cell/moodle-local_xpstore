@@ -39,9 +39,7 @@
 <div class="local_xpstore-container local_xpstore-config-wrapper config-wrapper" data-error-imagesize="{{str_errorimagesize}}">
     {{> local_xpstore/navigation_tabs }}
 
-
     {{#tab_products}}
-
             <div class="form-box {{#isediting}}editing{{/isediting}}">
         <h5 class="mb-3 font-weight-bold d-flex align-items-center">
             {{#isediting}}
@@ -129,8 +127,6 @@
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_limit}}</label>
                 <input type="number" name="limite" min="0" class="form-control form-control-sm bg-white" placeholder="{{str_limitzero}}" value="{{elimite}}" style="border: 1px solid #ced4da; box-shadow: none;">
             </div>
-
-
 
             <div class="col-12 col-md-6 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-category">{{str_category}}</label>
@@ -425,6 +421,7 @@
     </div>
     </form>
     </div>
+
         <div class="widget-generator mt-4 mb-4">
             <h5 class="mb-3 font-weight-bold">
                 {{str_widget_panel_title}}
@@ -452,14 +449,12 @@
                 {{/category_iframe_options}}
             </div>
         </div>
-
     {{/tab_products}}
     
     {{#tab_settings}}
             <form method="POST" action="{{url}}" enctype="multipart/form-data" class="xpstore-settings-form">
                 <input type="hidden" name="sesskey" value="{{sesskey}}">
                 <input type="hidden" name="action" value="savesettings">
-
     {{#has_categories}}
         <div class="form-box form-box-category mb-4">
             <h5 class="mb-3 font-weight-bold">
@@ -493,8 +488,6 @@
                 
             </div>
         </div>
-
-
     {{/has_categories}}
 
     {{#has_items}}
@@ -581,7 +574,6 @@
                         Sunset
                     </div>
                 </button>
-
                 <button type="button" class="btn btn-sm btn-outline-secondary palette-btn" data-primary="#7B2CBF" data-secondary="#3A86FF" data-caticon="#FFBE0B" data-icon="#FB5607">
                     <div class="d-flex align-items-center" style="gap: 4px;">
                         <span style="width:16px;height:16px;border-radius:50%;background:#7B2CBF;display:inline-block;"></span>
@@ -617,7 +609,6 @@
                         Lava Loot
                     </div>
                 </button>
-
                 <button type="button" class="btn btn-sm btn-outline-secondary palette-btn" data-primary="#FF0080" data-secondary="#7BFF00" data-caticon="#00E5FF" data-icon="#FFD60A">
                     <div class="d-flex align-items-center" style="gap: 4px;">
                         <span style="width:16px;height:16px;border-radius:50%;background:#FF0080;display:inline-block;"></span>
@@ -678,27 +669,22 @@
         </div>
 
         <div class="row align-items-end mb-4">
-
             <div class="col-6 col-md-3 col-lg-2 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_primarycolor}}</label>
                 <input type="color" name="color_primary" class="form-control color-picker-input" value="{{cpactual}}">
             </div>
-
             <div class="col-6 col-md-3 col-lg-2 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_secondarycolor}}</label>
                 <input type="color" name="color_secondary" class="form-control color-picker-input" value="{{cbactual}}">
             </div>
-
             <div class="col-6 col-md-3 col-lg-2 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_color_cat_icon}}</label>
                 <input type="color" name="color_cat_icon" class="form-control color-picker-input" value="{{ccactual}}">
             </div>
-
             <div class="col-6 col-md-3 col-lg-2 mb-3">
                 <label class="small font-weight-bold mb-1 form-label-block">{{str_iconcolor}}</label>
                 <input type="color" name="color_icon" class="form-control color-picker-input" value="{{ciactual}}">
             </div>
-
         </div>
 
         <div class="local_xpstore-container local_xpstore-embedded-container mb-4" id="xpstore_live_preview" style="--cp: {{cpactual}}; --cb: {{cbactual}}; --ci: {{ciactual}}; --cc: {{ccactual}}; --gradient: linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%);">
@@ -747,7 +733,6 @@
                                 {{#str}} mockup_shortdesc, local_xpstore {{/str}}
                             </div>
                         </div>
-
                         <div>
                             <div class="font-weight-bold m-0" style="font-size: 1.1rem; color: #0056D2;">
                                 500 XP
@@ -767,7 +752,6 @@
                         <div class="mini-wallet">
                             {{#str}} balance, local_xpstore {{/str}}:&nbsp;<span class="xp-balance-value">1200</span> XP
                         </div>
-
                         <div class="card-body">
                             <div class="w-title">
                                 {{#str}} mockup_sampleitem, local_xpstore {{/str}}
@@ -783,7 +767,6 @@
                                 {{#str}} mockup_shortdesc, local_xpstore {{/str}}
                             </div>
                         </div>
-
                         <div class="card-footer">
                             <div class="w-cost" style="color: #0056D2;">
                                 500 XP
@@ -809,13 +792,11 @@
                 </button>
             </div>
         </div>
-
     </div>
-
     </form>
     {{/tab_settings}}
-
 </div>
+
 {{#js}}
 require([
     'jquery',
@@ -840,17 +821,19 @@ require([
 
     mod.init();
 
-    // Sync bonusmode selector visibility and exact numeric-gradable options for Bonus ('G') type.
+    // Sync bonusmode selector visibility and exact options for Bonus ('G') and Retry/Improvement ('R') types.
     var syncBonusModeAndGradables = function() {
         if (!typeSelect) {
             return;
         }
-        var isBonus = (typeSelect.value === 'G');
+        var selectedType = typeSelect.value;
+        var isBonus = (selectedType === 'G');
+        var isRetry = (selectedType === 'R');
         var bonusModeContainer = document.getElementById('bonusmode_container');
         if (bonusModeContainer) {
             bonusModeContainer.style.display = isBonus ? '' : 'none';
         }
-        if (isBonus && activitySelect && allActivityOpts.length > 0) {
+        if ((isBonus || isRetry) && activitySelect && allActivityOpts.length > 0) {
             var currentVal = activitySelect.value;
             while (activitySelect.options.length > 1) {
                 activitySelect.remove(1);
@@ -860,18 +843,22 @@ require([
                 customMenu.innerHTML = '';
             }
             allActivityOpts.forEach(function(optData) {
-                if (optData.gradable !== '1') {
+                if (isBonus && optData.gradable !== '1') {
+                    return;
+                }
+                if (isRetry && optData.modname !== 'assign' && optData.modname !== 'forum') {
                     return;
                 }
                 var newOpt = document.createElement('option');
                 newOpt.value = optData.value;
                 newOpt.text = optData.text;
                 newOpt.setAttribute('data-modname', optData.modname);
-                newOpt.setAttribute('data-gradable', '1');
+                newOpt.setAttribute('data-gradable', optData.gradable || '0');
                 if (optData.value === currentVal) {
                     newOpt.selected = true;
                 }
                 activitySelect.appendChild(newOpt);
+
                 if (customMenu) {
                     var link = document.createElement('a');
                     link.className = 'dropdown-item py-2 text-truncate';
@@ -890,7 +877,10 @@ require([
                 activitySelect.selectedIndex = 0;
             }
             var selOpt = allActivityOpts.find(function(o) {
-                return o.gradable === '1' && o.value === activitySelect.value;
+                if (isBonus) {
+                    return o.gradable === '1' && o.value === activitySelect.value;
+                }
+                return (o.modname === 'assign' || o.modname === 'forum') && o.value === activitySelect.value;
             });
             var activityTextSpan = document.getElementById('selected-activity-text');
             if (activityTextSpan) {
@@ -903,6 +893,7 @@ require([
             }
         }
     };
+
     if (typeSelect) {
         typeSelect.addEventListener('change', syncBonusModeAndGradables);
         syncBonusModeAndGradables();
@@ -930,21 +921,37 @@ require([
                     rawItems.push(row.dataset.rawitem);
                 }
             });
-
             var sesskeyInput = bulkForm.querySelector('input[name="sesskey"]');
-            var formData = new FormData();
-            formData.append('sesskey', sesskeyInput ? sesskeyInput.value : '');
-            formData.append('action', 'reorder');
+            var params = new URLSearchParams();
+            params.append('sesskey', sesskeyInput ? sesskeyInput.value : M.cfg.sesskey);
+            params.append('action', 'reorder');
+            params.append('rawitems_json', JSON.stringify(rawItems));
             rawItems.forEach(function(item) {
-                formData.append('rawitems[]', item);
+                params.append('rawitems[]', item);
             });
 
-            fetch(bulkForm.action, {
+            var targetUrl = bulkForm.getAttribute('action') || window.location.href;
+            fetch(targetUrl, {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                },
+                credentials: 'same-origin',
+                body: params.toString()
             }).then(function(response) {
-                return response.json();
-            }).then(function(data) {
+                return response.text();
+            }).then(function(text) {
+                var data = null;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    var jsonMatch = text.match(/\{\s*"success"\s*:\s*true\s*\}/);
+                    if (jsonMatch) {
+                        data = {success: true};
+                    } else {
+                        throw e;
+                    }
+                }
                 if (data && data.success && info.element && info.element[0]) {
                     var movedRow = info.element[0];
                     movedRow.style.transition = 'background-color 0.5s';
@@ -980,7 +987,6 @@ require([
             updateDeleteBtn();
         });
     }
-
     checkboxes.forEach(function(cb) {
         cb.addEventListener('change', function() {
             var allChecked = checkboxes.length > 0 && Array.from(checkboxes).every(function(c) {
@@ -1000,6 +1006,7 @@ require([
             'Q': 'bolt',
             'A': 'file-text',
             'F': 'comments',
+            'R': 'rocket',
             'G': 'star',
             'S': 'unlock',
             'U': 'unlock'

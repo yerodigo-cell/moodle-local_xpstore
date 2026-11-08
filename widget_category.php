@@ -50,6 +50,9 @@ if (isset($PAGE->blocks)) {
     $PAGE->blocks->show_only_fake_blocks();
 }
 
+// Clean up expired temporary forum extension roles.
+local_xpstore_cleanup_expired_forum_roles($courseid, $USER->id);
+
 $action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'comprar' && confirm_sesskey()) {
     $cmid = required_param('cmid', PARAM_INT);
@@ -78,6 +81,8 @@ $catalog = local_xpstore_parse_catalog($courseid);
 $modinfo = get_fast_modinfo($courseid);
 $cms = $modinfo->get_cms();
 $historyurl = new moodle_url('/local/xpstore/history.php', ['id' => $courseid]);
+$storeaccess = local_xpstore_get_store_access_state($courseid);
+$storeclosed = !empty($storeaccess['closed']);
 
 $cpstore = local_xpstore_clean_hex_color(
     get_config('local_xpstore', 'color_primary_course_' . $courseid) ?: '#0056D2',
@@ -195,10 +200,22 @@ foreach ($catalog as $item) {
         }
     }
 
-    $disabled = ($saldo < $costo) || (!$requisitocumplido) || (!$nivelcumplido);
+    $stateallowed = true;
+    $statebtnlabel = '';
+    if (in_array($tipochar, ['A', 'F', 'R'], true) && isset($cm) && function_exists('local_xpstore_check_activity_redemption_state')) {
+        $statecheck = local_xpstore_check_activity_redemption_state($courseid, $USER->id, $tipochar, $cm);
+        if (!$statecheck['allowed']) {
+            $stateallowed = false;
+            $statebtnlabel = $statecheck['message'];
+        }
+    }
+
+    $disabled = $storeclosed || ($saldo < $costo) || (!$requisitocumplido) || (!$nivelcumplido) || (!$stateallowed);
     $btntext = get_string('canjear', 'local_xpstore');
     if ($disabled) {
-        if (!$nivelcumplido) {
+        if ($storeclosed) {
+            $btntext = $storeaccess['btn_label'];
+        } else if (!$nivelcumplido) {
             $sm = get_string_manager();
             $btntext = $sm->string_exists('requires_level', 'local_xpstore')
                 ? get_string('requires_level', 'local_xpstore', $minlevel)
@@ -209,6 +226,8 @@ foreach ($catalog as $item) {
                 ? get_string('requires_short', 'local_xpstore')
                 : 'Requiere';
             $btntext = $strreq . ' ' . $reqname;
+        } else if (!$stateallowed) {
+            $btntext = $statebtnlabel;
         } else {
             $btntext = get_string('insuficiente', 'local_xpstore');
         }
@@ -232,8 +251,8 @@ foreach ($catalog as $item) {
         'has_limit' => ($limite > 0),
         'comprasactuales' => $comprasactuales,
         'limitealcanzado' => $limitealcanzado,
-        'locked_by_req' => (!$requisitocumplido || !$nivelcumplido),
-        'req_name' => $reqname,
+        'locked_by_req' => ($storeclosed || !$requisitocumplido || !$nivelcumplido || !$stateallowed),
+        'req_name' => $storeclosed ? $storeaccess['btn_label'] : ($reqname ?: $statebtnlabel),
         'bought_this' => $boughtthis,
         'gotogradebook' => $gotogradebook,
         'cmurl' => $cmurl,
@@ -340,7 +359,7 @@ $templatedata = [
     'str_congratulations' => get_string('congratulations', 'local_xpstore'),
     'str_exito' => get_string('exito', 'local_xpstore'),
     'str_insuficiente' => ($status === 'req_failed')
-        ? get_string('error_prereq', 'local_xpstore')
+        ? ($storeclosed ? $storeaccess['error_message'] : get_string('error_prereq', 'local_xpstore'))
         : get_string('insuficiente', 'local_xpstore'),
     'str_limitreached' => get_string('limitreached', 'local_xpstore'),
     'str_saldo' => get_string('saldo', 'local_xpstore'),

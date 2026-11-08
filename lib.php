@@ -35,6 +35,63 @@ function local_xpstore_can_manage(\context $context, $userid = null): bool {
 }
 
 /**
+ * Returns the current open/closed access state and deadline configuration of the course store.
+ *
+ * @param int $courseid The course ID.
+ * @return array Store access state details.
+ */
+function local_xpstore_get_store_access_state(int $courseid): array {
+    $courseid = (int)$courseid;
+    $manualraw = get_config('local_xpstore', 'store_closed_course_' . $courseid);
+    $manualclosed = ($manualraw === '1');
+    $deadlineraw = get_config('local_xpstore', 'store_deadline_course_' . $courseid);
+    $deadline = ($deadlineraw !== false && is_numeric($deadlineraw)) ? max(0, (int)$deadlineraw) : 0;
+    $deadlinepassed = ($deadline > 0 && time() >= $deadline);
+    $isclosed = ($manualclosed || $deadlinepassed);
+
+    $deadlineiso = '';
+    $deadlineformatted = '';
+    if ($deadline > 0) {
+        $tz = \core_date::get_user_timezone_object();
+        $dt = new \DateTime('@' . $deadline);
+        $dt->setTimezone($tz);
+        $deadlineiso = $dt->format('Y-m-d\TH:i');
+        $deadlineformatted = userdate($deadline, get_string('strftimedatetimeshort', 'langconfig'));
+    }
+
+    $sm = get_string_manager();
+    $btnlabel = $sm->string_exists('btn_store_closed', 'local_xpstore')
+        ? get_string('btn_store_closed', 'local_xpstore')
+        : 'Tienda cerrada';
+    $errmsg = $sm->string_exists('error_store_closed', 'local_xpstore')
+        ? get_string('error_store_closed', 'local_xpstore')
+        : 'El periodo de canjes en la tienda ha finalizado.';
+
+    return [
+        'closed' => $isclosed,
+        'manual_closed' => $manualclosed,
+        'deadline' => $deadline,
+        'has_deadline' => ($deadline > 0),
+        'deadline_passed' => $deadlinepassed,
+        'deadline_iso' => $deadlineiso,
+        'deadline_formatted' => $deadlineformatted,
+        'btn_label' => $btnlabel,
+        'error_message' => $errmsg,
+    ];
+}
+
+/**
+ * Checks whether redemptions are currently closed/blocked in the given course.
+ *
+ * @param int $courseid The course ID.
+ * @return bool True if store redemptions are closed.
+ */
+function local_xpstore_is_store_closed(int $courseid): bool {
+    $state = local_xpstore_get_store_access_state($courseid);
+    return !empty($state['closed']);
+}
+
+/**
  * Encodes a free-text catalog field so ':' and ',' never corrupt catalog serialization.
  *
  * @param string $value Raw field value.
@@ -104,6 +161,7 @@ function local_xpstore_serialize_catalog_item(array $item): string {
     $cmid = max(0, (int)($item['cmid'] ?? 0));
     $costo = max(0, (int)($item['costo'] ?? 0));
     $nombre = local_xpstore_encode_catalog_field($item['nombre'] ?? '');
+
     $valornota = trim((string)($item['valornota'] ?? '0'));
     if ($valornota === '' || !is_numeric($valornota)) {
         $valornota = '0';
@@ -114,6 +172,7 @@ function local_xpstore_serialize_catalog_item(array $item): string {
             $valornota = '0';
         }
     }
+
     $categoria = local_xpstore_encode_catalog_field($item['categoria'] ?? '');
     $limite = max(0, (int)($item['limite'] ?? 0));
     $requisito = max(0, (int)($item['requisito'] ?? 0));
@@ -150,7 +209,7 @@ function local_xpstore_parse_catalog_entry($rawitem): ?array {
     }
 
     $tipo = strtoupper(substr($idcompleto, 0, 1));
-    $validtypes = ['Q', 'A', 'F', 'G', 'M', 'C', 'S', 'U'];
+    $validtypes = ['Q', 'A', 'F', 'R', 'G', 'M', 'C', 'S', 'U'];
     if (!in_array($tipo, $validtypes, true)) {
         return null;
     }
@@ -162,10 +221,12 @@ function local_xpstore_parse_catalog_entry($rawitem): ?array {
 
     $costo = max(0, (int)$parts[1]);
     $nombre = isset($parts[2]) ? local_xpstore_decode_catalog_field($parts[2]) : '';
+
     $valornotaraw = (isset($parts[3]) && trim($parts[3]) !== '' && is_numeric(trim($parts[3])))
         ? trim($parts[3])
         : (in_array($tipo, ['G', 'M', 'C'], true) ? '0.5' : '0');
     $valornotafloat = max(0.0, (float)$valornotaraw);
+
     $categoria = isset($parts[4]) ? local_xpstore_decode_catalog_field($parts[4]) : '';
     $limite = isset($parts[5]) ? max(0, (int)$parts[5]) : 0;
     $requisito = isset($parts[6]) ? max(0, (int)$parts[6]) : 0;
@@ -279,6 +340,7 @@ function local_xpstore_extend_navigation_course(navigation_node $parentnode, $co
 
     // 3. If it is a student (and it's visible) or a teacher (always visible), draw the store menu.
     $url = new moodle_url('/local/xpstore/index.php', ['id' => $course->id]);
+
     $shopnode = navigation_node::create(
         get_string('tiendaxp', 'local_xpstore'),
         $url,
@@ -287,6 +349,7 @@ function local_xpstore_extend_navigation_course(navigation_node $parentnode, $co
         'tiendaxp',
         new pix_icon('i/store', '')
     );
+
     $parentnode->add_node($shopnode);
 }
 
@@ -336,6 +399,7 @@ function local_xpstore_get_balance($userid, $courseid) {
           LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
               WHERE g.userid = ?
                 AND (g.courseid = ? OR (g.courseid = 0 AND (cm.course = ? OR gi.courseid = ?)))";
+
     $expenses = (int)$DB->get_field_sql($sqlg, [$userid, $courseid, $courseid, $courseid]);
 
     return max(0, $totalxp - $expenses);
@@ -425,8 +489,8 @@ function local_xpstore_get_user_course_bonus_info($courseid, $userid): array {
              WHERE g.userid = ?
                AND g.itemtype = 'C'
                AND (g.courseid = ? OR (g.courseid = 0 AND gi.courseid = ?))";
-    $purchases = $DB->get_records_sql($sql, [$userid, $courseid, $courseid]);
 
+    $purchases = $DB->get_records_sql($sql, [$userid, $courseid, $courseid]);
     if (empty($purchases)) {
         return ['bonus' => 0.0, 'bonusmode' => 0];
     }
@@ -480,7 +544,6 @@ function local_xpstore_get_user_course_bonus($courseid, $userid) {
  */
 function local_xpstore_merge_grade_feedback($existingfeedback, $totalbonus) {
     $current = (string)($existingfeedback ?? '');
-
     // Remove existing XP Store marker block if present.
     $cleaned = preg_replace('/\s*<!--xpstore-fb-->.*?<!--\/xpstore-fb-->/s', '', $current);
     // Also clean plain legacy one-liner if it matches our exact pattern without markers.
@@ -539,6 +602,7 @@ function local_xpstore_regrade_course_with_bonus($courseid, $userid): void {
 
     $courseid = (int)$courseid;
     $userid = (int)$userid;
+
     if (local_xpstore_course_regrade_guard($courseid, $userid)) {
         return;
     }
@@ -567,7 +631,6 @@ function local_xpstore_regrade_course_with_bonus($courseid, $userid): void {
 
         $courseitem->force_regrading();
         grade_regrade_final_grades($courseid);
-
         local_xpstore_sync_course_grade_bonus($courseid, $userid, true, true);
     } catch (\Throwable $e) {
         debugging('local_xpstore_regrade_course_with_bonus error: ' . $e->getMessage(), DEBUG_DEVELOPER);
@@ -593,6 +656,7 @@ function local_xpstore_sync_course_grade_bonus($courseid, $userid, $fromobserver
     $courseid = (int)$courseid;
     $userid = (int)$userid;
     $lockkey = $courseid . '_' . $userid;
+
     if (!empty($syncing[$lockkey])) {
         return;
     }
@@ -605,7 +669,6 @@ function local_xpstore_sync_course_grade_bonus($courseid, $userid, $fromobserver
     }
 
     $syncing[$lockkey] = true;
-
     try {
         require_once($CFG->libdir . '/gradelib.php');
 
@@ -695,6 +758,7 @@ function local_xpstore_sync_course_grade_bonus($courseid, $userid, $fromobserver
                 $purebase = $knownpure
                     ? (($grade->finalgrade !== null) ? (float)$grade->finalgrade : null)
                     : (($state && $state->basegrade !== null) ? (float)$state->basegrade : null);
+
                 $grade->finalgrade = $purebase;
                 $grade->overridden = 0;
                 $grade->aggregationstatus = 'unknown';
@@ -747,7 +811,6 @@ function local_xpstore_get_mod_grade_items($courseid, $itemmodule, $iteminstance
             $valueitems[] = $gi;
         }
     }
-
     if (!empty($valueitems)) {
         return $valueitems;
     }
@@ -758,7 +821,6 @@ function local_xpstore_get_mod_grade_items($courseid, $itemmodule, $iteminstance
             $active[] = $gi;
         }
     }
-
     return !empty($active) ? $active : [reset($items)];
 }
 
@@ -807,9 +869,9 @@ function local_xpstore_get_user_item_bonus_info($courseid, $gradeitem, $userid):
 
     $catalog = local_xpstore_parse_catalog($courseid);
     $catitem = $catalog[$type . $itemid] ?? null;
-
     $total = 0.0;
     $bonusmode = null;
+
     foreach ($purchases as $p) {
         if ($p->gradevalue !== null) {
             $total += max(0.0, (float)$p->gradevalue);
@@ -932,11 +994,12 @@ function local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, $userid, $fr
     $courseid = (int)$courseid;
     $userid = (int)$userid;
     $lockkey = (int)$gradeitem->id . '_' . $userid;
+
     if (!empty($syncingitem[$lockkey])) {
         return;
     }
-    $syncingitem[$lockkey] = true;
 
+    $syncingitem[$lockkey] = true;
     try {
         require_once($CFG->libdir . '/gradelib.php');
 
@@ -1045,6 +1108,7 @@ function local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, $userid, $fr
             if ($grade) {
                 $modknown = false;
                 $modgrade = local_xpstore_get_module_raw_grade($gradeitem, $userid, $modknown);
+
                 if ($modknown && empty($grade->overridden)) {
                     $origgrade = $modgrade;
                 } else if ($state) {
@@ -1103,8 +1167,8 @@ function local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, $userid, $fr
  */
 function local_xpstore_get_user_level($userid, $courseid) {
     global $DB;
-
     $lvl = null;
+
     if (class_exists('\block_xp\di')) {
         try {
             $world = \block_xp\di::get('course_world_factory')->get_world($courseid);
@@ -1124,6 +1188,262 @@ function local_xpstore_get_user_level($userid, $courseid) {
 
     $lvl = $DB->get_field('block_xp', 'lvl', ['userid' => $userid, 'courseid' => $courseid]);
     return $lvl ? max(1, (int)$lvl) : 1;
+}
+
+/**
+ * Cleans up expired temporary forum extension roles ('xpstore_forum_ext') in a course.
+ * Unassigns the role if more than 3 * DAYSECS have elapsed since the latest active
+ * redemption of 'F' or 'R' on that forum, provided the user did not hold the role beforehand.
+ *
+ * @param int $courseid Course ID.
+ * @param int|null $userid Optional user ID to clean up specifically.
+ * @return void
+ */
+function local_xpstore_cleanup_expired_forum_roles(int $courseid, ?int $userid = null): void {
+    global $DB;
+
+    try {
+        $role = $DB->get_record('role', ['shortname' => 'xpstore_forum_ext']);
+        if (!$role) {
+            return;
+        }
+
+        $sql = "SELECT ra.id AS raid, ra.userid, ra.contextid, cm.id AS cmid
+                  FROM {role_assignments} ra
+                  JOIN {context} ctx ON ctx.id = ra.contextid AND ctx.contextlevel = :contextlevel
+                  JOIN {course_modules} cm ON cm.id = ctx.instanceid AND cm.course = :courseid
+                  JOIN {modules} m ON m.id = cm.module AND m.name = 'forum'
+                 WHERE ra.roleid = :roleid";
+        $params = [
+            'contextlevel' => CONTEXT_MODULE,
+            'courseid' => $courseid,
+            'roleid' => $role->id,
+        ];
+
+        if ($userid !== null && $userid > 0) {
+            $sql .= " AND ra.userid = :userid";
+            $params['userid'] = (int)$userid;
+        }
+
+        $assignments = $DB->get_records_sql($sql, $params);
+        if (empty($assignments)) {
+            return;
+        }
+
+        $now = time();
+        $duration = 3 * DAYSECS;
+
+        foreach ($assignments as $ra) {
+            $uid = (int)$ra->userid;
+            $cmid = (int)$ra->cmid;
+
+            // Fetch all F and R purchases for this user and forum in chronological order.
+            $purchases = $DB->get_records_select(
+                'local_xpstore_gastos',
+                'userid = ? AND itemid = ? AND itemtype IN (?, ?) AND (courseid = ? OR courseid = 0)',
+                [$uid, $cmid, 'F', 'R', $courseid],
+                'timecreated ASC, id ASC'
+            );
+
+            if (empty($purchases)) {
+                // No purchases recorded through XP store; do not alter manually assigned teacher roles.
+                continue;
+            }
+
+            $earliest = reset($purchases);
+            $earliestprev = (!empty($earliest->prevdata)) ? json_decode($earliest->prevdata, true) : null;
+            if (is_array($earliestprev) && !empty($earliestprev['had_role'])) {
+                // User held the role prior to any XP store redemptions; preserve teacher assignment.
+                continue;
+            }
+
+            $latest = end($purchases);
+            $expiration = (int)$latest->timecreated + $duration;
+            if ($now > $expiration) {
+                role_unassign($role->id, $uid, (int)$ra->contextid);
+            }
+        }
+    } catch (\Throwable $e) {
+        debugging('local_xpstore_cleanup_expired_forum_roles error: ' . $e->getMessage(), DEBUG_DEVELOPER);
+    }
+}
+
+/**
+ * Validates activity-specific state requirements and mutual exclusivity for redemptions
+ * of type 'A' (Assignment extension), 'F' (Forum extension), and 'R' (Improvement/Retry).
+ *
+ * @param int $courseid Course ID.
+ * @param int $userid User ID.
+ * @param string $tipo Product type code ('A', 'F', 'R', etc.).
+ * @param stdClass|\cm_info $cm Course module object.
+ * @return array ['allowed' => bool, 'reason' => string, 'message' => string]
+ */
+function local_xpstore_check_activity_redemption_state(int $courseid, int $userid, string $tipo, $cm): array {
+    global $DB;
+
+    $tipo = strtoupper(trim((string)$tipo));
+    if (!in_array($tipo, ['A', 'F', 'R'], true)) {
+        return ['allowed' => true, 'reason' => '', 'message' => ''];
+    }
+
+    $cmid = (int)$cm->id;
+    $instance = (int)$cm->instance;
+    $modname = $cm->modname ?? $DB->get_field('modules', 'name', ['id' => $cm->module]);
+    $sm = get_string_manager();
+
+    // 1. Check mutual exclusivity:
+    // If attempting to buy 'R', user must NOT have previously purchased 'A' or 'F' on this cmid.
+    // If attempting to buy 'A' or 'F', user must NOT have previously purchased 'R' on this cmid.
+    $existingtypes = $DB->get_fieldset_select(
+        'local_xpstore_gastos',
+        'itemtype',
+        'userid = ? AND itemid = ? AND (courseid = ? OR courseid = 0)',
+        [$userid, $cmid, $courseid]
+    );
+
+    $hasext = in_array('A', $existingtypes, true) || in_array('F', $existingtypes, true);
+    $hasretry = in_array('R', $existingtypes, true);
+
+    if ($tipo === 'R') {
+        if ($hasext) {
+            $msg = $sm->string_exists('error_exclusivity_ext', 'local_xpstore')
+                ? get_string('error_exclusivity_ext', 'local_xpstore')
+                : 'No disponible: ya utilizaste una entrega extemporánea en esta actividad.';
+            return [
+                'allowed' => false,
+                'reason' => 'exclusivity_ext',
+                'message' => $msg,
+            ];
+        }
+        if ($modname !== 'assign' && $modname !== 'forum') {
+            return [
+                'allowed' => false,
+                'reason' => 'invalid_mod',
+                'message' => get_string('error_transaction', 'local_xpstore'),
+            ];
+        }
+    } else if ($tipo === 'A' || $tipo === 'F') {
+        if ($hasretry) {
+            $msg = $sm->string_exists('error_exclusivity_retry', 'local_xpstore')
+                ? get_string('error_exclusivity_retry', 'local_xpstore')
+                : 'No disponible: ya utilizaste una oportunidad de mejora en esta actividad.';
+            return [
+                'allowed' => false,
+                'reason' => 'exclusivity_retry',
+                'message' => $msg,
+            ];
+        }
+    }
+
+    // Helper to check whether user has an existing final grade for this module in the gradebook
+    // (handles multi-item modules like mod_forum safely via local_xpstore_get_mod_grade_items).
+    $hasfinalgrade = function(string $itemmod, int $iteminst) use ($DB, $courseid, $userid): bool {
+        if ($itemmod === 'assign') {
+            if ($DB->record_exists_select('assign_grades', 'assignment = ? AND userid = ? AND grade >= 0', [$iteminst, $userid])) {
+                return true;
+            }
+        } else if ($itemmod === 'forum') {
+            if ($DB->record_exists_select('forum_grades', 'forum = ? AND userid = ? AND grade >= 0', [$iteminst, $userid])) {
+                return true;
+            }
+        }
+        $gradeitems = local_xpstore_get_mod_grade_items($courseid, $itemmod, $iteminst);
+        foreach ($gradeitems as $gi) {
+            if ($DB->record_exists_select('grade_grades', 'itemid = ? AND userid = ? AND finalgrade IS NOT NULL', [$gi->id, $userid])) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // 2. State verification for 'A' and 'F' (Entrega extemporánea):
+    // Block if student already submitted (assign status = 'submitted'), posted in forum,
+    // or received a grade, UNLESS purchasing a secondary extension over a previous A/F.
+    if ($tipo === 'A' || $tipo === 'F') {
+        $haspriorextension = ($tipo === 'A')
+            ? in_array('A', $existingtypes, true)
+            : in_array('F', $existingtypes, true);
+
+        if (!$haspriorextension) {
+            if ($tipo === 'A' && $modname === 'assign') {
+                $hassubmitted = $DB->record_exists('assign_submission', [
+                    'assignment' => $instance,
+                    'userid' => $userid,
+                    'status' => 'submitted',
+                ]);
+                if ($hassubmitted || $hasfinalgrade('assign', $instance)) {
+                    $msg = $sm->string_exists('error_already_submitted', 'local_xpstore')
+                        ? get_string('error_already_submitted', 'local_xpstore')
+                        : 'Ya realizaste tu entrega en esta actividad. Si deseas subir tu nota, usa la Oportunidad de Mejora.';
+                    return [
+                        'allowed' => false,
+                        'reason' => 'already_submitted',
+                        'message' => $msg,
+                    ];
+                }
+            } else if ($tipo === 'F' && $modname === 'forum') {
+                $haspost = $DB->record_exists_sql(
+                    "SELECT 1 FROM {forum_posts} p
+                       JOIN {forum_discussions} d ON d.id = p.discussion
+                      WHERE d.forum = ? AND p.userid = ?",
+                    [$instance, $userid]
+                );
+                if ($haspost || $hasfinalgrade('forum', $instance)) {
+                    $msg = $sm->string_exists('error_already_submitted', 'local_xpstore')
+                        ? get_string('error_already_submitted', 'local_xpstore')
+                        : 'Ya participaste en este foro. Si deseas mejorar tu nota, usa la Oportunidad de Mejora.';
+                    return [
+                        'allowed' => false,
+                        'reason' => 'already_submitted',
+                        'message' => $msg,
+                    ];
+                }
+            }
+        }
+    }
+
+    // 3. State verification for 'R' (Oportunidad de mejora):
+    // Requires student to have already submitted/participated or already received a grade.
+    if ($tipo === 'R') {
+        if ($modname === 'assign') {
+            $hassubmitted = $DB->record_exists('assign_submission', [
+                'assignment' => $instance,
+                'userid' => $userid,
+                'status' => 'submitted',
+            ]);
+            $hasgrade = $hasfinalgrade('assign', $instance);
+            if (!$hassubmitted && !$hasgrade) {
+                $msg = $sm->string_exists('error_retry_needs_submission', 'local_xpstore')
+                    ? get_string('error_retry_needs_submission', 'local_xpstore')
+                    : 'Debes haber entregado o recibido calificación en esta actividad antes de canjear una oportunidad de mejora.';
+                return [
+                    'allowed' => false,
+                    'reason' => 'retry_needs_submission',
+                    'message' => $msg,
+                ];
+            }
+        } else if ($modname === 'forum') {
+            $haspost = $DB->record_exists_sql(
+                "SELECT 1 FROM {forum_posts} p
+                   JOIN {forum_discussions} d ON d.id = p.discussion
+                  WHERE d.forum = ? AND p.userid = ?",
+                [$instance, $userid]
+            );
+            $hasgrade = $hasfinalgrade('forum', $instance);
+            if (!$haspost && !$hasgrade) {
+                $msg = $sm->string_exists('error_retry_needs_submission', 'local_xpstore')
+                    ? get_string('error_retry_needs_submission', 'local_xpstore')
+                    : 'Debes haber participado o recibido calificación en este foro antes de canjear una oportunidad de mejora.';
+                return [
+                    'allowed' => false,
+                    'reason' => 'retry_needs_submission',
+                    'message' => $msg,
+                ];
+            }
+        }
+    }
+
+    return ['allowed' => true, 'reason' => '', 'message' => ''];
 }
 
 /**
@@ -1193,6 +1513,53 @@ function local_xpstore_capture_prevdata($courseid, $userid, $type, $cmid, $rewar
                 ? user_has_role_assignment($userid, $role->id, $cmcontext->id)
                 : false;
             return json_encode(['had_role' => (bool)$hadrole]);
+        } else if ($type === 'R') {
+            $cm = $DB->get_record('course_modules', ['id' => $cmid, 'course' => $courseid]);
+            if (!$cm) {
+                return null;
+            }
+            $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+            if ($modname === 'assign') {
+                $assign = $DB->get_record('assign', ['id' => $cm->instance]);
+                $ov = $assign ? $DB->get_record('assign_overrides', ['assignid' => $assign->id, 'userid' => $userid]) : null;
+                $flag = $assign ? $DB->get_record('assign_user_flags', ['assignment' => $assign->id, 'userid' => $userid]) : null;
+                $prevsub = $assign ? $DB->get_record_select(
+                    'assign_submission',
+                    'assignment = ? AND userid = ? ORDER BY attemptnumber DESC',
+                    [$assign->id, $userid],
+                    '*',
+                    IGNORE_MULTIPLE
+                ) : null;
+                $prevlatestid = $prevsub ? (int)$prevsub->id : null;
+                $prevattempt = $prevsub ? (int)$prevsub->attemptnumber : 0;
+                $newattempt = $prevsub ? ($prevattempt + 1) : 1;
+                return json_encode([
+                    'modname' => 'assign',
+                    'had_override' => (bool)$ov,
+                    'duedate' => $ov ? $ov->duedate : null,
+                    'cutoffdate' => $ov ? $ov->cutoffdate : null,
+                    'allowsubmissionsfromdate' => $ov ? $ov->allowsubmissionsfromdate : null,
+                    'timelimit' => $ov ? $ov->timelimit : null,
+                    'had_flag' => (bool)$flag,
+                    'extensionduedate' => $flag ? (int)$flag->extensionduedate : 0,
+                    'locked' => $flag ? (int)$flag->locked : 0,
+                    'prev_maxattempts' => $assign ? (int)$assign->maxattempts : 1,
+                    'prev_reopenmethod' => $assign ? (string)$assign->attemptreopenmethod : 'none',
+                    'prev_latest_id' => $prevlatestid,
+                    'prev_attemptnumber' => $prevattempt,
+                    'new_attemptnumber' => $newattempt,
+                ]);
+            } else if ($modname === 'forum') {
+                $cmcontext = \context_module::instance($cmid, IGNORE_MISSING);
+                $role = $DB->get_record('role', ['shortname' => 'xpstore_forum_ext']);
+                $hadrole = ($cmcontext && $role)
+                    ? user_has_role_assignment($userid, $role->id, $cmcontext->id)
+                    : false;
+                return json_encode([
+                    'modname' => 'forum',
+                    'had_role' => (bool)$hadrole,
+                ]);
+            }
         }
     } catch (\Throwable $e) {
         debugging('local_xpstore_capture_prevdata error: ' . $e->getMessage(), DEBUG_DEVELOPER);
@@ -1245,6 +1612,16 @@ function local_xpstore_process_redemption($course, $userid, $tipo, $cmid): array
     $userid = (int)$userid;
     $tipo = strtoupper(trim((string)$tipo));
     $cmid = (int)$cmid;
+
+    // 0. Enforce store-wide manual lock or redemption deadline.
+    $storeaccess = local_xpstore_get_store_access_state($courseid);
+    if (!empty($storeaccess['closed'])) {
+        return [
+            'success' => false,
+            'code' => 'req_failed',
+            'message' => $storeaccess['error_message'],
+        ];
+    }
 
     // 1. Validate item against authoritative course catalog (never trust client cost/type).
     $catalog = local_xpstore_parse_catalog($courseid);
@@ -1302,6 +1679,14 @@ function local_xpstore_process_redemption($course, $userid, $tipo, $cmid): array
             $activityurl = $cm->url->out(false);
         } else {
             $activityurl = (new moodle_url('/mod/' . $cm->modname . '/view.php', ['id' => $cm->id]))->out(false);
+        }
+
+        if ($tipo === 'R' && ($cm->modname !== 'assign' && $cm->modname !== 'forum')) {
+            return [
+                'success' => false,
+                'code' => 'invalid',
+                'message' => get_string('error_transaction', 'local_xpstore'),
+            ];
         }
 
         if ($tipo === 'G') {
@@ -1371,6 +1756,18 @@ function local_xpstore_process_redemption($course, $userid, $tipo, $cmid): array
     }
 
     try {
+        if (in_array($tipo, ['A', 'F', 'R'], true)) {
+            local_xpstore_cleanup_expired_forum_roles($courseid, $userid);
+            $statecheck = local_xpstore_check_activity_redemption_state($courseid, $userid, $tipo, $cm);
+            if (!$statecheck['allowed']) {
+                return [
+                    'success' => false,
+                    'code' => 'req_failed',
+                    'message' => $statecheck['message'],
+                ];
+            }
+        }
+
         if ($limite > 0) {
             $purchasedcount = (int)$DB->count_records_select(
                 'local_xpstore_gastos',
@@ -1408,9 +1805,10 @@ function local_xpstore_process_redemption($course, $userid, $tipo, $cmid): array
             'prevdata' => $prevdata,
             'timecreated' => time(),
         ];
-        $gastoid = $DB->insert_record('local_xpstore_gastos', $record);
 
+        $gastoid = $DB->insert_record('local_xpstore_gastos', $record);
         $delivered = local_xpstore_deliver_product($userid, $cmid, $tipo, $courseid);
+
         if (!$delivered) {
             $DB->delete_records('local_xpstore_gastos', ['id' => $gastoid]);
             return [
@@ -1582,7 +1980,6 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
         } else if ($type === 'S') {
             require_once($CFG->dirroot . '/group/lib.php');
             $group = $DB->get_record('groups', ['courseid' => $cm->course, 'name' => $rewardname]);
-
             if (!$group) {
                 $newgroup = new stdClass();
                 $newgroup->courseid = $cm->course;
@@ -1591,7 +1988,6 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
             } else {
                 $groupid = $group->id;
             }
-
             if (!groups_is_member($groupid, $userid)) {
                 groups_add_member($groupid, $userid);
             }
@@ -1602,11 +1998,108 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
                 return false;
             }
             role_assign($roleid, $userid, $context->id);
+        } else if ($type === 'R') {
+            $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+            if ($modname === 'assign') {
+                $assign = $DB->get_record('assign', ['id' => $cm->instance], '*', MUST_EXIST);
+
+                // 1. Dynamic attempt reopening configuration.
+                if ((int)$assign->maxattempts === 1 || (string)$assign->attemptreopenmethod === 'none') {
+                    if ((int)$assign->maxattempts === 1) {
+                        $assign->maxattempts = -1;
+                    }
+                    if ((string)$assign->attemptreopenmethod === 'none') {
+                        $assign->attemptreopenmethod = 'manual';
+                    }
+                    $DB->update_record('assign', $assign);
+                }
+
+                // 2. Open a new attempt while preserving previous attempt records and grades.
+                $prevsub = $DB->get_record_select(
+                    'assign_submission',
+                    'assignment = ? AND userid = ? ORDER BY attemptnumber DESC',
+                    [$assign->id, $userid],
+                    '*',
+                    IGNORE_MULTIPLE
+                );
+
+                $DB->set_field('assign_submission', 'latest', 0, ['assignment' => $assign->id, 'userid' => $userid]);
+
+                $newattemptnumber = $prevsub ? ((int)$prevsub->attemptnumber + 1) : 1;
+                $newsubmission = (object)[
+                    'assignment' => $assign->id,
+                    'userid' => $userid,
+                    'timecreated' => time(),
+                    'timemodified' => time(),
+                    'status' => 'reopened',
+                    'groupid' => $prevsub ? (int)$prevsub->groupid : 0,
+                    'attemptnumber' => $newattemptnumber,
+                    'latest' => 1,
+                ];
+                $DB->insert_record('assign_submission', $newsubmission);
+
+                // 3. Extend due date, cutoff date and user flags by fixed 3 days (time() + 3 * DAYSECS).
+                $newdeadline = time() + (3 * DAYSECS);
+                $override = $DB->get_record('assign_overrides', ['assignid' => $assign->id, 'userid' => $userid]);
+                $flag = $DB->get_record('assign_user_flags', ['assignment' => $assign->id, 'userid' => $userid]);
+
+                $curdue = max(
+                    (int)$assign->duedate,
+                    (int)($override->duedate ?? 0),
+                    (int)($flag->extensionduedate ?? 0),
+                    $newdeadline
+                );
+                $curcutoff = ($override && $override->cutoffdate !== null)
+                    ? (int)$override->cutoffdate
+                    : (int)$assign->cutoffdate;
+                $newcutoff = ($curcutoff === 0)
+                    ? (($override && $override->cutoffdate !== null) ? $override->cutoffdate : null)
+                    : max($curcutoff, $curdue);
+
+                if ($override) {
+                    $override->duedate = $curdue;
+                    $override->cutoffdate = $newcutoff;
+                    $DB->update_record('assign_overrides', $override);
+                } else {
+                    $newov = (object)[
+                        'assignid' => $assign->id,
+                        'userid' => $userid,
+                        'duedate' => $curdue,
+                        'cutoffdate' => $newcutoff,
+                    ];
+                    $DB->insert_record('assign_overrides', $newov);
+                }
+
+                if ($flag) {
+                    $flag->extensionduedate = $curdue;
+                    $flag->locked = 0;
+                    $DB->update_record('assign_user_flags', $flag);
+                } else {
+                    $newflag = (object)[
+                        'assignment' => $assign->id,
+                        'userid' => $userid,
+                        'extensionduedate' => $curdue,
+                        'locked' => 0,
+                        'mailed' => 0,
+                    ];
+                    $DB->insert_record('assign_user_flags', $newflag);
+                }
+            } else if ($modname === 'forum') {
+                $context = context_module::instance($cm->id);
+                $roleid = local_xpstore_get_or_create_forum_role();
+                if (!$roleid) {
+                    return false;
+                }
+                role_assign($roleid, $userid, $context->id);
+            } else {
+                return false;
+            }
         }
 
         if ($courseid) {
             rebuild_course_cache($courseid, true);
         }
+
         return true;
     } catch (\Throwable $e) {
         debugging('local_xpstore_deliver_product error: ' . $e->getMessage(), DEBUG_DEVELOPER);
@@ -1615,12 +2108,12 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
 }
 
 /**
- * Restores non-grade benefits ('Q', 'A', 'S', 'F') using captured prevdata so pre-existing
- * teacher accommodations (extra time, passwords, open dates, groups, roles) are preserved.
+ * Restores non-grade benefits ('Q', 'A', 'S', 'F', 'R') using captured prevdata so pre-existing
+ * teacher accommodations (extra time, passwords, open dates, groups, roles, attempts) are preserved.
  *
  * @param int $courseid The course ID.
  * @param int $userid The user ID.
- * @param string $type Benefit type ('Q', 'A', 'S', 'F').
+ * @param string $type Benefit type ('Q', 'A', 'S', 'F', 'R').
  * @param int $itemid Course module ID.
  * @param int|null $instance Module instance ID (for Q/A).
  * @param array $deletedrows Array of deleted {local_xpstore_gastos} records for this user+item.
@@ -1661,7 +2154,6 @@ function local_xpstore_revert_nongrade_benefit(
         if (!$override) {
             return;
         }
-
         if ($remainingcount === 0) {
             if ($earliestprev && !empty($earliestprev['had_override'])) {
                 $override->attempts = $earliestprev['attempts'] ?? null;
@@ -1713,6 +2205,7 @@ function local_xpstore_revert_nongrade_benefit(
             $assign = $DB->get_record('assign', ['id' => $instance]);
             $mindue = $assign ? (int)$assign->duedate : 0;
             $delta = max(1, count($deletedrows)) * 3 * DAYSECS;
+
             if ($override && $override->duedate !== null) {
                 $override->duedate = max($mindue, (int)$override->duedate - $delta);
                 if ($override->cutoffdate !== null && (int)$override->cutoffdate > 0) {
@@ -1758,6 +2251,89 @@ function local_xpstore_revert_nongrade_benefit(
         if ($cmcontext && $role) {
             role_unassign($role->id, $userid, $cmcontext->id);
         }
+    } else if ($type === 'R' && $remainingcount === 0) {
+        $modname = $earliestprev['modname'] ?? '';
+        if ($modname === '' && $itemid > 0) {
+            $cmrec = $DB->get_record('course_modules', ['id' => $itemid]);
+            if ($cmrec) {
+                $modname = $DB->get_field('modules', 'name', ['id' => $cmrec->module]) ?: '';
+            }
+        }
+
+        if ($modname === 'assign' && !empty($instance)) {
+            $override = $DB->get_record('assign_overrides', ['assignid' => $instance, 'userid' => $userid]);
+            $flag = $DB->get_record('assign_user_flags', ['assignment' => $instance, 'userid' => $userid]);
+
+            if ($override) {
+                if ($earliestprev && !empty($earliestprev['had_override'])) {
+                    $override->duedate = $earliestprev['duedate'] ?? null;
+                    $override->cutoffdate = $earliestprev['cutoffdate'] ?? null;
+                    $DB->update_record('assign_overrides', $override);
+                } else if (
+                    $override->timelimit !== null ||
+                    $override->allowsubmissionsfromdate !== null
+                ) {
+                    $override->duedate = null;
+                    $override->cutoffdate = null;
+                    $DB->update_record('assign_overrides', $override);
+                } else {
+                    $DB->delete_records('assign_overrides', ['id' => $override->id]);
+                }
+            }
+
+            if ($flag) {
+                $flag->extensionduedate = $earliestprev ? (int)($earliestprev['extensionduedate'] ?? 0) : 0;
+                $flag->locked = $earliestprev ? (int)($earliestprev['locked'] ?? 0) : 0;
+                $DB->update_record('assign_user_flags', $flag);
+            }
+
+            // Remove reopened attempt if still in 'reopened' or 'new' status.
+            $newattempt = isset($earliestprev['new_attemptnumber']) ? (int)$earliestprev['new_attemptnumber'] : null;
+            $reopenedsub = null;
+            if ($newattempt !== null) {
+                $reopenedsub = $DB->get_record('assign_submission', [
+                    'assignment' => $instance,
+                    'userid' => $userid,
+                    'attemptnumber' => $newattempt,
+                ]);
+            }
+            if (!$reopenedsub) {
+                $reopenedsub = $DB->get_record_select(
+                    'assign_submission',
+                    'assignment = ? AND userid = ? AND latest = 1 AND status IN (?, ?)',
+                    [$instance, $userid, 'reopened', 'new']
+                );
+            }
+            if ($reopenedsub && in_array($reopenedsub->status, ['reopened', 'new'], true)) {
+                $DB->delete_records('assign_submission', ['id' => $reopenedsub->id]);
+            }
+
+            // Restore latest = 1 on prev_latest_id or the highest remaining attempt.
+            $prevlatestid = isset($earliestprev['prev_latest_id']) ? (int)$earliestprev['prev_latest_id'] : 0;
+            if ($prevlatestid > 0 && $DB->record_exists('assign_submission', ['id' => $prevlatestid])) {
+                $DB->set_field('assign_submission', 'latest', 1, ['id' => $prevlatestid]);
+            } else {
+                $lastsub = $DB->get_record_select(
+                    'assign_submission',
+                    'assignment = ? AND userid = ? ORDER BY attemptnumber DESC',
+                    [$instance, $userid],
+                    '*',
+                    IGNORE_MULTIPLE
+                );
+                if ($lastsub) {
+                    $DB->set_field('assign_submission', 'latest', 1, ['id' => $lastsub->id]);
+                }
+            }
+        } else if ($modname === 'forum') {
+            if ($earliestprev && !empty($earliestprev['had_role'])) {
+                return;
+            }
+            $cmcontext = context_module::instance($itemid, IGNORE_MISSING);
+            $role = $DB->get_record('role', ['shortname' => 'xpstore_forum_ext']);
+            if ($cmcontext && $role) {
+                role_unassign($role->id, $userid, $cmcontext->id);
+            }
+        }
     }
 }
 
@@ -1788,6 +2364,7 @@ function local_xpstore_cleanup_orphan_grade_bonuses($courseid, $userid = null) {
     $like2 = $DB->sql_like('gg.feedback', '?', false);
     $params = [$courseid, $courseid, '%xpstore-fb%', '%XP Store%'];
     $usersql = '';
+
     if ($userid !== null) {
         $usersql = ' AND (gg.userid = ? OR gs.userid = ?)';
         $params[] = (int)$userid;
@@ -1800,8 +2377,8 @@ function local_xpstore_cleanup_orphan_grade_bonuses($courseid, $userid = null) {
          LEFT JOIN {local_xpstore_grade_state} gs ON gs.itemid = gi.id AND (gg.id IS NULL OR gs.userid = gg.userid)
              WHERE gi.courseid = ?
                AND (gs.courseid = ? OR {$like1} OR {$like2}){$usersql}";
-    $records = $DB->get_recordset_sql($sql, $params);
 
+    $records = $DB->get_recordset_sql($sql, $params);
     foreach ($records as $row) {
         $uid = (int)$row->targetuserid;
         if ($uid <= 0) {
@@ -1832,6 +2409,11 @@ function local_xpstore_reset_purchases($courseid, $userid = null) {
     global $DB, $CFG;
 
     $courseid = (int)$courseid;
+    if ($userid === null) {
+        set_config('store_closed_course_' . $courseid, '0', 'local_xpstore');
+        set_config('store_deadline_course_' . $courseid, 0, 'local_xpstore');
+    }
+
     $params = [$courseid, $courseid, $courseid];
     $usersql = '';
     if ($userid !== null) {
@@ -1845,8 +2427,8 @@ function local_xpstore_reset_purchases($courseid, $userid = null) {
          LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
          LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
              WHERE (g.courseid = ? OR (g.courseid = 0 AND (cm.course = ? OR gi.courseid = ?))){$usersql}";
-    $records = $DB->get_records_sql($sql, $params);
 
+    $records = $DB->get_records_sql($sql, $params);
     if (empty($records)) {
         if ($userid !== null) {
             local_xpstore_sync_course_grade_bonus($courseid, (int)$userid, false);
@@ -1856,7 +2438,6 @@ function local_xpstore_reset_purchases($courseid, $userid = null) {
     }
 
     $catalog = local_xpstore_parse_catalog($courseid);
-
     $gastoids = [];
     $coursebonususers = [];
     $itembonuses = [];
@@ -1865,6 +2446,7 @@ function local_xpstore_reset_purchases($courseid, $userid = null) {
     foreach ($records as $rec) {
         $gastoids[] = $rec->id;
         $uid = (int)$rec->userid;
+
         if ($rec->itemtype === 'C') {
             $coursebonususers[$uid] = $uid;
         } else if ($rec->itemtype === 'G' || $rec->itemtype === 'M') {
@@ -1878,7 +2460,7 @@ function local_xpstore_reset_purchases($courseid, $userid = null) {
                     'instance' => $rec->instance,
                 ];
             }
-        } else if (in_array($rec->itemtype, ['Q', 'A', 'S', 'F'], true)) {
+        } else if (in_array($rec->itemtype, ['Q', 'A', 'R', 'S', 'F'], true)) {
             $ngkey = $rec->itemtype . '_' . (int)$rec->itemid . '_' . $uid;
             if (!isset($nongradegroups[$ngkey])) {
                 $nongradegroups[$ngkey] = [
@@ -1945,7 +2527,7 @@ function local_xpstore_reset_purchases($courseid, $userid = null) {
 
 /**
  * Deletes/undoes a single purchase record in a course, refunds the XP spent,
- * and reverts the corresponding bonus or benefit ('C', 'G', 'M', 'Q', 'A', 'S', 'F').
+ * and reverts the corresponding bonus or benefit ('C', 'G', 'M', 'Q', 'A', 'R', 'S', 'F').
  *
  * @param int $courseid The course ID.
  * @param int $gastoid The ID of the purchase in {local_xpstore_gastos}.
@@ -1955,12 +2537,14 @@ function local_xpstore_delete_single_purchase($courseid, $gastoid) {
     global $DB, $CFG;
 
     $courseid = (int)$courseid;
+
     $sql = "SELECT g.*, cm.module, cm.instance
               FROM {local_xpstore_gastos} g
          LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
          LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
              WHERE g.id = ?
                AND (g.courseid = ? OR (g.courseid = 0 AND (cm.course = ? OR gi.courseid = ?)))";
+
     $rec = $DB->get_record_sql($sql, [(int)$gastoid, $courseid, $courseid, $courseid]);
     if (!$rec) {
         return null;
@@ -1999,11 +2583,10 @@ function local_xpstore_delete_single_purchase($courseid, $gastoid) {
                 $gradeitems = [$gi];
             }
         }
-
         foreach ($gradeitems as $gradeitem) {
             local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, $userid, false);
         }
-    } else if (in_array($type, ['Q', 'A', 'S', 'F'], true)) {
+    } else if (in_array($type, ['Q', 'A', 'R', 'S', 'F'], true)) {
         local_xpstore_revert_nongrade_benefit(
             $courseid,
             $userid,
@@ -2041,7 +2624,6 @@ function local_xpstore_reset_userdata($data) {
 function local_xpstore_get_or_create_forum_role() {
     global $DB, $CFG;
     require_once($CFG->libdir . '/accesslib.php');
-
     $shortname = 'xpstore_forum_ext';
     if ($role = $DB->get_record('role', ['shortname' => $shortname])) {
         return $role->id;
@@ -2070,7 +2652,6 @@ function local_xpstore_get_or_create_forum_role() {
         assign_capability('mod/forum:canoverridecutoff', CAP_ALLOW, $roleid, $syscontext->id, true);
         return $roleid;
     }
-
     return false;
 }
 
@@ -2171,6 +2752,12 @@ function local_xpstore_apply_special_restriction($cmid, $groupid, $courseid, $re
  * @return array
  */
 function local_xpstore_get_navigation_data($courseid, $activetab) {
+    $sm = get_string_manager();
+    $access = local_xpstore_get_store_access_state((int)$courseid);
+    $controlurl = ($activetab === 'products' || $activetab === 'settings')
+        ? (new moodle_url('/local/xpstore/config.php', ['id' => $courseid, 'tab' => $activetab]))->out(false)
+        : (new moodle_url('/local/xpstore/index.php', ['id' => $courseid]))->out(false);
+
     return [
         'storeurl' => (new moodle_url('/local/xpstore/index.php', ['id' => $courseid]))->out(false),
         'reporturl' => (new moodle_url('/local/xpstore/report.php', ['id' => $courseid]))->out(false),
@@ -2181,16 +2768,34 @@ function local_xpstore_get_navigation_data($courseid, $activetab) {
         'str_audit' => get_string('audit', 'local_xpstore'),
         'str_analytics' => get_string('analytics', 'local_xpstore'),
         'str_products' => get_string('products', 'local_xpstore'),
-
         'str_settings' => get_string('settings', 'local_xpstore'),
         'str_preview' => get_string('preview', 'local_xpstore'),
         'str_style' => get_string('style', 'local_xpstore'),
-
         'tab_store' => ($activetab === 'store'),
         'tab_redemptions' => ($activetab === 'redemptions'),
         'tab_analytics' => ($activetab === 'analytics'),
         'tab_products' => ($activetab === 'products'),
         'tab_settings' => ($activetab === 'settings'),
+        'show_store_controls' => in_array($activetab, ['store', 'products', 'settings'], true),
+        'storecontrolurl' => $controlurl,
+        'store_is_closed' => $access['closed'],
+        'has_store_deadline' => $access['has_deadline'],
+        'store_deadline_iso' => $access['deadline_iso'],
+        'store_deadline_formatted' => $access['deadline_formatted'],
+        'str_store_open_btn' => $sm->string_exists('store_open_btn', 'local_xpstore')
+            ? get_string('store_open_btn', 'local_xpstore') : 'Canjes: Abiertos',
+        'str_store_closed_btn' => $sm->string_exists('store_closed_btn', 'local_xpstore')
+            ? get_string('store_closed_btn', 'local_xpstore') : 'Canjes: Cerrados',
+        'str_store_toggle_close_tooltip' => $sm->string_exists('store_toggle_close_tooltip', 'local_xpstore')
+            ? get_string('store_toggle_close_tooltip', 'local_xpstore') : 'Bloquear todos los canjes de la tienda',
+        'str_store_toggle_open_tooltip' => $sm->string_exists('store_toggle_open_tooltip', 'local_xpstore')
+            ? get_string('store_toggle_open_tooltip', 'local_xpstore') : 'Habilitar los canjes de la tienda',
+        'str_store_deadline' => $sm->string_exists('store_deadline', 'local_xpstore')
+            ? get_string('store_deadline', 'local_xpstore') : 'Fecha límite de canjes',
+        'str_store_deadline_short' => $sm->string_exists('store_deadline_short', 'local_xpstore')
+            ? get_string('store_deadline_short', 'local_xpstore') : 'Límite',
+        'str_store_deadline_clear' => $sm->string_exists('store_deadline_clear', 'local_xpstore')
+            ? get_string('store_deadline_clear', 'local_xpstore') : 'Sin fecha límite',
     ];
 }
 
@@ -2213,7 +2818,6 @@ function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $h
 
     $availability = $cm->availability;
     $newrestriction = ['type' => 'xpstore', 'productid' => (string)$productid];
-
     $showstatus = empty($hiddenwhenlocked) ? true : false;
 
     if (empty($availability)) {
@@ -2278,7 +2882,7 @@ function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $h
 /**
  * Returns the default FontAwesome icon name for a given reward type.
  *
- * @param string $type The reward type code (Q, A, F, G, M, C, S, U).
+ * @param string $type The reward type code (Q, A, F, R, G, M, C, S, U).
  * @return string The FontAwesome icon name (without 'fa-').
  */
 function local_xpstore_get_default_card_icon($type) {
@@ -2286,6 +2890,7 @@ function local_xpstore_get_default_card_icon($type) {
         'Q' => 'bolt',
         'A' => 'file-text',
         'F' => 'comments',
+        'R' => 'rocket',
         'G' => 'star',
         'M' => 'star',
         'C' => 'star',
@@ -2472,7 +3077,7 @@ function local_xpstore_save_card_image($courseid, array $uploadedfile, $existing
 /**
  * Returns the student-facing badge label for a product type.
  *
- * @param string $tipo Product type character ('Q', 'A', 'F', 'G', 'M', 'C', 'S', 'U').
+ * @param string $tipo Product type character ('Q', 'A', 'F', 'R', 'G', 'M', 'C', 'S', 'U').
  * @param string $boost Optional bonus points value for grade boost products.
  * @return string Localized student-facing label.
  */
@@ -2493,6 +3098,12 @@ function local_xpstore_get_student_badge_label($tipo, $boost = '0') {
     }
     if ($tipo === 'Q') {
         return get_string('badge_extra_attempt', 'local_xpstore');
+    }
+    if ($tipo === 'R') {
+        $sm = get_string_manager();
+        return $sm->string_exists('badge_retry', 'local_xpstore')
+            ? get_string('badge_retry', 'local_xpstore')
+            : 'Oportunidad de mejora';
     }
     return '';
 }
