@@ -25,7 +25,6 @@ define([], function() {
         init: function() {
             var typeSelect = document.getElementById('type_select');
             var activitySelect = document.getElementById('activity_select');
-
             if (typeSelect && activitySelect) {
                 var allOptions = Array.from(activitySelect.querySelectorAll('option:not([disabled])'));
 
@@ -65,8 +64,6 @@ define([], function() {
                             show = (optData.modname === 'assign');
                         } else if (selectedType === 'F') {
                             show = (optData.modname === 'forum');
-                        } else if (selectedType === 'R') {
-                            show = (optData.modname === 'assign' || optData.modname === 'forum');
                         } else if (selectedType === 'G') {
                             var gradables = [
                                 'quiz', 'assign', 'forum', 'workshop',
@@ -124,14 +121,12 @@ define([], function() {
                         return o.value === activitySelect.value;
                     });
                     var selectedOptionHtml = '';
-
                     if (selectedOption) {
                         selectedOptionHtml = selectedOption.html;
                     } else if (activitySelect.options.length > 0 && activitySelect.selectedIndex >= 0) {
                         var opt = activitySelect.options[activitySelect.selectedIndex];
                         selectedOptionHtml = '<span class="text-muted">' + opt.text + '</span>';
                     }
-
                     var activityTextSpan = document.getElementById('selected-activity-text');
                     if (activityTextSpan) {
                         activityTextSpan.innerHTML = selectedOptionHtml;
@@ -144,46 +139,43 @@ define([], function() {
 
             // Live Preview Logic
             var livePreview = document.getElementById('xpstore_live_preview');
-            if (livePreview) {
-                var colorPrimary = document.querySelector('input[name="color_primary"]');
-                var colorSecondary = document.querySelector('input[name="color_secondary"]');
-                var colorIcon = document.querySelector('input[name="color_icon"]');
-                var colorCatIcon = document.querySelector('input[name="color_cat_icon"]');
+        if (livePreview) {
+            var colorPrimary = document.querySelector('input[name="color_primary"]');
+            var colorSecondary = document.querySelector('input[name="color_secondary"]');
+            var colorIcon = document.querySelector('input[name="color_icon"]');
+            var colorCatIcon = document.querySelector('input[name="color_cat_icon"]');
 
-                if (colorPrimary) {
-                    var updatePrimary = function(e) {
-                        livePreview.style.setProperty('--cp', e.target.value);
-                        livePreview.style.setProperty('--gradient', 'linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%)');
-                    };
-                    colorPrimary.addEventListener('input', updatePrimary);
-                    colorPrimary.addEventListener('change', updatePrimary);
-                }
-
-                if (colorSecondary) {
-                    var updateSecondary = function(e) {
-                        livePreview.style.setProperty('--cb', e.target.value);
-                        livePreview.style.setProperty('--gradient', 'linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%)');
-                    };
-                    colorSecondary.addEventListener('input', updateSecondary);
-                    colorSecondary.addEventListener('change', updateSecondary);
-                }
-
-                if (colorIcon) {
-                    var updateIcon = function(e) {
-                        livePreview.style.setProperty('--ci', e.target.value);
-                    };
-                    colorIcon.addEventListener('input', updateIcon);
-                    colorIcon.addEventListener('change', updateIcon);
-                }
-
-                if (colorCatIcon) {
-                    var updateCatIcon = function(e) {
-                        livePreview.style.setProperty('--cc', e.target.value);
-                    };
-                    colorCatIcon.addEventListener('input', updateCatIcon);
-                    colorCatIcon.addEventListener('change', updateCatIcon);
-                }
+            if (colorPrimary) {
+                var updatePrimary = function(e) {
+                    livePreview.style.setProperty('--cp', e.target.value);
+                    livePreview.style.setProperty('--gradient', 'linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%)');
+                };
+                colorPrimary.addEventListener('input', updatePrimary);
+                colorPrimary.addEventListener('change', updatePrimary);
             }
+            if (colorSecondary) {
+                var updateSecondary = function(e) {
+                    livePreview.style.setProperty('--cb', e.target.value);
+                    livePreview.style.setProperty('--gradient', 'linear-gradient(135deg, var(--cp) 0%, var(--cb) 100%)');
+                };
+                colorSecondary.addEventListener('input', updateSecondary);
+                colorSecondary.addEventListener('change', updateSecondary);
+            }
+            if (colorIcon) {
+                var updateIcon = function(e) {
+                    livePreview.style.setProperty('--ci', e.target.value);
+                };
+                colorIcon.addEventListener('input', updateIcon);
+                colorIcon.addEventListener('change', updateIcon);
+            }
+            if (colorCatIcon) {
+                var updateCatIcon = function(e) {
+                    livePreview.style.setProperty('--cc', e.target.value);
+                };
+                colorCatIcon.addEventListener('input', updateCatIcon);
+                colorCatIcon.addEventListener('change', updateCatIcon);
+            }
+        }
         }
     };
 });

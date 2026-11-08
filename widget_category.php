@@ -202,7 +202,7 @@ foreach ($catalog as $item) {
 
     $stateallowed = true;
     $statebtnlabel = '';
-    if (in_array($tipochar, ['A', 'F', 'R'], true) && isset($cm) && function_exists('local_xpstore_check_activity_redemption_state')) {
+    if (in_array($tipochar, ['A', 'F', 'R'], true) && isset($cm)) {
         $statecheck = local_xpstore_check_activity_redemption_state($courseid, $USER->id, $tipochar, $cm);
         if (!$statecheck['allowed']) {
             $stateallowed = false;

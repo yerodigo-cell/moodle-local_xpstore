@@ -182,7 +182,7 @@ $storeclosed = !empty($storeaccess['closed']);
 
 $stateallowed = true;
 $statebtnlabel = '';
-if (in_array($producto['tipo'], ['A', 'F', 'R'], true) && isset($cm) && function_exists('local_xpstore_check_activity_redemption_state')) {
+if (in_array($producto['tipo'], ['A', 'F', 'R'], true) && isset($cm)) {
     $statecheck = local_xpstore_check_activity_redemption_state($courseid, $USER->id, $producto['tipo'], $cm);
     if (!$statecheck['allowed']) {
         $stateallowed = false;

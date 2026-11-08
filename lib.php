@@ -1337,7 +1337,7 @@ function local_xpstore_check_activity_redemption_state(int $courseid, int $useri
 
     // Helper to check whether user has an existing final grade for this module in the gradebook
     // (handles multi-item modules like mod_forum safely via local_xpstore_get_mod_grade_items).
-    $hasfinalgrade = function(string $itemmod, int $iteminst) use ($DB, $courseid, $userid): bool {
+    $hasfinalgrade = function (string $itemmod, int $iteminst) use ($DB, $courseid, $userid): bool {
         if ($itemmod === 'assign') {
             if ($DB->record_exists_select('assign_grades', 'assignment = ? AND userid = ? AND grade >= 0', [$iteminst, $userid])) {
                 return true;
@@ -1349,7 +1349,8 @@ function local_xpstore_check_activity_redemption_state(int $courseid, int $useri
         }
         $gradeitems = local_xpstore_get_mod_grade_items($courseid, $itemmod, $iteminst);
         foreach ($gradeitems as $gi) {
-            if ($DB->record_exists_select('grade_grades', 'itemid = ? AND userid = ? AND finalgrade IS NOT NULL', [$gi->id, $userid])) {
+            $select = 'itemid = ? AND userid = ? AND finalgrade IS NOT NULL';
+            if ($DB->record_exists_select('grade_grades', $select, [$gi->id, $userid])) {
                 return true;
             }
         }

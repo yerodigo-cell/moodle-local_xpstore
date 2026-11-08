@@ -24,7 +24,6 @@ namespace local_xpstore;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class observer {
-
     /**
      * Checks whether the user performing a course restore is authorized to copy
      * local_xpstore configuration and custom images from the source course on this site.
