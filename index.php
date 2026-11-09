@@ -140,7 +140,7 @@ $saldo = local_xpstore_get_balance($USER->id, $courseid);
 $userlevel = local_xpstore_get_user_level($USER->id, $courseid);
 $catalog = local_xpstore_parse_catalog($courseid);
 $isteacher = local_xpstore_can_manage($context) || is_siteadmin();
-// 1. Pasa el objeto $course (evita 1 query repetida a {course}).
+// 1. Pass the $course object directly to avoid a duplicate query on {course}.
 $modinfo = get_fast_modinfo($course);
 $cms = $modinfo->get_cms();
 $storeaccess = local_xpstore_get_store_access_state($courseid);
@@ -166,7 +166,7 @@ $ccstore = local_xpstore_clean_hex_color(
 $caticons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid) ?: '', true) ?: [];
 $completion = null;
 
-// 2. Precarga en lote antes del foreach para evitar N+1.
+// 2. Batch-preload catalog requirements before the loop to avoid N+1 queries.
 $hasforumitems = false;
 $needgradeitems = false;
 foreach ($catalog as $citem) {
@@ -177,12 +177,12 @@ foreach ($catalog as $citem) {
     }
 }
 
-// Solo limpia roles de foro si la tienda realmente ofrece productos F o R.
+// Only clean up expired forum roles if the catalog offers F or R items.
 if ($hasforumitems && function_exists('local_xpstore_cleanup_expired_forum_roles')) {
     local_xpstore_cleanup_expired_forum_roles($courseid, $USER->id);
 }
 
-// Precarga todos los conteos de compras del usuario en este curso en una sola consulta.
+// Preload all purchase counts for the current user in this course in a single query.
 $userpurchasecounts = [];
 $concatkey = $DB->sql_concat('itemtype', "'_'", 'itemid');
 $sqlcounts = "SELECT {$concatkey} AS prodkey, COUNT(1) AS cnt
@@ -193,7 +193,7 @@ foreach ($DB->get_records_sql($sqlcounts, [$USER->id, $courseid]) as $row) {
     $userpurchasecounts[$row->prodkey] = (int)$row->cnt;
 }
 
-// Precarga todos los grade_items del curso en una sola consulta si hay productos M o C.
+// Preload all course grade_items in a single query if the catalog contains M or C items.
 $coursegradeitems = $needgradeitems
     ? $DB->get_records('grade_items', ['courseid' => $courseid])
     : [];
@@ -304,12 +304,12 @@ foreach ($catalog as $item) {
             $sm = get_string_manager();
             $btntext = $sm->string_exists('requires_level', 'local_xpstore')
                 ? get_string('requires_level', 'local_xpstore', $minlevel)
-                : ('Requiere Nivel ' . $minlevel);
+                : ('Requires Level ' . $minlevel);
         } else if (!$requisitocumplido) {
             $sm = get_string_manager();
             $strreq = $sm->string_exists('requires_short', 'local_xpstore')
                 ? get_string('requires_short', 'local_xpstore')
-                : 'Requiere';
+                : 'Requires';
             $btntext = $strreq . ' ' . $reqname;
         } else if (!$stateallowed) {
             $btntext = $statebtnlabel;

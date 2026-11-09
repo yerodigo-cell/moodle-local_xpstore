@@ -41,8 +41,8 @@ require_login($course);
 
 $action = optional_param('action', '', PARAM_ALPHA);
 
-// CRÍTICO: Si solo estamos mostrando el widget (no comprando), liberamos el lock de sesión
-// inmediatamente para que múltiples iframes en el curso carguen en paralelo sin bloquearse.
+// Release the session lock immediately when only rendering the widget (not redeeming)
+// so multiple embedded iframes on the course page can load in parallel without blocking.
 if ($action !== 'comprar') {
     \core\session\manager::write_close();
 }
@@ -62,7 +62,7 @@ $catalog = local_xpstore_parse_catalog($courseid);
 $catkey = $tiporeq . $cmidreq;
 $producto = null;
 
-// Pasar el objeto $course (ya cargado en RAM) en lugar de $courseid evita 1 query extra a {course}.
+// Pass the loaded $course object instead of $courseid to avoid an extra query on {course}.
 $modinfo = get_fast_modinfo($course);
 $cms = $modinfo->get_cms();
 
@@ -169,8 +169,8 @@ $reqname = '';
 $stateallowed = true;
 $statebtnlabel = '';
 
-// CORTOCIRCUITO CRÍTICO: Si el producto NO está oculto por nivel, ni agotado (Sold out), ni la tienda está cerrada,
-// recién ahí consultamos completion y estado de entregas/foros/calificaciones.
+// Short-circuit: only query completion and activity/grade states if the item is not
+// hidden by level, not sold out, and the store is open.
 if (!$hiddenbylevel && !$limitealcanzado && !$storeclosed) {
     if ($producto['requisito'] > 0) {
         if (isset($cms[$producto['requisito']]) && empty($cms[$producto['requisito']]->deletioninprogress)) {
@@ -284,12 +284,12 @@ if ($disabled) {
         $sm = get_string_manager();
         $btntext = $sm->string_exists('requires_level', 'local_xpstore')
             ? get_string('requires_level', 'local_xpstore', $producto['minlevel'])
-            : ('Requiere Nivel ' . $producto['minlevel']);
+            : ('Requires Level ' . $producto['minlevel']);
     } else if (!$requisitocumplido) {
         $sm = get_string_manager();
         $strreq = $sm->string_exists('requires_short', 'local_xpstore')
             ? get_string('requires_short', 'local_xpstore')
-            : 'Requiere';
+            : 'Requires';
         $btntext = $strreq . ' ' . $reqname;
     } else if (!$stateallowed) {
         $btntext = $statebtnlabel;

@@ -64,10 +64,10 @@ function local_xpstore_get_store_access_state(int $courseid): array {
     $sm = get_string_manager();
     $btnlabel = $sm->string_exists('btn_store_closed', 'local_xpstore')
         ? get_string('btn_store_closed', 'local_xpstore')
-        : 'Tienda cerrada';
+        : 'Store closed';
     $errmsg = $sm->string_exists('error_store_closed', 'local_xpstore')
         ? get_string('error_store_closed', 'local_xpstore')
-        : 'El periodo de canjes en la tienda ha finalizado.';
+        : 'The store redemption period has ended.';
 
     return [
         'closed' => $isclosed,
@@ -1352,7 +1352,7 @@ function local_xpstore_check_activity_redemption_state(int $courseid, int $useri
         if ($hasext) {
             $msg = $sm->string_exists('error_exclusivity_ext', 'local_xpstore')
                 ? get_string('error_exclusivity_ext', 'local_xpstore')
-                : 'No disponible: ya utilizaste una entrega extemporánea en esta actividad.';
+                : 'Not available: you already used a late submission extension on this activity.';
             return [
                 'allowed' => false,
                 'reason' => 'exclusivity_ext',
@@ -1370,7 +1370,7 @@ function local_xpstore_check_activity_redemption_state(int $courseid, int $useri
         if ($hasretry) {
             $msg = $sm->string_exists('error_exclusivity_retry', 'local_xpstore')
                 ? get_string('error_exclusivity_retry', 'local_xpstore')
-                : 'No disponible: ya utilizaste una oportunidad de mejora en esta actividad.';
+                : 'Not available: you already used an improvement opportunity on this activity.';
             return [
                 'allowed' => false,
                 'reason' => 'exclusivity_retry',
@@ -1401,7 +1401,7 @@ function local_xpstore_check_activity_redemption_state(int $courseid, int $useri
         return false;
     };
 
-    // 2. State verification for 'A' and 'F' (Entrega extemporánea):
+    // 2. State verification for 'A' and 'F' (Late submission / extension):
     // Block if student already submitted (assign status = 'submitted'), posted in forum,
     // or received a grade, UNLESS purchasing a secondary extension over a previous A/F.
     if ($tipo === 'A' || $tipo === 'F') {
@@ -1419,7 +1419,7 @@ function local_xpstore_check_activity_redemption_state(int $courseid, int $useri
                 if ($hassubmitted || $hasfinalgrade('assign', $instance)) {
                     $msg = $sm->string_exists('error_already_submitted', 'local_xpstore')
                         ? get_string('error_already_submitted', 'local_xpstore')
-                        : 'Ya realizaste tu entrega en esta actividad. Si deseas subir tu nota, usa la Oportunidad de Mejora.';
+                        : 'You have already submitted or completed this activity.';
                     return [
                         'allowed' => false,
                         'reason' => 'already_submitted',
@@ -1436,7 +1436,7 @@ function local_xpstore_check_activity_redemption_state(int $courseid, int $useri
                 if ($haspost || $hasfinalgrade('forum', $instance)) {
                     $msg = $sm->string_exists('error_already_submitted', 'local_xpstore')
                         ? get_string('error_already_submitted', 'local_xpstore')
-                        : 'Ya participaste en este foro. Si deseas mejorar tu nota, usa la Oportunidad de Mejora.';
+                        : 'You have already participated in this forum.';
                     return [
                         'allowed' => false,
                         'reason' => 'already_submitted',
@@ -1447,7 +1447,7 @@ function local_xpstore_check_activity_redemption_state(int $courseid, int $useri
         }
     }
 
-    // 3. State verification for 'R' (Oportunidad de mejora):
+    // 3. State verification for 'R' (Improvement / resubmission opportunity):
     // Requires student to have already submitted/participated or already received a grade.
     if ($tipo === 'R') {
         if ($modname === 'assign') {
@@ -1460,7 +1460,7 @@ function local_xpstore_check_activity_redemption_state(int $courseid, int $useri
             if (!$hassubmitted && !$hasgrade) {
                 $msg = $sm->string_exists('error_retry_needs_submission', 'local_xpstore')
                     ? get_string('error_retry_needs_submission', 'local_xpstore')
-                    : 'Debes haber entregado o recibido calificación en esta actividad antes de canjear una oportunidad de mejora.';
+                    : 'To redeem an improvement opportunity, you must have a prior submission on this activity.';
                 return [
                     'allowed' => false,
                     'reason' => 'retry_needs_submission',
@@ -1478,7 +1478,7 @@ function local_xpstore_check_activity_redemption_state(int $courseid, int $useri
             if (!$haspost && !$hasgrade) {
                 $msg = $sm->string_exists('error_retry_needs_submission', 'local_xpstore')
                     ? get_string('error_retry_needs_submission', 'local_xpstore')
-                    : 'Debes haber participado o recibido calificación en este foro antes de canjear una oportunidad de mejora.';
+                    : 'To redeem an improvement opportunity, you must have prior participation in this forum.';
                 return [
                     'allowed' => false,
                     'reason' => 'retry_needs_submission',
@@ -2838,19 +2838,19 @@ function local_xpstore_get_navigation_data($courseid, $activetab) {
         'store_deadline_iso' => $access['deadline_iso'],
         'store_deadline_formatted' => $access['deadline_formatted'],
         'str_store_open_btn' => $sm->string_exists('store_open_btn', 'local_xpstore')
-            ? get_string('store_open_btn', 'local_xpstore') : 'Canjes: Abiertos',
+            ? get_string('store_open_btn', 'local_xpstore') : 'Redemptions: Open',
         'str_store_closed_btn' => $sm->string_exists('store_closed_btn', 'local_xpstore')
-            ? get_string('store_closed_btn', 'local_xpstore') : 'Canjes: Cerrados',
+            ? get_string('store_closed_btn', 'local_xpstore') : 'Redemptions: Closed',
         'str_store_toggle_close_tooltip' => $sm->string_exists('store_toggle_close_tooltip', 'local_xpstore')
-            ? get_string('store_toggle_close_tooltip', 'local_xpstore') : 'Bloquear todos los canjes de la tienda',
+            ? get_string('store_toggle_close_tooltip', 'local_xpstore') : 'Block all store redemptions',
         'str_store_toggle_open_tooltip' => $sm->string_exists('store_toggle_open_tooltip', 'local_xpstore')
-            ? get_string('store_toggle_open_tooltip', 'local_xpstore') : 'Habilitar los canjes de la tienda',
+            ? get_string('store_toggle_open_tooltip', 'local_xpstore') : 'Enable store redemptions',
         'str_store_deadline' => $sm->string_exists('store_deadline', 'local_xpstore')
-            ? get_string('store_deadline', 'local_xpstore') : 'Fecha límite de canjes',
+            ? get_string('store_deadline', 'local_xpstore') : 'Redemption deadline',
         'str_store_deadline_short' => $sm->string_exists('store_deadline_short', 'local_xpstore')
-            ? get_string('store_deadline_short', 'local_xpstore') : 'Límite',
+            ? get_string('store_deadline_short', 'local_xpstore') : 'Deadline',
         'str_store_deadline_clear' => $sm->string_exists('store_deadline_clear', 'local_xpstore')
-            ? get_string('store_deadline_clear', 'local_xpstore') : 'Sin fecha límite',
+            ? get_string('store_deadline_clear', 'local_xpstore') : 'No deadline',
     ];
 }
 
@@ -3083,7 +3083,7 @@ function local_xpstore_save_card_image($courseid, array $uploadedfile, $existing
     ) {
         $errormsg = $sm->string_exists('error_imagesize', 'local_xpstore')
             ? get_string('error_imagesize', 'local_xpstore')
-            : 'La imagen supera el tamaño máximo permitido de 256 KB.';
+            : 'The image exceeds the maximum allowed size of 256 KB.';
         return false;
     }
 
@@ -3101,7 +3101,7 @@ function local_xpstore_save_card_image($courseid, array $uploadedfile, $existing
     if ($imginfo === false || !in_array($imginfo['mime'], $allowedmimes, true)) {
         $errormsg = $sm->string_exists('error_imagetype', 'local_xpstore')
             ? get_string('error_imagetype', 'local_xpstore')
-            : 'Formato de imagen no válido (usa PNG, JPG, GIF o WEBP).';
+            : 'Invalid image format (use PNG, JPG, GIF, or WEBP).';
         return false;
     }
 
@@ -3167,7 +3167,7 @@ function local_xpstore_get_student_badge_label($tipo, $boost = '0') {
         $sm = get_string_manager();
         return $sm->string_exists('badge_retry', 'local_xpstore')
             ? get_string('badge_retry', 'local_xpstore')
-            : 'Oportunidad de mejora';
+            : 'Improvement opportunity';
     }
     return '';
 }

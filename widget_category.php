@@ -244,12 +244,12 @@ foreach ($catalog as $item) {
             $sm = get_string_manager();
             $btntext = $sm->string_exists('requires_level', 'local_xpstore')
                 ? get_string('requires_level', 'local_xpstore', $minlevel)
-                : ('Requiere Nivel ' . $minlevel);
+                : ('Requires Level ' . $minlevel);
         } else if (!$requisitocumplido) {
             $sm = get_string_manager();
             $strreq = $sm->string_exists('requires_short', 'local_xpstore')
                 ? get_string('requires_short', 'local_xpstore')
-                : 'Requiere';
+                : 'Requires';
             $btntext = $strreq . ' ' . $reqname;
         } else if (!$stateallowed) {
             $btntext = $statebtnlabel;

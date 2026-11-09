@@ -625,7 +625,7 @@ $availabletypes = [
     'Q' => get_string('type_q', 'local_xpstore'),
     'A' => get_string('type_a', 'local_xpstore'),
     'F' => get_string('type_f', 'local_xpstore'),
-    'R' => $sm->string_exists('type_r', 'local_xpstore') ? get_string('type_r', 'local_xpstore') : 'MEJORA / REENVÍO',
+    'R' => $sm->string_exists('type_r', 'local_xpstore') ? get_string('type_r', 'local_xpstore') : 'Improvement (Resubmission)',
     'G' => get_string('type_g', 'local_xpstore'),
     'S' => get_string('type_s', 'local_xpstore'),
     'U' => get_string('type_u', 'local_xpstore'),
@@ -792,13 +792,13 @@ $catalogitems = [];
 $hasitems = !empty($parsedcataloglist);
 
 $strcustomimage = $sm->string_exists('customimage', 'local_xpstore')
-    ? get_string('customimage', 'local_xpstore') : 'Imagen personalizada';
+    ? get_string('customimage', 'local_xpstore') : 'Custom image';
 $struploadimage = $sm->string_exists('uploadimage', 'local_xpstore')
-    ? get_string('uploadimage', 'local_xpstore') : 'Subir imagen';
+    ? get_string('uploadimage', 'local_xpstore') : 'Upload image';
 $strmaximagesize = $sm->string_exists('maximagesize', 'local_xpstore')
-    ? get_string('maximagesize', 'local_xpstore') : 'Máx. 256 KB (PNG, JPG, GIF, WEBP)';
+    ? get_string('maximagesize', 'local_xpstore') : 'Max. 256 KB (PNG, JPG, GIF, WEBP)';
 $strerrorimagesize = $sm->string_exists('error_imagesize', 'local_xpstore')
-    ? get_string('error_imagesize', 'local_xpstore') : 'La imagen supera el tamaño máximo permitido de 256 KB.';
+    ? get_string('error_imagesize', 'local_xpstore') : 'The image exceeds the maximum allowed size of 256 KB.';
 
 $availableicons = local_xpstore_get_available_icons();
 $eiscustomimage = local_xpstore_is_custom_card_image($eicono);
@@ -1052,13 +1052,13 @@ $templatedata = array_merge([
     'activity_options' => $activityoptions,
     'ecmid' => $ecmid,
     'str_requirement' => $sm->string_exists('requirement', 'local_xpstore') ?
-        get_string('requirement', 'local_xpstore') : 'Requisito',
+        get_string('requirement', 'local_xpstore') : 'Prerequisite',
     'str_chooserequirement' => $sm->string_exists('chooserequirement', 'local_xpstore') ?
-        get_string('chooserequirement', 'local_xpstore') : 'Elige un requisito',
+        get_string('chooserequirement', 'local_xpstore') : 'Select a prerequisite',
     'str_requires' => $sm->string_exists('requires', 'local_xpstore') ?
-        get_string('requires', 'local_xpstore') : 'Requiere',
+        get_string('requires', 'local_xpstore') : 'Requires',
     'str_requires_short' => $sm->string_exists('requires_short', 'local_xpstore') ?
-        get_string('requires_short', 'local_xpstore') : 'Requiere',
+        get_string('requires_short', 'local_xpstore') : 'Requires',
     'help_requirement' => $OUTPUT->help_icon('requirement', 'local_xpstore'),
     'help_hiddenwhenlocked' => $OUTPUT->help_icon('hiddenwhenlocked', 'local_xpstore'),
     'requirement_options' => $requirementoptions,
@@ -1068,18 +1068,18 @@ $templatedata = array_merge([
     'str_showrestricted' => get_string('showrestricted', 'local_xpstore'),
     'str_hidecompletely' => get_string('hidecompletely', 'local_xpstore'),
     'str_minlevel' => $sm->string_exists('minlevel', 'local_xpstore') ?
-        get_string('minlevel', 'local_xpstore') : 'Nivel mínimo (Level Up!)',
+        get_string('minlevel', 'local_xpstore') : 'Minimum level (Level Up!)',
     'help_minlevel' => $OUTPUT->help_icon('minlevel', 'local_xpstore'),
     'str_minlevelzero' => $sm->string_exists('minlevelzero', 'local_xpstore') ?
-        get_string('minlevelzero', 'local_xpstore') : '0 = Cualquier nivel',
+        get_string('minlevelzero', 'local_xpstore') : '0 = Any level',
     'str_minlevel_short' => $sm->string_exists('minlevel_short', 'local_xpstore') ?
-        get_string('minlevel_short', 'local_xpstore') : 'Nivel mín.',
+        get_string('minlevel_short', 'local_xpstore') : 'Min. level',
     'str_levelvisibility' => $sm->string_exists('levelvisibility', 'local_xpstore') ?
-        get_string('levelvisibility', 'local_xpstore') : 'Si no alcanza el nivel',
+        get_string('levelvisibility', 'local_xpstore') : 'When level is not met',
     'str_hidecardbylevel' => $sm->string_exists('hidecardbylevel', 'local_xpstore') ?
-        get_string('hidecardbylevel', 'local_xpstore') : 'Ocultar tarjeta hasta alcanzar el nivel',
+        get_string('hidecardbylevel', 'local_xpstore') : 'Hide card until level is reached',
     'str_showlockedbylevel' => $sm->string_exists('showlockedbylevel', 'local_xpstore') ?
-        get_string('showlockedbylevel', 'local_xpstore') : 'Mostrar bloqueada (Requiere Nivel X)',
+        get_string('showlockedbylevel', 'local_xpstore') : 'Show locked (Requires Level X)',
     'eminlevel' => $eminlevel,
     'ehidebylevel' => ($ehidebylevel === 1),
     'has_eminlevel' => ((int)$eminlevel > 0),
@@ -1093,7 +1093,7 @@ $templatedata = array_merge([
     'str_label' => get_string('label', 'local_xpstore'),
     'enombre' => $enombre,
     'str_cardicon' => $sm->string_exists('cardicon', 'local_xpstore') ?
-        get_string('cardicon', 'local_xpstore') : 'Icono de la Tarjeta',
+        get_string('cardicon', 'local_xpstore') : 'Card icon',
     'eicono' => $eicono,
     'eis_custom_image' => $eiscustomimage,
     'eiconourl' => $eiconourl,
@@ -1132,7 +1132,7 @@ $templatedata = array_merge([
     'str_categoryicons' => get_string('categoryicons', 'local_xpstore'),
     'category_icon_options' => $categoryiconoptions,
     'str_cardicons' => $sm->string_exists('cardicons', 'local_xpstore') ?
-        get_string('cardicons', 'local_xpstore') : 'Iconos de Tarjetas',
+        get_string('cardicons', 'local_xpstore') : 'Card icons',
     'card_icon_options' => $cardiconoptions,
     'str_saveicons' => get_string('saveicons', 'local_xpstore'),
     'str_widget_panel_title' => get_string('widget_panel_title', 'local_xpstore'),

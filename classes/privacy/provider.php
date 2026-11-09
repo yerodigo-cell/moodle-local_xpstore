@@ -330,7 +330,7 @@ class provider implements
         $userid = $contextlist->get_user()->id;
         [$contextsql, $contextparams] = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
 
-        // 1. Delete module-level gastos in approved CONTEXT_MODULE contexts.
+        // 1. Delete module-level redemption records in approved CONTEXT_MODULE contexts.
         $sqlmod = "SELECT g.id
                      FROM {local_xpstore_gastos} g
                      JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype NOT IN ('M', 'C')
@@ -343,7 +343,7 @@ class provider implements
             $DB->delete_records_select('local_xpstore_gastos', "id {$idsql}", $idparams);
         }
 
-        // 2. Delete course-level gastos and grade_state in approved CONTEXT_COURSE contexts.
+        // 2. Delete course-level redemption and grade_state records in approved CONTEXT_COURSE contexts.
         $sqlcourse = "SELECT g.id
                         FROM {local_xpstore_gastos} g
                    LEFT JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype NOT IN ('M', 'C')

@@ -23,7 +23,7 @@
  */
 
 /**
- * history.php - Historial del Estudiante
+ * history.php - Student redemption history.
  */
 
 require_once(__DIR__ . '/../../config.php');

@@ -4,7 +4,7 @@
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="local_xpstore_gastos" COMMENT="Registro de compras y canjes de XP">
+    <TABLE NAME="local_xpstore_gastos" COMMENT="Record of XP purchases and redemptions">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -28,7 +28,7 @@
         <INDEX NAME="user_itemid_course" UNIQUE="false" FIELDS="userid, itemid, courseid"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="local_xpstore_grade_state" COMMENT="Estado de calificaciones base antes de bonos de XP Store">
+    <TABLE NAME="local_xpstore_grade_state" COMMENT="Base grade state prior to XP Store bonuses">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
