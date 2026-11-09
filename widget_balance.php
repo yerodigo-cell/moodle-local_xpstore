@@ -25,6 +25,7 @@
 /**
  * widget_balance.php - Embedded widget to display only balance.
  */
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
@@ -33,7 +34,9 @@ global $PAGE, $OUTPUT, $DB, $USER;
 $courseid = required_param('id', PARAM_INT);
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
+
 require_login($course);
+\core\session\manager::write_close();
 
 $url = new moodle_url('/local/xpstore/widget_balance.php', ['id' => $courseid]);
 $PAGE->set_url($url);

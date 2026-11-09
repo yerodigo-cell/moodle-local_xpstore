@@ -24,6 +24,7 @@ namespace local_xpstore;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class observer {
+
     /**
      * Checks whether the user performing a course restore is authorized to copy
      * local_xpstore configuration and custom images from the source course on this site.
@@ -143,13 +144,16 @@ class observer {
             return $cm->modname;
         }, $modinfo->get_cms()));
 
-        // Fix all activities and detect embedded old course id.
-        foreach ($modnames as $modname) {
-            if ($DB->get_manager()->table_exists($modname)) {
-                $records = $DB->get_records($modname, ['course' => $newcourseid]);
-                foreach ($records as $record) {
-                    $updated = false;
+        // Preload module records and track dirty records in memory to avoid N*M queries.
+        $modrecordsbymod = [];
+        $dirtymodrecords = [];
+        $dbman = $DB->get_manager();
 
+        foreach ($modnames as $modname) {
+            if ($dbman->table_exists($modname)) {
+                $modrecordsbymod[$modname] = $DB->get_records($modname, ['course' => $newcourseid]);
+                foreach ($modrecordsbymod[$modname] as $recid => $record) {
+                    $updated = false;
                     if (isset($record->intro) && strpos($record->intro, '/local/xpstore/') !== false) {
                         if (!$detectedoldcourseid && preg_match($pattern, $record->intro, $matches)) {
                             $detectedoldcourseid = (int)$matches[2];
@@ -160,7 +164,6 @@ class observer {
                             $updated = true;
                         }
                     }
-
                     if (isset($record->content) && strpos($record->content, '/local/xpstore/') !== false) {
                         if (!$detectedoldcourseid && preg_match($pattern, $record->content, $matches)) {
                             $detectedoldcourseid = (int)$matches[2];
@@ -171,17 +174,17 @@ class observer {
                             $updated = true;
                         }
                     }
-
                     if ($updated) {
-                        $DB->update_record($modname, $record);
+                        $dirtymodrecords[$modname][$recid] = true;
                     }
                 }
             }
         }
 
-        // Also fix widget URLs inside course section summaries ({course_sections}.summary).
+        // Preload course sections once and track dirty sections in memory.
         $sections = $DB->get_records('course_sections', ['course' => $newcourseid]);
-        foreach ($sections as $section) {
+        $dirtysections = [];
+        foreach ($sections as $secid => $section) {
             if (!empty($section->summary) && strpos($section->summary, '/local/xpstore/') !== false) {
                 if (!$detectedoldcourseid && preg_match($pattern, $section->summary, $matches)) {
                     $detectedoldcourseid = (int)$matches[2];
@@ -189,7 +192,7 @@ class observer {
                 $newsummary = preg_replace($pattern, $replacement, $section->summary);
                 if ($newsummary !== $section->summary) {
                     $section->summary = $newsummary;
-                    $DB->update_record('course_sections', $section);
+                    $dirtysections[$secid] = true;
                 }
             }
         }
@@ -239,6 +242,18 @@ class observer {
                     ['courseid' => $newcourseid, 'itemtype' => 'manual'],
                     'sortorder ASC, id ASC'
                 );
+                $newcoursegradeitemid = $DB->get_field('grade_items', 'id', [
+                    'courseid' => $newcourseid,
+                    'itemtype' => 'course',
+                ]);
+
+                $cmrecords = null;
+                $dirtycmrecords = [];
+                $oldcontext = \context_course::instance($oldcourseid, IGNORE_MISSING);
+                $newcontext = \context_course::instance($newcourseid, IGNORE_MISSING);
+                $fs = get_file_storage();
+                $forumroleensured = false;
+
                 $usedmanualids = [];
                 $newcatalogparts = [];
                 $seenproductkeys = [];
@@ -263,12 +278,8 @@ class observer {
                             }
                         }
                     } else if ($tipochar === 'C') {
-                        $newitemid = $DB->get_field('grade_items', 'id', [
-                            'courseid' => $newcourseid,
-                            'itemtype' => 'course',
-                        ]);
-                        if ($newitemid) {
-                            $newcmid = (int)$newitemid;
+                        if ($newcoursegradeitemid) {
+                            $newcmid = (int)$newcoursegradeitemid;
                         }
                     } else {
                         if (isset($cmidmap[$oldcmid])) {
@@ -293,40 +304,35 @@ class observer {
                         // Copy custom card image file to the new course context if present.
                         if (!empty($entry['icono']) && strpos($entry['icono'], 'img_') === 0) {
                             $imgitemid = (int)substr($entry['icono'], 4);
-                            if ($imgitemid > 0) {
-                                $oldcontext = \context_course::instance($oldcourseid, IGNORE_MISSING);
-                                $newcontext = \context_course::instance($newcourseid, IGNORE_MISSING);
-                                if ($oldcontext && $newcontext) {
-                                    $fs = get_file_storage();
-                                    $oldfiles = $fs->get_area_files(
-                                        $oldcontext->id,
-                                        'local_xpstore',
-                                        'cardimage',
-                                        $imgitemid,
-                                        'id DESC',
-                                        false
-                                    );
-                                    foreach ($oldfiles as $oldfile) {
-                                        if (
-                                            !$fs->file_exists(
-                                                $newcontext->id,
-                                                'local_xpstore',
-                                                'cardimage',
-                                                $imgitemid,
-                                                $oldfile->get_filepath(),
-                                                $oldfile->get_filename()
-                                            )
-                                        ) {
-                                            $filerecord = [
-                                                'contextid' => $newcontext->id,
-                                                'component' => 'local_xpstore',
-                                                'filearea'  => 'cardimage',
-                                                'itemid'    => $imgitemid,
-                                                'filepath'  => $oldfile->get_filepath(),
-                                                'filename'  => $oldfile->get_filename(),
-                                            ];
-                                            $fs->create_file_from_storedfile($filerecord, $oldfile);
-                                        }
+                            if ($imgitemid > 0 && $oldcontext && $newcontext) {
+                                $oldfiles = $fs->get_area_files(
+                                    $oldcontext->id,
+                                    'local_xpstore',
+                                    'cardimage',
+                                    $imgitemid,
+                                    'id DESC',
+                                    false
+                                );
+                                foreach ($oldfiles as $oldfile) {
+                                    if (
+                                        !$fs->file_exists(
+                                            $newcontext->id,
+                                            'local_xpstore',
+                                            'cardimage',
+                                            $imgitemid,
+                                            $oldfile->get_filepath(),
+                                            $oldfile->get_filename()
+                                        )
+                                    ) {
+                                        $filerecord = [
+                                            'contextid' => $newcontext->id,
+                                            'component' => 'local_xpstore',
+                                            'filearea'  => 'cardimage',
+                                            'itemid'    => $imgitemid,
+                                            'filepath'  => $oldfile->get_filepath(),
+                                            'filename'  => $oldfile->get_filename(),
+                                        ];
+                                        $fs->create_file_from_storedfile($filerecord, $oldfile);
                                     }
                                 }
                             }
@@ -353,8 +359,9 @@ class observer {
                                     $oldgroupid > 0 ? $oldgroupid : 0
                                 );
                             }
-                        } else if ($tipochar === 'F' || $tipochar === 'R') {
+                        } else if (($tipochar === 'F' || $tipochar === 'R') && !$forumroleensured) {
                             local_xpstore_get_or_create_forum_role();
+                            $forumroleensured = true;
                         }
 
                         $newcatalogparts[] = local_xpstore_serialize_catalog_item($entry);
@@ -371,10 +378,12 @@ class observer {
 
                         // Fix 'Unlock' availability restrictions that contain U{oldcmid}.
                         if ($tipochar === 'U') {
+                            if ($cmrecords === null) {
+                                $cmrecords = $DB->get_records('course_modules', ['course' => $newcourseid]);
+                            }
                             $oldproductid = 'U' . $oldcmid;
                             $newproductid = 'U' . $newcmid;
-                            $cmrecords = $DB->get_records('course_modules', ['course' => $newcourseid]);
-                            foreach ($cmrecords as $cmrec) {
+                            foreach ($cmrecords as $cmrecid => $cmrec) {
                                 if (
                                     !empty($cmrec->availability) &&
                                     strpos($cmrec->availability, '"' . $oldproductid . '"') !== false
@@ -386,52 +395,55 @@ class observer {
                                     );
                                     if ($newavail !== $cmrec->availability) {
                                         $cmrec->availability = $newavail;
-                                        $DB->update_record('course_modules', $cmrec);
+                                        $dirtycmrecords[$cmrecid] = true;
                                     }
                                 }
                             }
                         }
 
-                        foreach ($modnames as $modname) {
-                            if ($DB->get_manager()->table_exists($modname)) {
-                                $records = $DB->get_records($modname, ['course' => $newcourseid]);
-                                foreach ($records as $record) {
-                                    $updated = false;
-                                    if (isset($record->intro) && strpos($record->intro, 'cmid=' . $oldcmid) !== false) {
-                                        $newintro = preg_replace_callback($cmidpattern, $cmidreplacement, $record->intro);
-                                        if ($newintro !== $record->intro) {
-                                            $record->intro = $newintro;
-                                            $updated = true;
-                                        }
+                        foreach ($modrecordsbymod as $modname => $records) {
+                            foreach ($records as $recid => $record) {
+                                $updated = false;
+                                if (isset($record->intro) && strpos($record->intro, 'cmid=' . $oldcmid) !== false) {
+                                    $newintro = preg_replace_callback($cmidpattern, $cmidreplacement, $record->intro);
+                                    if ($newintro !== $record->intro) {
+                                        $record->intro = $newintro;
+                                        $updated = true;
                                     }
-                                    if (isset($record->content) && strpos($record->content, 'cmid=' . $oldcmid) !== false) {
-                                        $newcontent = preg_replace_callback(
-                                            $cmidpattern,
-                                            $cmidreplacement,
-                                            $record->content
-                                        );
-                                        if ($newcontent !== $record->content) {
-                                            $record->content = $newcontent;
-                                            $updated = true;
-                                        }
+                                }
+                                if (isset($record->content) && strpos($record->content, 'cmid=' . $oldcmid) !== false) {
+                                    $newcontent = preg_replace_callback(
+                                        $cmidpattern,
+                                        $cmidreplacement,
+                                        $record->content
+                                    );
+                                    if ($newcontent !== $record->content) {
+                                        $record->content = $newcontent;
+                                        $updated = true;
                                     }
-                                    if ($updated) {
-                                        $DB->update_record($modname, $record);
-                                    }
+                                }
+                                if ($updated) {
+                                    $dirtymodrecords[$modname][$recid] = true;
                                 }
                             }
                         }
 
-                        $sections = $DB->get_records('course_sections', ['course' => $newcourseid]);
-                        foreach ($sections as $section) {
+                        foreach ($sections as $secid => $section) {
                             if (!empty($section->summary) && strpos($section->summary, 'cmid=' . $oldcmid) !== false) {
                                 $newsummary = preg_replace_callback($cmidpattern, $cmidreplacement, $section->summary);
                                 if ($newsummary !== $section->summary) {
                                     $section->summary = $newsummary;
-                                    $DB->update_record('course_sections', $section);
+                                    $dirtysections[$secid] = true;
                                 }
                             }
                         }
+                    }
+                }
+
+                // Flush modified course_modules availability records once.
+                if ($cmrecords !== null && !empty($dirtycmrecords)) {
+                    foreach (array_keys($dirtycmrecords) as $cmrecid) {
+                        $DB->update_record('course_modules', $cmrecords[$cmrecid]);
                     }
                 }
 
@@ -440,6 +452,18 @@ class observer {
                     set_config('catalog_course_' . $newcourseid, $newcatalog, 'local_xpstore');
                 }
             }
+        }
+
+        // Flush modified module records once per changed record.
+        foreach ($dirtymodrecords as $modname => $recids) {
+            foreach (array_keys($recids) as $recid) {
+                $DB->update_record($modname, $modrecordsbymod[$modname][$recid]);
+            }
+        }
+
+        // Flush modified course_sections once per changed section.
+        foreach (array_keys($dirtysections) as $secid) {
+            $DB->update_record('course_sections', $sections[$secid]);
         }
 
         rebuild_course_cache($newcourseid, true);
@@ -454,12 +478,31 @@ class observer {
     public static function user_graded(\core\event\user_graded $event) {
         global $DB, $CFG;
         static $processingitems = [];
+        static $coursehasanybonus = [];
+        static $gradeitemcache = [];
+        static $courseitemcache = [];
 
         $courseid = (int)$event->courseid;
         $userid = (int)$event->relateduserid;
         $gradeid = (int)$event->objectid;
 
         if ($courseid <= 0 || $userid <= 0 || $gradeid <= 0) {
+            return;
+        }
+
+        // Fast per-request check: skip immediately if this course has no grade bonuses or grade states at all.
+        if (empty($coursehasanybonus[$courseid]) || (defined('PHPUNIT_TEST') && PHPUNIT_TEST)) {
+            $coursehasanybonus[$courseid] = $DB->record_exists_select(
+                'local_xpstore_grade_state',
+                'courseid = ?',
+                [$courseid]
+            ) || $DB->record_exists_select(
+                'local_xpstore_gastos',
+                "courseid IN (?, 0) AND itemtype IN ('G', 'M', 'C')",
+                [$courseid]
+            );
+        }
+        if (!$coursehasanybonus[$courseid]) {
             return;
         }
 
@@ -470,16 +513,30 @@ class observer {
             return;
         }
 
-        $sql = "SELECT gi.*
-                  FROM {grade_grades} gg
-                  JOIN {grade_items} gi ON gi.id = gg.itemid
-                 WHERE gg.id = ?";
-        $gradeitem = $DB->get_record_sql($sql, [$gradeid]);
+        // Resolve the grade_item using event metadata or static cache before falling back to a JOIN query.
+        $itemid = isset($event->other['itemid']) ? (int)$event->other['itemid'] : 0;
+        if ($itemid > 0) {
+            if (!array_key_exists($itemid, $gradeitemcache)) {
+                $gradeitemcache[$itemid] = $DB->get_record('grade_items', ['id' => $itemid]);
+            }
+            $gradeitem = $gradeitemcache[$itemid];
+        } else {
+            $sql = "SELECT gi.*
+                      FROM {grade_grades} gg
+                      JOIN {grade_items} gi ON gi.id = gg.itemid
+                     WHERE gg.id = ?";
+            $gradeitem = $DB->get_record_sql($sql, [$gradeid]);
+            if ($gradeitem) {
+                $gradeitemcache[(int)$gradeitem->id] = $gradeitem;
+            }
+        }
+
         if (!$gradeitem || (int)$gradeitem->courseid !== $courseid) {
             return;
         }
 
         if ($gradeitem->itemtype === 'course') {
+            $courseitemcache[$courseid] = $gradeitem;
             $hascoursebonus = $DB->record_exists_select(
                 'local_xpstore_gastos',
                 "userid = ? AND itemtype = 'C' AND itemid = ?",
@@ -500,13 +557,13 @@ class observer {
             if (!empty($processingitems[$guardkey])) {
                 return;
             }
-            $processingitems[$guardkey] = true;
 
+            $processingitems[$guardkey] = true;
             try {
                 $exptype = ($gradeitem->itemtype === 'manual') ? 'M' : 'G';
                 $hasitembonus = $DB->record_exists_select(
                     'local_xpstore_gastos',
-                    "userid = ? AND itemtype = ? AND (courseid = ? OR courseid = 0)",
+                    "userid = ? AND itemtype = ? AND courseid IN (?, 0)",
                     [$userid, $exptype, $courseid]
                 ) || $DB->record_exists('local_xpstore_grade_state', [
                     'itemid' => (int)$gradeitem->id,
@@ -519,10 +576,14 @@ class observer {
 
                 // If the student also holds an active Course Total ('C') bonus in this course,
                 // force a clean course aggregation from basegrade and re-apply the course bonus.
-                $courseitem = $DB->get_record('grade_items', [
-                    'courseid' => $courseid,
-                    'itemtype' => 'course',
-                ]);
+                if (!array_key_exists($courseid, $courseitemcache)) {
+                    $courseitemcache[$courseid] = $DB->get_record('grade_items', [
+                        'courseid' => $courseid,
+                        'itemtype' => 'course',
+                    ]);
+                }
+                $courseitem = $courseitemcache[$courseid];
+
                 if ($courseitem) {
                     $hascoursebonus = $DB->record_exists_select(
                         'local_xpstore_gastos',

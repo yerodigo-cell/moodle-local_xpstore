@@ -34,11 +34,8 @@ global $USER, $PAGE, $OUTPUT, $DB;
 $courseid = required_param('id', PARAM_INT);
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
-require_login($course);
 
-if (function_exists('local_xpstore_cleanup_expired_forum_roles')) {
-    local_xpstore_cleanup_expired_forum_roles($courseid, $USER->id);
-}
+require_login($course);
 
 $url = new moodle_url('/local/xpstore/history.php', ['id' => $courseid]);
 $PAGE->set_url($url);
@@ -48,8 +45,8 @@ $PAGE->set_title(get_string('history', 'local_xpstore'));
 
 echo $OUTPUT->header();
 
-// Load module info to extract real URLs.
-$modinfo = get_fast_modinfo($courseid);
+// Load module info in RAM to extract real URLs and activity names without extra DB queries.
+$modinfo = get_fast_modinfo($course);
 
 // Show return button (navigates back to previous page or widget host).
 $showinmenu = get_config('local_xpstore', 'show_menu_course_' . $courseid);
@@ -78,7 +75,7 @@ $templatedata = [
 // Read parsed catalog to fetch fallback custom labels and applied values.
 $catalogmap = local_xpstore_parse_catalog($courseid, true);
 
-$sql = "SELECT g.*, cm.module, cm.instance, gi.itemname AS gi_itemname
+$sql = "SELECT g.*, cm.module, cm.instance, gi.id AS gi_id, gi.itemname AS gi_itemname
           FROM {local_xpstore_gastos} g
      LEFT JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype NOT IN ('M', 'C')
      LEFT JOIN {grade_items} gi ON gi.id = g.itemid AND g.itemtype IN ('M', 'C')
@@ -91,41 +88,37 @@ $logs = $DB->get_records_sql($sql, [$USER->id, $courseid, $courseid, $courseid])
 if ($logs) {
     $templatedata['has_logs'] = true;
     $totalgastado = 0;
+    $gradebookurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
+    $courseviewurl = (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
 
     foreach ($logs as $log) {
         $amount = max(0, (int)$log->amount);
         $totalgastado += $amount;
+        $itemid = (int)$log->itemid;
 
         if ($log->itemtype === 'M') {
             $activityname = !empty($log->gi_itemname)
                 ? $log->gi_itemname
                 : get_string('activitydeleted', 'local_xpstore');
         } else if ($log->itemtype === 'C') {
-            if ($DB->record_exists('grade_items', ['id' => $log->itemid])) {
-                $activityname = local_xpstore_get_course_grade_item_name($log->itemid);
+            if (!empty($log->gi_id)) {
+                $activityname = trim((string)$log->gi_itemname) !== ''
+                    ? format_string($log->gi_itemname)
+                    : get_string('coursetotal', 'grades');
             } else {
                 $activityname = get_string('activitydeleted', 'local_xpstore');
             }
         } else {
-            $activityname = '';
-            if (!empty($log->module)) {
-                $modname = $DB->get_field('modules', 'name', ['id' => $log->module]);
-                if (!empty($modname) && $DB->get_manager()->table_exists($modname)) {
-                    $instname = $DB->get_field($modname, 'name', ['id' => $log->instance]);
-                    if ($instname !== false && $instname !== '') {
-                        $activityname = $instname;
-                    }
-                }
-            }
-            if ($activityname === '') {
+            if (isset($modinfo->cms[$itemid]) && empty($modinfo->cms[$itemid]->deletioninprogress)) {
+                $activityname = $modinfo->cms[$itemid]->name;
+            } else {
                 $activityname = get_string('activitydeleted', 'local_xpstore');
             }
         }
 
         $tipostr = strtolower($log->itemtype);
         $tipocharupper = strtoupper($tipostr);
-        $itemkey = $tipocharupper . (int)$log->itemid;
-
+        $itemkey = $tipocharupper . $itemid;
         $studentlabel = local_xpstore_get_student_badge_label($tipocharupper);
         $labeltipo = ($studentlabel !== '') ? $studentlabel : 'Legacy';
 
@@ -141,13 +134,12 @@ if ($logs) {
         $isgrade = in_array($tipocharupper, ['G', 'M', 'C'], true);
         $gradeurl = '';
         $cmurl = '';
-
         if ($isgrade) {
-            $gradeurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
+            $gradeurl = $gradebookurl;
         } else {
-            $cmurl = (isset($modinfo->cms[$log->itemid]) && $modinfo->cms[$log->itemid]->url)
-                ? $modinfo->cms[$log->itemid]->url->out(false)
-                : (new moodle_url('/course/view.php', ['id' => $courseid]))->out(false);
+            $cmurl = (isset($modinfo->cms[$itemid]) && $modinfo->cms[$itemid]->url)
+                ? $modinfo->cms[$itemid]->url->out(false)
+                : $courseviewurl;
         }
 
         $catentry = $catalogmap[$itemkey] ?? null;

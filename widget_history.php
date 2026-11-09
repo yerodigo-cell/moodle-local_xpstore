@@ -25,6 +25,7 @@
 /**
  * widget_history.php - Embedded button to navigate to history.
  */
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
@@ -33,8 +34,9 @@ global $PAGE, $OUTPUT, $DB;
 $courseid = required_param('id', PARAM_INT);
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
-require_login($course);
 
+require_login($course);
+\core\session\manager::write_close();
 
 $url = new moodle_url('/local/xpstore/widget_history.php', ['id' => $courseid]);
 $PAGE->set_url($url);

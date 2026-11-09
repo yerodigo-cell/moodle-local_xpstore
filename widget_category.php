@@ -25,6 +25,7 @@
 /**
  * widget_category.php - Embedded store category widget.
  */
+
 require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
 
@@ -37,9 +38,15 @@ $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 require_login($course);
 
+$action = optional_param('action', '', PARAM_ALPHA);
+
+// Release the session lock immediately when rendering the iframe so multiple widgets load in parallel.
+if ($action !== 'comprar') {
+    \core\session\manager::write_close();
+}
+
 $urlparams = ['id' => $courseid, 'cat' => $catreq];
 $url = new moodle_url('/local/xpstore/widget_category.php', $urlparams);
-
 $PAGE->set_url($url);
 $PAGE->set_context($context);
 $PAGE->set_pagelayout('embedded');
@@ -50,10 +57,6 @@ if (isset($PAGE->blocks)) {
     $PAGE->blocks->show_only_fake_blocks();
 }
 
-// Clean up expired temporary forum extension roles.
-local_xpstore_cleanup_expired_forum_roles($courseid, $USER->id);
-
-$action = optional_param('action', '', PARAM_ALPHA);
 if ($action === 'comprar' && confirm_sesskey()) {
     $cmid = required_param('cmid', PARAM_INT);
     $tipo = required_param('tipo', PARAM_ALPHA);
@@ -78,7 +81,7 @@ $tipocompra = strtoupper(optional_param('tipo_compra', '', PARAM_ALPHA));
 $saldo = local_xpstore_get_balance($USER->id, $courseid);
 $userlevel = local_xpstore_get_user_level($USER->id, $courseid);
 $catalog = local_xpstore_parse_catalog($courseid);
-$modinfo = get_fast_modinfo($courseid);
+$modinfo = get_fast_modinfo($course);
 $cms = $modinfo->get_cms();
 $historyurl = new moodle_url('/local/xpstore/history.php', ['id' => $courseid]);
 $storeaccess = local_xpstore_get_store_access_state($courseid);
@@ -100,12 +103,40 @@ $ccstore = local_xpstore_clean_hex_color(
     get_config('local_xpstore', 'color_cat_icon_course_' . $courseid) ?: $cpstore,
     $cpstore
 );
-
 $caticons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid) ?: '', true) ?: [];
 
 $completion = null;
 $storecategories = [];
 $catreqlower = \core_text::strtolower(trim($catreq));
+
+// Preload flags, user purchase counts, and grade_items in batch before looping over the catalog.
+$hasforumitems = false;
+$needgradeitems = false;
+foreach ($catalog as $citem) {
+    if ($citem['tipo'] === 'F' || $citem['tipo'] === 'R') {
+        $hasforumitems = true;
+    } else if ($citem['tipo'] === 'M' || $citem['tipo'] === 'C') {
+        $needgradeitems = true;
+    }
+}
+
+if ($hasforumitems && function_exists('local_xpstore_cleanup_expired_forum_roles')) {
+    local_xpstore_cleanup_expired_forum_roles($courseid, $USER->id);
+}
+
+$userpurchasecounts = [];
+$concatkey = $DB->sql_concat('itemtype', "'_'", 'itemid');
+$sqlcounts = "SELECT {$concatkey} AS prodkey, COUNT(1) AS cnt
+                FROM {local_xpstore_gastos}
+               WHERE userid = ? AND courseid IN (?, 0)
+            GROUP BY itemtype, itemid";
+foreach ($DB->get_records_sql($sqlcounts, [$USER->id, $courseid]) as $row) {
+    $userpurchasecounts[$row->prodkey] = (int)$row->cnt;
+}
+
+$coursegradeitems = $needgradeitems
+    ? $DB->get_records('grade_items', ['courseid' => $courseid])
+    : [];
 
 foreach ($catalog as $item) {
     $tipochar = $item['tipo'];
@@ -118,8 +149,8 @@ foreach ($catalog as $item) {
     $requisito = (int)$item['requisito'];
     $minlevel = (int)$item['minlevel'];
     $hidebylevel = (int)$item['hidebylevel'];
-    $nivelcumplido = ($minlevel <= 0 || $userlevel >= $minlevel);
 
+    $nivelcumplido = ($minlevel <= 0 || $userlevel >= $minlevel);
     if (!$nivelcumplido && $hidebylevel === 1) {
         continue;
     }
@@ -129,17 +160,17 @@ foreach ($catalog as $item) {
     }
 
     if ($tipochar === 'M') {
-        $gi = $DB->get_record('grade_items', ['id' => $cid, 'courseid' => $courseid, 'itemtype' => 'manual']);
-        if (!$gi) {
+        $gi = $coursegradeitems[$cid] ?? null;
+        if (!$gi || $gi->itemtype !== 'manual') {
             continue;
         }
         $nreal = format_string($gi->itemname);
     } else if ($tipochar === 'C') {
-        $gi = $DB->get_record('grade_items', ['id' => $cid, 'courseid' => $courseid, 'itemtype' => 'course']);
-        if (!$gi) {
+        $gi = $coursegradeitems[$cid] ?? null;
+        if (!$gi || $gi->itemtype !== 'course') {
             continue;
         }
-        $nreal = local_xpstore_get_course_grade_item_name($cid);
+        $nreal = trim((string)$gi->itemname) !== '' ? format_string($gi->itemname) : get_string('coursetotal', 'grades');
     } else if (isset($cms[$cid]) && empty($cms[$cid]->deletioninprogress)) {
         $cm = $cms[$cid];
         $nreal = format_string($cm->name);
@@ -156,20 +187,14 @@ foreach ($catalog as $item) {
         $iscustomimg = false;
     }
 
-    $comprasactuales = (int)$DB->count_records_select(
-        'local_xpstore_gastos',
-        'userid = ? AND itemid = ? AND itemtype = ? AND (courseid = ? OR courseid = 0)',
-        [$USER->id, $cid, $tipochar, $courseid]
-    );
+    $comprasactuales = $userpurchasecounts[$tipochar . '_' . $cid] ?? 0;
     $limitealcanzado = ($limite > 0 && $comprasactuales >= $limite);
-
     $isbonus = in_array($tipochar, ['G', 'M', 'C'], true);
     $isspecial = ($tipochar === 'S');
     $isunlock = ($tipochar === 'U');
 
     $boughtthis = ($status === 'success' && $boughtcmid === $cid && $tipocompra === $tipochar);
     $gotogradebook = ($boughtthis && $isbonus);
-
     if ($tipochar === 'M' || $tipochar === 'C') {
         $cmurl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
     } else {
@@ -291,7 +316,6 @@ $strsuccessunlock = '';
 $successicon = 'gift';
 $successiscustomimg = false;
 $successiconurl = '';
-
 if ($status === 'success') {
     $itemname = '';
     $activityname = '';
@@ -323,11 +347,9 @@ if ($status === 'success') {
             $activityname = get_string('course');
         }
     }
-
     $a = new stdClass();
     $a->reward = s($itemname);
     $a->activity = s($activityname);
-
     if (in_array($tipocompra, ['G', 'M', 'C'], true)) {
         $redirecturl = (new moodle_url('/grade/report/user/index.php', ['id' => $courseid]))->out(false);
         $strgotodest = get_string('gotogradebook', 'local_xpstore');

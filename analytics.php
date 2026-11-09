@@ -34,6 +34,7 @@ $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
 require_login($course);
+
 if (!local_xpstore_can_manage($context)) {
     require_capability('local/xpstore:manage', $context);
 }
@@ -51,45 +52,39 @@ if ($action === 'reset' && confirm_sesskey()) {
     redirect($url, get_string('productdeleted', 'local_xpstore'));
 }
 
-// Pre-load parsed store catalog to resolve custom labels.
+// Pre-load parsed store catalog and course modinfo in RAM.
 $catalogmap = local_xpstore_parse_catalog($courseid, true);
+$modinfo = get_fast_modinfo($course);
 
 $coursefilter = "(g.courseid = ? OR (g.courseid = 0 AND (cm.course = ? OR gi.courseid = ?)))";
 $filterparams = [$courseid, $courseid, $courseid];
 
-// Global stats.
-$totalpurchases = $DB->count_records_sql("
-    SELECT COUNT(g.id)
-      FROM {local_xpstore_gastos} g
- LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
- LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
-     WHERE {$coursefilter}", $filterparams);
+// 1. Global stats in a single SQL pass instead of 3 separate LEFT JOIN queries.
+$statssql = "SELECT COUNT(g.id) AS totalpurchases,
+                    COALESCE(SUM(CASE WHEN g.amount > 0 THEN g.amount ELSE 0 END), 0) AS totalxp,
+                    COUNT(DISTINCT g.userid) AS engagedstudents
+               FROM {local_xpstore_gastos} g
+          LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
+          LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
+              WHERE {$coursefilter}";
+$stats = $DB->get_record_sql($statssql, $filterparams);
 
-$totalxp = $DB->get_field_sql("
-    SELECT COALESCE(SUM(CASE WHEN g.amount > 0 THEN g.amount ELSE 0 END), 0)
-      FROM {local_xpstore_gastos} g
- LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
- LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
-     WHERE {$coursefilter}", $filterparams) ?: 0;
+$totalpurchases = $stats ? (int)$stats->totalpurchases : 0;
+$totalxp = $stats ? (int)$stats->totalxp : 0;
+$engagedstudents = $stats ? (int)$stats->engagedstudents : 0;
 
-$engagedstudents = $DB->count_records_sql("
-    SELECT COUNT(DISTINCT g.userid)
-      FROM {local_xpstore_gastos} g
- LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
- LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
-     WHERE {$coursefilter}", $filterparams);
-
-// Course total students.
-$coursecontext = context_course::instance($courseid);
-$totalstudentsincourse = count(get_enrolled_users($coursecontext, '', 0, 'u.id'));
+// 2. Course total students using SQL COUNT instead of loading user objects into RAM.
+$totalstudentsincourse = count_enrolled_users($context);
 $engagementrate = $totalstudentsincourse > 0 ? round(($engagedstudents / $totalstudentsincourse) * 100) : 0;
 
-// Data for charts.
+// 3. Data for charts (including grade_items name to avoid N+1 queries inside foreach).
 $uniqueidsql = $DB->sql_concat('g.itemtype', "'_'", 'g.itemid');
 $sql = "SELECT {$uniqueidsql} AS uniqueid, g.itemid, g.itemtype,
                COUNT(g.id) AS purchases,
                COALESCE(SUM(CASE WHEN g.amount > 0 THEN g.amount ELSE 0 END), 0) AS totalxp,
-               MAX(g.rewardname) AS storedrewardname
+               MAX(g.rewardname) AS storedrewardname,
+               MAX(gi.id) AS gi_id,
+               MAX(gi.itemname) AS gi_itemname
           FROM {local_xpstore_gastos} g
      LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
      LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
@@ -103,39 +98,33 @@ $chartdatapurchases = [];
 $chartdataxp = [];
 $activitypurchases = [];
 
-// Prepare data.
+// Prepare data in memory without additional DB queries.
 if ($itemsdata) {
     foreach ($itemsdata as $item) {
+        $itemid = (int)$item->itemid;
+
         if ($item->itemtype === 'M') {
-            $giname = $DB->get_field('grade_items', 'itemname', ['id' => $item->itemid]);
-            $activityname = ($giname !== false && $giname !== '')
-                ? $giname
+            $activityname = (!empty($item->gi_itemname))
+                ? $item->gi_itemname
                 : get_string('activitydeleted', 'local_xpstore');
         } else if ($item->itemtype === 'C') {
-            if ($DB->record_exists('grade_items', ['id' => $item->itemid])) {
-                $activityname = local_xpstore_get_course_grade_item_name($item->itemid);
+            if (!empty($item->gi_id)) {
+                $activityname = trim((string)$item->gi_itemname) !== ''
+                    ? format_string($item->gi_itemname)
+                    : get_string('coursetotal', 'grades');
             } else {
                 $activityname = get_string('activitydeleted', 'local_xpstore');
             }
         } else {
-            $activityname = '';
-            $cm = $DB->get_record('course_modules', ['id' => $item->itemid]);
-            if ($cm) {
-                $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
-                if (!empty($modname) && $DB->get_manager()->table_exists($modname)) {
-                    $instname = $DB->get_field($modname, 'name', ['id' => $cm->instance]);
-                    if ($instname !== false && $instname !== '') {
-                        $activityname = $instname;
-                    }
-                }
-            }
-            if ($activityname === '') {
+            if (isset($modinfo->cms[$itemid]) && empty($modinfo->cms[$itemid]->deletioninprogress)) {
+                $activityname = $modinfo->cms[$itemid]->name;
+            } else {
                 $activityname = get_string('activitydeleted', 'local_xpstore');
             }
         }
 
         $tipocharupper = strtoupper($item->itemtype);
-        $itemkey = $tipocharupper . (int)$item->itemid;
+        $itemkey = $tipocharupper . $itemid;
         $catentry = $catalogmap[$itemkey] ?? null;
 
         $customlabel = '';
@@ -155,8 +144,8 @@ if ($itemsdata) {
             ENT_QUOTES | ENT_HTML5,
             'UTF-8'
         ) : '';
-
         $displayname = $cleancustom !== '' ? $cleancustom : $cleanactivity;
+
         // Limit label length for charts.
         $shortname = core_text::substr($displayname, 0, 20) . (core_text::strlen($displayname) > 20 ? '...' : '');
 

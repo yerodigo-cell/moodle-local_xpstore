@@ -103,21 +103,22 @@ function xmldb_local_xpstore_upgrade($oldversion) {
              LEFT JOIN {grade_items} gi ON gi.id = g.itemid AND g.itemtype IN ('M', 'C')
                  WHERE g.courseid = 0 OR g.rewardname IS NULL";
         $records = $DB->get_recordset_sql($sql);
-
         $catalogcache = [];
+
         foreach ($records as $rec) {
             $cid = (int)$rec->courseid;
             if ($cid <= 0) {
                 $cid = !empty($rec->cmcourse) ? (int)$rec->cmcourse : (!empty($rec->gicourse) ? (int)$rec->gicourse : 0);
             }
+
             if ($cid > 0 && !isset($catalogcache[$cid])) {
                 $catalogcache[$cid] = local_xpstore_parse_catalog($cid);
             }
 
             $key = $rec->itemtype . (int)$rec->itemid;
             $catitem = ($cid > 0 && isset($catalogcache[$cid][$key])) ? $catalogcache[$cid][$key] : null;
-
             $needsupdate = false;
+
             if ((int)$rec->courseid === 0 && $cid > 0) {
                 $rec->courseid = $cid;
                 $needsupdate = true;
@@ -134,6 +135,7 @@ function xmldb_local_xpstore_upgrade($oldversion) {
                 $rec->gradevalue = $catitem ? (float)$catitem['valornota'] : 0.5;
                 $needsupdate = true;
             }
+
             if ($needsupdate) {
                 unset($rec->cmcourse, $rec->gicourse);
                 $DB->update_record('local_xpstore_gastos', $rec);
@@ -193,6 +195,29 @@ function xmldb_local_xpstore_upgrade($oldversion) {
         local_xpstore_get_or_create_forum_role();
 
         upgrade_plugin_savepoint(true, 2026103000, 'local', 'xpstore');
+    }
+
+    if ($oldversion < 2026110900) {
+        $table = new xmldb_table('local_xpstore_gastos');
+
+        // 1. Add composite index (courseid, itemtype) and drop redundant single-column courseid index.
+        $idxnew1 = new xmldb_index('course_type', XMLDB_INDEX_NOTUNIQUE, ['courseid', 'itemtype']);
+        if (!$dbman->index_exists($table, $idxnew1)) {
+            $dbman->add_index($table, $idxnew1);
+        }
+
+        $idxold = new xmldb_index('courseid', XMLDB_INDEX_NOTUNIQUE, ['courseid']);
+        if ($dbman->index_exists($table, $idxold)) {
+            $dbman->drop_index($table, $idxold);
+        }
+
+        // 2. Add composite index (userid, itemid, courseid) for fast mutual-exclusivity and item checks.
+        $idxnew2 = new xmldb_index('user_itemid_course', XMLDB_INDEX_NOTUNIQUE, ['userid', 'itemid', 'courseid']);
+        if (!$dbman->index_exists($table, $idxnew2)) {
+            $dbman->add_index($table, $idxnew2);
+        }
+
+        upgrade_plugin_savepoint(true, 2026110900, 'local', 'xpstore');
     }
 
     return true;

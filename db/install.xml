@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="local/xpstore/db" VERSION="20261030" COMMENT="XP Store database tables"
+<XMLDB PATH="local/xpstore/db" VERSION="20261108" COMMENT="XP Store database tables"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -23,8 +23,9 @@
       </KEYS>
       <INDEXES>
         <INDEX NAME="userid_courseid" UNIQUE="false" FIELDS="userid, courseid"/>
-        <INDEX NAME="courseid" UNIQUE="false" FIELDS="courseid"/>
+        <INDEX NAME="course_type" UNIQUE="false" FIELDS="courseid, itemtype"/>
         <INDEX NAME="user_item" UNIQUE="false" FIELDS="userid, itemtype, itemid"/>
+        <INDEX NAME="user_itemid_course" UNIQUE="false" FIELDS="userid, itemid, courseid"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_xpstore_grade_state" COMMENT="Estado de calificaciones base antes de bonos de XP Store">

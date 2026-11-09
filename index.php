@@ -42,10 +42,6 @@ $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 require_login($course);
 
-if (function_exists('local_xpstore_cleanup_expired_forum_roles')) {
-    local_xpstore_cleanup_expired_forum_roles($courseid, $USER->id);
-}
-
 $url = new moodle_url('/local/xpstore/index.php', ['id' => $courseid]);
 $historyurl = new moodle_url('/local/xpstore/history.php', ['id' => $courseid]);
 $configurl = new moodle_url('/local/xpstore/config.php', ['id' => $courseid]);
@@ -144,7 +140,8 @@ $saldo = local_xpstore_get_balance($USER->id, $courseid);
 $userlevel = local_xpstore_get_user_level($USER->id, $courseid);
 $catalog = local_xpstore_parse_catalog($courseid);
 $isteacher = local_xpstore_can_manage($context) || is_siteadmin();
-$modinfo = get_fast_modinfo($courseid);
+// 1. Pasa el objeto $course (evita 1 query repetida a {course}).
+$modinfo = get_fast_modinfo($course);
 $cms = $modinfo->get_cms();
 $storeaccess = local_xpstore_get_store_access_state($courseid);
 $storeclosed = !empty($storeaccess['closed']);
@@ -168,8 +165,40 @@ $ccstore = local_xpstore_clean_hex_color(
 
 $caticons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid) ?: '', true) ?: [];
 $completion = null;
-$storecategories = [];
 
+// 2. PRECARGA EN LOTE ANTES DEL FOREACH (Elimina el N+1):
+$hasforumitems = false;
+$needgradeitems = false;
+foreach ($catalog as $citem) {
+    if ($citem['tipo'] === 'F' || $citem['tipo'] === 'R') {
+        $hasforumitems = true;
+    } else if ($citem['tipo'] === 'M' || $citem['tipo'] === 'C') {
+        $needgradeitems = true;
+    }
+}
+
+// Solo limpia roles de foro si la tienda realmente ofrece productos F o R:
+if ($hasforumitems && function_exists('local_xpstore_cleanup_expired_forum_roles')) {
+    local_xpstore_cleanup_expired_forum_roles($courseid, $USER->id);
+}
+
+// Precarga TODOS los conteos de compras del usuario en este curso en 1 sola query:
+$userpurchasecounts = [];
+$concatkey = $DB->sql_concat('itemtype', "'_'", 'itemid');
+$sqlcounts = "SELECT {$concatkey} AS prodkey, COUNT(1) AS cnt
+                FROM {local_xpstore_gastos}
+               WHERE userid = ? AND courseid IN (?, 0)
+            GROUP BY itemtype, itemid";
+foreach ($DB->get_records_sql($sqlcounts, [$USER->id, $courseid]) as $row) {
+    $userpurchasecounts[$row->prodkey] = (int)$row->cnt;
+}
+
+// Precarga TODOS los grade_items del curso en 1 sola query (si hay productos M o C):
+$coursegradeitems = $needgradeitems
+    ? $DB->get_records('grade_items', ['courseid' => $courseid])
+    : [];
+
+$storecategories = [];
 foreach ($catalog as $item) {
     $tipochar = $item['tipo'];
     $cid = (int)$item['cmid'];
@@ -188,17 +217,17 @@ foreach ($catalog as $item) {
     }
 
     if ($tipochar === 'M') {
-        $gi = $DB->get_record('grade_items', ['id' => $cid, 'courseid' => $courseid, 'itemtype' => 'manual']);
-        if (!$gi) {
+        $gi = $coursegradeitems[$cid] ?? null;
+        if (!$gi || $gi->itemtype !== 'manual') {
             continue;
         }
         $nreal = format_string($gi->itemname);
     } else if ($tipochar === 'C') {
-        $gi = $DB->get_record('grade_items', ['id' => $cid, 'courseid' => $courseid, 'itemtype' => 'course']);
-        if (!$gi) {
+        $gi = $coursegradeitems[$cid] ?? null;
+        if (!$gi || $gi->itemtype !== 'course') {
             continue;
         }
-        $nreal = local_xpstore_get_course_grade_item_name($cid);
+        $nreal = trim((string)$gi->itemname) !== '' ? format_string($gi->itemname) : get_string('coursetotal', 'grades');
     } else if (isset($cms[$cid]) && empty($cms[$cid]->deletioninprogress)) {
         $cm = $cms[$cid];
         $nreal = format_string($cm->name);
@@ -215,11 +244,7 @@ foreach ($catalog as $item) {
         $iscustomimg = false;
     }
 
-    $comprasactuales = (int)$DB->count_records_select(
-        'local_xpstore_gastos',
-        'userid = ? AND itemid = ? AND itemtype = ? AND (courseid = ? OR courseid = 0)',
-        [$USER->id, $cid, $tipochar, $courseid]
-    );
+    $comprasactuales = $userpurchasecounts[$tipochar . '_' . $cid] ?? 0;
     $limitealcanzado = ($limite > 0 && $comprasactuales >= $limite);
     $isbonus = in_array($tipochar, ['G', 'M', 'C'], true);
     $isspecial = ($tipochar === 'S');

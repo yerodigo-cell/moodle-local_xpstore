@@ -44,9 +44,11 @@ function local_xpstore_get_store_access_state(int $courseid): array {
     $courseid = (int)$courseid;
     $manualraw = get_config('local_xpstore', 'store_closed_course_' . $courseid);
     $manualclosed = ($manualraw === '1');
+
     $deadlineraw = get_config('local_xpstore', 'store_deadline_course_' . $courseid);
     $deadline = ($deadlineraw !== false && is_numeric($deadlineraw)) ? max(0, (int)$deadlineraw) : 0;
     $deadlinepassed = ($deadline > 0 && time() >= $deadline);
+
     $isclosed = ($manualclosed || $deadlinepassed);
 
     $deadlineiso = '';
@@ -258,15 +260,25 @@ function local_xpstore_parse_catalog_entry($rawitem): ?array {
 
 /**
  * Parses the catalog configuration of a course into normalized item definitions.
+ * Uses a request-scoped cache keyed by the raw config string so repeated calls are free
+ * while immediate set_config updates in the same request are automatically respected.
  *
  * @param int $courseid The course ID.
  * @param bool $indexed If true (default), keys array by "{tipo}{cmid}"; if false, returns a 0-indexed list.
  * @return array Parsed catalog entries.
  */
 function local_xpstore_parse_catalog($courseid, $indexed = true): array {
-    $configraw = get_config('local_xpstore', 'catalog_course_' . (int)$courseid) ?: '';
+    static $catalogcache = [];
+
+    $courseid = (int)$courseid;
+    $configraw = get_config('local_xpstore', 'catalog_course_' . $courseid) ?: '';
     if (trim($configraw) === '') {
         return [];
+    }
+
+    $cachekey = $courseid . '_' . ($indexed ? '1' : '0');
+    if (isset($catalogcache[$cachekey]) && $catalogcache[$cachekey]['raw'] === $configraw) {
+        return $catalogcache[$cachekey]['parsed'];
     }
 
     $rawitems = array_filter(explode(',', $configraw), function ($v) {
@@ -288,6 +300,11 @@ function local_xpstore_parse_catalog($courseid, $indexed = true): array {
             $result[] = $parsed;
         }
     }
+
+    $catalogcache[$cachekey] = [
+        'raw' => $configraw,
+        'parsed' => $result,
+    ];
 
     return $result;
 }
@@ -313,34 +330,34 @@ function local_xpstore_get_broadcast_channel($courseid, $userid): string {
  */
 function local_xpstore_extend_navigation_course(navigation_node $parentnode, $course, $context) {
     global $DB;
+    static $hasxpcache = [];
 
-    // 1. Detect if Level Up! is in the course.
-    $hasxp = $DB->record_exists('block_instances', [
-        'blockname' => 'xp',
-        'parentcontextid' => $context->id,
-    ]);
-
-    // If Level Up! block is not active in this course, do not show the menu to anyone.
-    if (!$hasxp) {
-        return;
-    }
-
-    // 2. Check the specific visibility configuration for THIS COURSE.
+    // 1. Check the specific visibility configuration for THIS COURSE first (cached in RAM by Moodle, 0 DB queries).
     $showinmenu = get_config('local_xpstore', 'show_menu_course_' . $course->id);
-
-    // If it's not set (false), default it to '0' (hidden).
     if ($showinmenu === false) {
         $showinmenu = '0';
     }
 
-    // MAGIC HERE: If the menu is hidden ('0') AND the user is NOT a store manager/teacher, hide it.
+    // If the menu is hidden ('0') AND the user is NOT a store manager/teacher, exit before querying block_instances.
     if ($showinmenu === '0' && !local_xpstore_can_manage($context)) {
-        return; // Exit, hiding the menu only for students.
+        return;
     }
 
-    // 3. If it is a student (and it's visible) or a teacher (always visible), draw the store menu.
-    $url = new moodle_url('/local/xpstore/index.php', ['id' => $course->id]);
+    // 2. Detect if Level Up! is in the course (cached per context in request memory).
+    $ctxid = (int)$context->id;
+    if (!array_key_exists($ctxid, $hasxpcache)) {
+        $hasxpcache[$ctxid] = $DB->record_exists('block_instances', [
+            'blockname' => 'xp',
+            'parentcontextid' => $ctxid,
+        ]);
+    }
 
+    if (!$hasxpcache[$ctxid]) {
+        return;
+    }
+
+    // 3. Draw the store menu.
+    $url = new moodle_url('/local/xpstore/index.php', ['id' => $course->id]);
     $shopnode = navigation_node::create(
         get_string('tiendaxp', 'local_xpstore'),
         $url,
@@ -393,14 +410,27 @@ function local_xpstore_get_balance($userid, $courseid) {
         $totalxp = (int)($xp ?: 0);
     }
 
-    $sqlg = "SELECT COALESCE(SUM(CASE WHEN g.amount > 0 THEN g.amount ELSE 0 END), 0)
-               FROM {local_xpstore_gastos} g
-          LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
-          LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
-              WHERE g.userid = ?
-                AND (g.courseid = ? OR (g.courseid = 0 AND (cm.course = ? OR gi.courseid = ?)))";
+    // Fast path: if the user has no legacy courseid = 0 records, avoid the dual LEFT JOIN completely.
+    $haslegacyzero = $DB->record_exists_select(
+        'local_xpstore_gastos',
+        'userid = ? AND courseid = 0 AND amount > 0',
+        [$userid]
+    );
 
-    $expenses = (int)$DB->get_field_sql($sqlg, [$userid, $courseid, $courseid, $courseid]);
+    if (!$haslegacyzero) {
+        $sqlg = "SELECT COALESCE(SUM(amount), 0)
+                   FROM {local_xpstore_gastos}
+                  WHERE userid = ? AND courseid = ? AND amount > 0";
+        $expenses = (int)$DB->get_field_sql($sqlg, [$userid, $courseid]);
+    } else {
+        $sqlg = "SELECT COALESCE(SUM(CASE WHEN g.amount > 0 THEN g.amount ELSE 0 END), 0)
+                   FROM {local_xpstore_gastos} g
+              LEFT JOIN {course_modules} cm ON g.itemid = cm.id AND g.itemtype NOT IN ('M', 'C')
+              LEFT JOIN {grade_items} gi ON g.itemid = gi.id AND g.itemtype IN ('M', 'C')
+                  WHERE g.userid = ?
+                    AND (g.courseid = ? OR (g.courseid = 0 AND (cm.course = ? OR gi.courseid = ?)))";
+        $expenses = (int)$DB->get_field_sql($sqlg, [$userid, $courseid, $courseid, $courseid]);
+    }
 
     return max(0, $totalxp - $expenses);
 }
@@ -432,12 +462,10 @@ function local_xpstore_get_course_grade_item_name($itemid = 0) {
  */
 function local_xpstore_save_grade_state($courseid, $itemid, $userid, $basegrade, $appliedgrade): void {
     global $DB;
-
     $existing = $DB->get_record('local_xpstore_grade_state', [
         'itemid' => (int)$itemid,
         'userid' => (int)$userid,
     ]);
-
     if ($existing) {
         $existing->courseid = (int)$courseid;
         $existing->basegrade = $basegrade;
@@ -489,7 +517,6 @@ function local_xpstore_get_user_course_bonus_info($courseid, $userid): array {
              WHERE g.userid = ?
                AND g.itemtype = 'C'
                AND (g.courseid = ? OR (g.courseid = 0 AND gi.courseid = ?))";
-
     $purchases = $DB->get_records_sql($sql, [$userid, $courseid, $courseid]);
     if (empty($purchases)) {
         return ['bonus' => 0.0, 'bonusmode' => 0];
@@ -544,8 +571,10 @@ function local_xpstore_get_user_course_bonus($courseid, $userid) {
  */
 function local_xpstore_merge_grade_feedback($existingfeedback, $totalbonus) {
     $current = (string)($existingfeedback ?? '');
+
     // Remove existing XP Store marker block if present.
     $cleaned = preg_replace('/\s*<!--xpstore-fb-->.*?<!--\/xpstore-fb-->/s', '', $current);
+
     // Also clean plain legacy one-liner if it matches our exact pattern without markers.
     $cleaned = preg_replace('/^\+\d+(?:\.\d+)?\s+[^\r\n]+XP Store\)?$/iu', '', trim($cleaned));
 
@@ -564,7 +593,6 @@ function local_xpstore_merge_grade_feedback($existingfeedback, $totalbonus) {
     if (trim($cleaned) === '') {
         return $wrapped;
     }
-
     return rtrim($cleaned) . "\n" . $wrapped;
 }
 
@@ -669,6 +697,7 @@ function local_xpstore_sync_course_grade_bonus($courseid, $userid, $fromobserver
     }
 
     $syncing[$lockkey] = true;
+
     try {
         require_once($CFG->libdir . '/gradelib.php');
 
@@ -734,7 +763,6 @@ function local_xpstore_sync_course_grade_bonus($courseid, $userid, $fromobserver
                 $newvalue = ($bonusmode === 1)
                     ? null
                     : min($grademax, max($grademin, $grademin + $totalbonus));
-
                 local_xpstore_save_grade_state($courseid, $courseitem->id, $userid, null, $newvalue);
 
                 $newgrade = (object)[
@@ -769,7 +797,6 @@ function local_xpstore_sync_course_grade_bonus($courseid, $userid, $fromobserver
                 $grade->aggregationstatus = 'unknown';
                 $DB->update_record('grade_grades', $grade);
             }
-
             if ($state) {
                 $DB->delete_records('local_xpstore_grade_state', ['id' => $state->id]);
             }
@@ -793,7 +820,6 @@ function local_xpstore_sync_course_grade_bonus($courseid, $userid, $fromobserver
  */
 function local_xpstore_get_mod_grade_items($courseid, $itemmodule, $iteminstance) {
     global $DB;
-
     $items = $DB->get_records('grade_items', [
         'itemtype' => 'mod',
         'itemmodule' => $itemmodule,
@@ -860,7 +886,7 @@ function local_xpstore_get_user_item_bonus_info($courseid, $gradeitem, $userid):
 
     $purchases = $DB->get_records_select(
         'local_xpstore_gastos',
-        'userid = ? AND itemtype = ? AND itemid = ? AND (courseid = ? OR courseid = 0)',
+        'userid = ? AND itemtype = ? AND itemid = ? AND courseid IN (?, 0)',
         [$userid, $type, $itemid, $courseid]
     );
     if (empty($purchases)) {
@@ -869,6 +895,7 @@ function local_xpstore_get_user_item_bonus_info($courseid, $gradeitem, $userid):
 
     $catalog = local_xpstore_parse_catalog($courseid);
     $catitem = $catalog[$type . $itemid] ?? null;
+
     $total = 0.0;
     $bonusmode = null;
 
@@ -919,11 +946,9 @@ function local_xpstore_get_user_item_bonus($courseid, $gradeitem, $userid) {
 function local_xpstore_get_module_raw_grade($gradeitem, $userid, &$known = false) {
     global $DB;
     $known = false;
-
     if ($gradeitem->itemtype !== 'mod') {
         return null;
     }
-
     $mod = $gradeitem->itemmodule;
     $instance = (int)$gradeitem->iteminstance;
     $userid = (int)$userid;
@@ -998,8 +1023,8 @@ function local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, $userid, $fr
     if (!empty($syncingitem[$lockkey])) {
         return;
     }
-
     $syncingitem[$lockkey] = true;
+
     try {
         require_once($CFG->libdir . '/gradelib.php');
 
@@ -1012,7 +1037,6 @@ function local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, $userid, $fr
         $bonusinfo = local_xpstore_get_user_item_bonus_info($courseid, $gradeitem, $userid);
         $totalbonus = (float)$bonusinfo['bonus'];
         $bonusmode = (int)$bonusinfo['bonusmode'];
-
         if ($totalbonus <= 0 && $fromobserver) {
             $syncingitem[$lockkey] = false;
             return;
@@ -1130,7 +1154,6 @@ function local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, $userid, $fr
                 $grade->timemodified = time();
                 $DB->update_record('grade_grades', $grade);
             }
-
             if ($state) {
                 $DB->delete_records('local_xpstore_grade_state', ['id' => $state->id]);
             }
@@ -1168,7 +1191,6 @@ function local_xpstore_sync_item_grade_bonus($courseid, $gradeitem, $userid, $fr
 function local_xpstore_get_user_level($userid, $courseid) {
     global $DB;
     $lvl = null;
-
     if (class_exists('\block_xp\di')) {
         try {
             $world = \block_xp\di::get('course_world_factory')->get_world($courseid);
@@ -1185,7 +1207,6 @@ function local_xpstore_get_user_level($userid, $courseid) {
             $lvl = null;
         }
     }
-
     $lvl = $DB->get_field('block_xp', 'lvl', ['userid' => $userid, 'courseid' => $courseid]);
     return $lvl ? max(1, (int)$lvl) : 1;
 }
@@ -1201,10 +1222,23 @@ function local_xpstore_get_user_level($userid, $courseid) {
  */
 function local_xpstore_cleanup_expired_forum_roles(int $courseid, ?int $userid = null): void {
     global $DB;
+    static $cachedroleid = null;
 
     try {
-        $role = $DB->get_record('role', ['shortname' => 'xpstore_forum_ext']);
-        if (!$role) {
+        // Throttle forum role cleanup to once every 5 minutes per course (even when called from multiple widgets).
+        $now = time();
+        $throttlekey = 'last_forum_cleanup_course_' . $courseid;
+        $lastrun = (int)get_config('local_xpstore', $throttlekey);
+        if (($now - $lastrun) < 300) {
+            return;
+        }
+        set_config($throttlekey, $now, 'local_xpstore');
+
+        if ($cachedroleid === null) {
+            $role = $DB->get_record('role', ['shortname' => 'xpstore_forum_ext'], 'id');
+            $cachedroleid = $role ? (int)$role->id : 0;
+        }
+        if ($cachedroleid <= 0) {
             return;
         }
 
@@ -1217,9 +1251,8 @@ function local_xpstore_cleanup_expired_forum_roles(int $courseid, ?int $userid =
         $params = [
             'contextlevel' => CONTEXT_MODULE,
             'courseid' => $courseid,
-            'roleid' => $role->id,
+            'roleid' => $cachedroleid,
         ];
-
         if ($userid !== null && $userid > 0) {
             $sql .= " AND ra.userid = :userid";
             $params['userid'] = (int)$userid;
@@ -1233,17 +1266,29 @@ function local_xpstore_cleanup_expired_forum_roles(int $courseid, ?int $userid =
         $now = time();
         $duration = 3 * DAYSECS;
 
+        // Preload relevant F and R purchases for this course in a single query to avoid N+1 inside foreach.
+        $pwhere = "itemtype IN ('F', 'R') AND courseid IN (?, 0)";
+        $pparams = [$courseid];
+        if ($userid !== null && $userid > 0) {
+            $pwhere .= " AND userid = ?";
+            $pparams[] = (int)$userid;
+        }
+        $allpurchases = $DB->get_records_select(
+            'local_xpstore_gastos',
+            $pwhere,
+            $pparams,
+            'timecreated ASC, id ASC'
+        );
+
+        $purchasesbyusercm = [];
+        foreach ($allpurchases as $p) {
+            $purchasesbyusercm[(int)$p->userid . '_' . (int)$p->itemid][] = $p;
+        }
+
         foreach ($assignments as $ra) {
             $uid = (int)$ra->userid;
             $cmid = (int)$ra->cmid;
-
-            // Fetch all F and R purchases for this user and forum in chronological order.
-            $purchases = $DB->get_records_select(
-                'local_xpstore_gastos',
-                'userid = ? AND itemid = ? AND itemtype IN (?, ?) AND (courseid = ? OR courseid = 0)',
-                [$uid, $cmid, 'F', 'R', $courseid],
-                'timecreated ASC, id ASC'
-            );
+            $purchases = $purchasesbyusercm[$uid . '_' . $cmid] ?? [];
 
             if (empty($purchases)) {
                 // No purchases recorded through XP store; do not alter manually assigned teacher roles.
@@ -1260,7 +1305,7 @@ function local_xpstore_cleanup_expired_forum_roles(int $courseid, ?int $userid =
             $latest = end($purchases);
             $expiration = (int)$latest->timecreated + $duration;
             if ($now > $expiration) {
-                role_unassign($role->id, $uid, (int)$ra->contextid);
+                role_unassign($cachedroleid, $uid, (int)$ra->contextid);
             }
         }
     } catch (\Throwable $e) {
@@ -1297,10 +1342,9 @@ function local_xpstore_check_activity_redemption_state(int $courseid, int $useri
     $existingtypes = $DB->get_fieldset_select(
         'local_xpstore_gastos',
         'itemtype',
-        'userid = ? AND itemid = ? AND (courseid = ? OR courseid = 0)',
+        'userid = ? AND itemid = ? AND courseid IN (?, 0)',
         [$userid, $cmid, $courseid]
     );
-
     $hasext = in_array('A', $existingtypes, true) || in_array('F', $existingtypes, true);
     $hasretry = in_array('R', $existingtypes, true);
 
@@ -1460,7 +1504,6 @@ function local_xpstore_check_activity_redemption_state(int $courseid, int $useri
  */
 function local_xpstore_capture_prevdata($courseid, $userid, $type, $cmid, $rewardname): ?string {
     global $DB, $CFG;
-
     $courseid = (int)$courseid;
     $userid = (int)$userid;
     $cmid = (int)$cmid;
@@ -1534,6 +1577,7 @@ function local_xpstore_capture_prevdata($courseid, $userid, $type, $cmid, $rewar
                 $prevlatestid = $prevsub ? (int)$prevsub->id : null;
                 $prevattempt = $prevsub ? (int)$prevsub->attemptnumber : 0;
                 $newattempt = $prevsub ? ($prevattempt + 1) : 1;
+
                 return json_encode([
                     'modname' => 'assign',
                     'had_override' => (bool)$ov,
@@ -1772,7 +1816,7 @@ function local_xpstore_process_redemption($course, $userid, $tipo, $cmid): array
         if ($limite > 0) {
             $purchasedcount = (int)$DB->count_records_select(
                 'local_xpstore_gastos',
-                'userid = ? AND itemtype = ? AND itemid = ? AND (courseid = ? OR courseid = 0)',
+                'userid = ? AND itemtype = ? AND itemid = ? AND courseid IN (?, 0)',
                 [$userid, $tipo, $cmid, $courseid]
             );
             if ($purchasedcount >= $limite) {
@@ -1806,10 +1850,9 @@ function local_xpstore_process_redemption($course, $userid, $tipo, $cmid): array
             'prevdata' => $prevdata,
             'timecreated' => time(),
         ];
-
         $gastoid = $DB->insert_record('local_xpstore_gastos', $record);
-        $delivered = local_xpstore_deliver_product($userid, $cmid, $tipo, $courseid);
 
+        $delivered = local_xpstore_deliver_product($userid, $cmid, $tipo, $courseid);
         if (!$delivered) {
             $DB->delete_records('local_xpstore_gastos', ['id' => $gastoid]);
             return [
@@ -1885,6 +1928,7 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
             $curattempts = ($override && $override->attempts !== null)
                 ? (int)$override->attempts
                 : (int)$quiz->attempts;
+
             // In Moodle quiz, attempts == 0 means unlimited; never cap an unlimited quiz.
             if ($curattempts === 0) {
                 $newattempts = ($override && $override->attempts !== null) ? 0 : null;
@@ -1895,6 +1939,7 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
             $curclose = ($override && $override->timeclose !== null)
                 ? (int)$override->timeclose
                 : (int)$quiz->timeclose;
+
             // In Moodle quiz, timeclose == 0 means no closing deadline; never impose one if unset.
             if ($curclose === 0) {
                 $newclose = ($override && $override->timeclose !== null) ? $override->timeclose : null;
@@ -2097,10 +2142,10 @@ function local_xpstore_deliver_product($userid, $cmid, $type, $courseid = null) 
             }
         }
 
-        if ($courseid) {
+        // Only invalidate course_modinfo cache when the product alters module availability ('S' or 'U').
+        if ($courseid && ($type === 'S' || $type === 'U')) {
             rebuild_course_cache($courseid, true);
         }
-
         return true;
     } catch (\Throwable $e) {
         debugging('local_xpstore_deliver_product error: ' . $e->getMessage(), DEBUG_DEVELOPER);
@@ -2281,7 +2326,6 @@ function local_xpstore_revert_nongrade_benefit(
                     $DB->delete_records('assign_overrides', ['id' => $override->id]);
                 }
             }
-
             if ($flag) {
                 $flag->extensionduedate = $earliestprev ? (int)($earliestprev['extensionduedate'] ?? 0) : 0;
                 $flag->locked = $earliestprev ? (int)($earliestprev['locked'] ?? 0) : 0;
@@ -2359,13 +2403,11 @@ function local_xpstore_reset_course_form_definition(&$mform) {
  */
 function local_xpstore_cleanup_orphan_grade_bonuses($courseid, $userid = null) {
     global $DB;
-
     $courseid = (int)$courseid;
     $like1 = $DB->sql_like('gg.feedback', '?', false);
     $like2 = $DB->sql_like('gg.feedback', '?', false);
     $params = [$courseid, $courseid, '%xpstore-fb%', '%XP Store%'];
     $usersql = '';
-
     if ($userid !== null) {
         $usersql = ' AND (gg.userid = ? OR gs.userid = ?)';
         $params[] = (int)$userid;
@@ -2408,8 +2450,8 @@ function local_xpstore_cleanup_orphan_grade_bonuses($courseid, $userid = null) {
  */
 function local_xpstore_reset_purchases($courseid, $userid = null) {
     global $DB, $CFG;
-
     $courseid = (int)$courseid;
+
     if ($userid === null) {
         set_config('store_closed_course_' . $courseid, '0', 'local_xpstore');
         set_config('store_deadline_course_' . $courseid, 0, 'local_xpstore');
@@ -2536,7 +2578,6 @@ function local_xpstore_reset_purchases($courseid, $userid = null) {
  */
 function local_xpstore_delete_single_purchase($courseid, $gastoid) {
     global $DB, $CFG;
-
     $courseid = (int)$courseid;
 
     $sql = "SELECT g.*, cm.module, cm.instance
@@ -2560,7 +2601,7 @@ function local_xpstore_delete_single_purchase($courseid, $gastoid) {
 
     $remainingcount = (int)$DB->count_records_select(
         'local_xpstore_gastos',
-        'userid = ? AND itemtype = ? AND itemid = ? AND (courseid = ? OR courseid = 0)',
+        'userid = ? AND itemtype = ? AND itemid = ? AND courseid IN (?, 0)',
         [$userid, $type, $itemid, $courseid]
     );
 
@@ -2600,7 +2641,10 @@ function local_xpstore_delete_single_purchase($courseid, $gastoid) {
         );
     }
 
-    rebuild_course_cache($courseid, true);
+    if ($type === 'S' || $type === 'U') {
+        rebuild_course_cache($courseid, true);
+    }
+
     return $userid;
 }
 
@@ -2624,10 +2668,17 @@ function local_xpstore_reset_userdata($data) {
  */
 function local_xpstore_get_or_create_forum_role() {
     global $DB, $CFG;
+    static $cachedroleid = null;
+
+    if ($cachedroleid !== null) {
+        return $cachedroleid;
+    }
+
     require_once($CFG->libdir . '/accesslib.php');
     $shortname = 'xpstore_forum_ext';
-    if ($role = $DB->get_record('role', ['shortname' => $shortname])) {
-        return $role->id;
+    if ($role = $DB->get_record('role', ['shortname' => $shortname], 'id')) {
+        $cachedroleid = (int)$role->id;
+        return $cachedroleid;
     }
 
     // Never attempt system-level role creation from an unprivileged student session;
@@ -2651,7 +2702,8 @@ function local_xpstore_get_or_create_forum_role() {
     if ($roleid) {
         set_role_contextlevels($roleid, [CONTEXT_MODULE]);
         assign_capability('mod/forum:canoverridecutoff', CAP_ALLOW, $roleid, $syscontext->id, true);
-        return $roleid;
+        $cachedroleid = (int)$roleid;
+        return $cachedroleid;
     }
     return false;
 }
@@ -2710,6 +2762,7 @@ function local_xpstore_apply_special_restriction($cmid, $groupid, $courseid, $re
                     }
                 }
             }
+
             if ($exists && $replaced) {
                 // Remove duplicate group entries if both old and new were present.
                 $seen = [];
@@ -2779,6 +2832,7 @@ function local_xpstore_get_navigation_data($courseid, $activetab) {
         'tab_settings' => ($activetab === 'settings'),
         'show_store_controls' => in_array($activetab, ['store', 'products', 'settings'], true),
         'storecontrolurl' => $controlurl,
+        'sesskey' => sesskey(),
         'store_is_closed' => $access['closed'],
         'has_store_deadline' => $access['has_deadline'],
         'store_deadline_iso' => $access['deadline_iso'],
@@ -2856,6 +2910,7 @@ function local_xpstore_apply_unlock_restriction($cmid, $productid, $courseid, $h
                     break;
                 }
             }
+
             if (!$exists) {
                 $tree['c'][] = $newrestriction;
                 $tree['showc'][] = $showstatus;
@@ -2903,12 +2958,18 @@ function local_xpstore_get_default_card_icon($type) {
 
 /**
  * Returns the list of available FontAwesome icons for categories and cards.
+ * Cached statically per request so parsing 20+ catalog items does not call get_string 500+ times.
  *
  * @return array Associative array of icon_name => localized_label.
  */
 function local_xpstore_get_available_icons() {
+    static $icons = null;
+    if ($icons !== null) {
+        return $icons;
+    }
+
     $sm = get_string_manager();
-    return [
+    $icons = [
         'bolt' => get_string('icon_bolt', 'local_xpstore'),
         'clock-o' => $sm->string_exists('icon_clock', 'local_xpstore')
             ? get_string('icon_clock', 'local_xpstore') : 'Clock',
@@ -2942,6 +3003,7 @@ function local_xpstore_get_available_icons() {
         'globe' => get_string('icon_globe', 'local_xpstore'),
         'book' => get_string('icon_book', 'local_xpstore'),
     ];
+    return $icons;
 }
 
 /**
@@ -3070,8 +3132,8 @@ function local_xpstore_save_card_image($courseid, array $uploadedfile, $existing
         'filepath'  => '/',
         'filename'  => $filename,
     ];
-
     $fs->create_file_from_pathname($filerecord, $uploadedfile['tmp_name']);
+
     return 'img_' . $itemid;
 }
 
@@ -3085,6 +3147,7 @@ function local_xpstore_save_card_image($courseid, array $uploadedfile, $existing
 function local_xpstore_get_student_badge_label($tipo, $boost = '0') {
     $tipo = strtoupper((string)$tipo);
     $booststr = (string)$boost;
+
     if (in_array($tipo, ['G', 'M', 'C'], true)) {
         if ($booststr !== '' && $booststr !== '0') {
             return '+' . $booststr . ' ' . get_string('points', 'local_xpstore');
@@ -3131,6 +3194,7 @@ function local_xpstore_pluginfile($course, $cm, $context, $filearea, $args, $for
     }
 
     require_login($course, false, $cm);
+    \core\session\manager::write_close();
 
     $itemid = (int)array_shift($args);
     $filename = array_pop($args);

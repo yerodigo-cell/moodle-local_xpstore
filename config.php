@@ -47,9 +47,46 @@ $PAGE->set_title(get_string('configtitle', 'local_xpstore'));
 $action = optional_param('action', '', PARAM_ALPHANUMEXT);
 $tab = optional_param('tab', '', PARAM_TEXT);
 $catalogkey = 'catalog_course_' . $courseid;
+$modinfo = get_fast_modinfo($course);
+
+if ($action === 'togglestore' && confirm_sesskey()) {
+    $access = local_xpstore_get_store_access_state($courseid);
+    if ($access['closed']) {
+        set_config('store_closed_course_' . $courseid, '0', 'local_xpstore');
+        if ($access['deadline_passed']) {
+            set_config('store_deadline_course_' . $courseid, 0, 'local_xpstore');
+        }
+    } else {
+        set_config('store_closed_course_' . $courseid, '1', 'local_xpstore');
+    }
+    $redirecttab = ($tab === 'settings') ? 'settings' : 'products';
+    redirect(new moodle_url($url, ['tab' => $redirecttab]));
+}
+
+if ($action === 'savedeadline' && confirm_sesskey()) {
+    $cleardeadline = optional_param('clear_deadline', 0, PARAM_INT);
+    $deadlinestr = trim(optional_param('store_deadline', '', PARAM_TEXT));
+    if ($cleardeadline || $deadlinestr === '') {
+        set_config('store_deadline_course_' . $courseid, 0, 'local_xpstore');
+    } else {
+        try {
+            $tz = \core_date::get_user_timezone_object();
+            $dt = new \DateTime($deadlinestr, $tz);
+            $ts = $dt->getTimestamp();
+            set_config('store_deadline_course_' . $courseid, max(0, $ts), 'local_xpstore');
+            if ($ts > time()) {
+                set_config('store_closed_course_' . $courseid, '0', 'local_xpstore');
+            }
+        } catch (\Throwable $e) {
+            set_config('store_deadline_course_' . $courseid, 0, 'local_xpstore');
+        }
+    }
+    $redirecttab = ($tab === 'settings') ? 'settings' : 'products';
+    redirect(new moodle_url($url, ['tab' => $redirecttab]));
+}
 
 // Validates that a target cmid/gradeitem belongs to the given course.
-$validatetarget = function (int $courseid, string $tipo, int $cmid) use ($DB): bool {
+$validatetarget = function (int $courseid, string $tipo, int $cmid) use ($DB, $modinfo): bool {
     if ($cmid <= 0) {
         return false;
     }
@@ -60,14 +97,12 @@ $validatetarget = function (int $courseid, string $tipo, int $cmid) use ($DB): b
         return $DB->record_exists('grade_items', ['id' => $cmid, 'courseid' => $courseid, 'itemtype' => 'course']);
     }
     if ($tipo === 'R') {
-        $sql = "SELECT 1
-                  FROM {course_modules} cm
-                  JOIN {modules} m ON m.id = cm.module
-                 WHERE cm.id = ? AND cm.course = ? AND m.name IN ('assign', 'forum')";
-        return $DB->record_exists_sql($sql, [$cmid, $courseid]);
+        return isset($modinfo->cms[$cmid])
+            && empty($modinfo->cms[$cmid]->deletioninprogress)
+            && in_array($modinfo->cms[$cmid]->modname, ['assign', 'forum'], true);
     }
     if (in_array($tipo, ['Q', 'A', 'F', 'G', 'S', 'U'], true)) {
-        return $DB->record_exists('course_modules', ['id' => $cmid, 'course' => $courseid]);
+        return isset($modinfo->cms[$cmid]) && empty($modinfo->cms[$cmid]->deletioninprogress);
     }
     return false;
 };
@@ -104,7 +139,7 @@ if ($action === 'add' && confirm_sesskey()) {
     $limite = max(0, optional_param('limite', 0, PARAM_INT));
     $requisito = max(0, optional_param('requisito', 0, PARAM_INT));
 
-    if ($requisito > 0 && !$DB->record_exists('course_modules', ['id' => $requisito, 'course' => $courseid])) {
+    if ($requisito > 0 && !isset($modinfo->cms[$requisito])) {
         $requisito = 0;
     }
 
@@ -202,7 +237,7 @@ if ($action === 'edit_save' && confirm_sesskey()) {
     $limite = max(0, optional_param('limite', 0, PARAM_INT));
     $requisito = max(0, optional_param('requisito', 0, PARAM_INT));
 
-    if ($requisito > 0 && !$DB->record_exists('course_modules', ['id' => $requisito, 'course' => $courseid])) {
+    if ($requisito > 0 && !isset($modinfo->cms[$requisito])) {
         $requisito = 0;
     }
 
@@ -610,7 +645,6 @@ $requirementoptions = [
     ['id' => 0, 'name' => get_string('none'), 'selected' => ($erequisito == 0)],
 ];
 
-$modinfo = get_fast_modinfo($courseid);
 global $OUTPUT;
 
 $getcmiconhtml = function ($cm) {
@@ -670,8 +704,10 @@ $getcmiconhtml = function ($cm) {
 
 require_once($CFG->libdir . '/gradelib.php');
 $coursegradeitem = \grade_item::fetch_course_item($courseid);
+$coursetotalname = ($coursegradeitem && trim((string)$coursegradeitem->itemname) !== '')
+    ? format_string($coursegradeitem->itemname)
+    : get_string('coursetotal', 'grades');
 if ($coursegradeitem && (int)$coursegradeitem->gradetype === 1) {
-    $coursetotalname = local_xpstore_get_course_grade_item_name($coursegradeitem->id);
     $courseiconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
                       'display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; ' .
                       'margin: 0 8px 0 0; padding: 0; vertical-align: middle; overflow: hidden; ' .
@@ -720,20 +756,21 @@ foreach ($modinfo->get_cms() as $cm) {
     }
 }
 
+try {
+    $manualiconurl = $OUTPUT->image_url('i/manual_item')->out();
+} catch (Exception $e) {
+    $manualiconurl = '';
+}
+
 $manualitems = $DB->get_records('grade_items', ['courseid' => $courseid, 'itemtype' => 'manual']);
 foreach ($manualitems as $item) {
     if ((int)$item->gradetype !== 1) {
         continue;
     }
-    try {
-        $iconurl = $OUTPUT->image_url('i/manual_item')->out();
-    } catch (Exception $e) {
-        $iconurl = '';
-    }
     $iconhtml = '<span class="xpstore-icon-container" style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
                 'display: inline-block; text-align: center; line-height: 28px; margin: 0 8px 0 0; padding: 0; ' .
                 'vertical-align: middle; overflow: hidden;">' .
-                '<img src="' . s($iconurl) . '" alt="" style="vertical-align: middle; width: 16px; height: 16px;">' .
+                '<img src="' . s($manualiconurl) . '" alt="" style="vertical-align: middle; width: 16px; height: 16px;">' .
                 '</span>';
     $namehtml = $iconhtml . format_string($item->itemname);
     $activityoptions[] = [
@@ -814,7 +851,7 @@ if ($hasitems) {
 
             global $CFG;
             $urlcat = $CFG->wwwroot . "/local/xpstore/widget_category.php?id={$courseid}&cat=" . rawurlencode($catname);
-            $iframecat = '<iframe src="' . $urlcat . '" width="100%" height="650" ' .
+            $iframecat = '<iframe loading="lazy" src="' . $urlcat . '" width="100%" height="650" ' .
                 'style="border: none; border-radius: 15px; overflow: hidden;" ' .
                 'scrolling="no" allowfullscreen allowtransparency="true"></iframe>';
             $categoryiframeoptions[] = [
@@ -853,30 +890,26 @@ if ($hasitems) {
         }
 
         if ($tipo === 'M') {
-            $gi = $DB->get_record('grade_items', ['id' => $cid, 'courseid' => $courseid, 'itemtype' => 'manual']);
+            $gi = $manualitems[$cid] ?? null;
             if (!$gi) {
                 continue;
             }
             $realname = format_string($gi->itemname);
             $labeltipo = get_string('type_g', 'local_xpstore');
-            try {
-                $iconurl = $OUTPUT->image_url('i/manual_item')->out();
-                $iconhtml = '<span class="xpstore-icon-container" ' .
-                            'style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
-                            'display: inline-block; text-align: center; line-height: 28px; ' .
-                            'margin: 0 8px 0 0; padding: 0; ' .
-                            'vertical-align: middle; overflow: hidden;">' .
-                            '<img src="' . s($iconurl) . '" alt="" style="vertical-align: middle; width: 16px; height: 16px;">' .
-                            '</span>';
-            } catch (Exception $e) {
-                $iconhtml = '';
-            }
+            $iconhtml = ($manualiconurl !== '')
+                ? '<span class="xpstore-icon-container" ' .
+                  'style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
+                  'display: inline-block; text-align: center; line-height: 28px; ' .
+                  'margin: 0 8px 0 0; padding: 0; ' .
+                  'vertical-align: middle; overflow: hidden;">' .
+                  '<img src="' . s($manualiconurl) . '" alt="" style="vertical-align: middle; width: 16px; height: 16px;">' .
+                  '</span>'
+                : '';
         } else if ($tipo === 'C') {
-            $gi = $DB->get_record('grade_items', ['id' => $cid, 'courseid' => $courseid, 'itemtype' => 'course']);
-            if (!$gi) {
+            if (!$coursegradeitem || (int)$coursegradeitem->id !== $cid) {
                 continue;
             }
-            $realname = local_xpstore_get_course_grade_item_name($cid);
+            $realname = $coursetotalname;
             $labeltipo = get_string('type_g', 'local_xpstore');
             $iconhtml = '<span class="xpstore-icon-container" ' .
                         'style="width: 28px; height: 28px; min-width: 28px; max-width: 28px; ' .
@@ -907,7 +940,7 @@ if ($hasitems) {
 
         global $CFG;
         $widgeturl = $CFG->wwwroot . "/local/xpstore/widget.php?id={$courseid}&tipo={$tipo}&cmid={$cid}";
-        $iframecode = '<iframe src="' . $widgeturl . '" ' .
+        $iframecode = '<iframe loading="lazy" src="' . $widgeturl . '" ' .
             'style="width: 280px !important; max-width: 100%; height: 350px !important; border: none; ' .
             'overflow: hidden; border-radius: 15px; display: inline-block; margin: 10px;" ' .
             'scrolling="no" allowtransparency="true"></iframe>';
@@ -969,16 +1002,16 @@ if ($hasitems) {
 
 global $CFG;
 $urlstore = $CFG->wwwroot . "/local/xpstore/widget_category.php?id={$courseid}";
-$iframestore = '<iframe src="' . $urlstore . '" width="100%" height="800" ' .
+$iframestore = '<iframe loading="lazy" src="' . $urlstore . '" width="100%" height="800" ' .
     'style="border: none; border-radius: 15px; overflow: hidden;" ' .
     'scrolling="no" allowfullscreen allowtransparency="true"></iframe>';
 
 $urlhistoryw = $CFG->wwwroot . "/local/xpstore/widget_history.php?id={$courseid}";
-$iframehistory = '<iframe src="' . $urlhistoryw . '" width="100%" height="150" ' .
+$iframehistory = '<iframe loading="lazy" src="' . $urlhistoryw . '" width="100%" height="150" ' .
     'style="border: none; overflow: hidden;" scrolling="no"></iframe>';
 
 $urlbalancew = $CFG->wwwroot . "/local/xpstore/widget_balance.php?id={$courseid}";
-$iframebalance = '<iframe src="' . $urlbalancew . '" width="100%" height="180" ' .
+$iframebalance = '<iframe loading="lazy" src="' . $urlbalancew . '" width="100%" height="180" ' .
     'style="border: none; overflow: hidden;" scrolling="no"></iframe>';
 
 $menuvisible = get_config('local_xpstore', 'show_menu_course_' . $courseid);

@@ -39,8 +39,12 @@ $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 require_login($course);
 
-if (function_exists('local_xpstore_cleanup_expired_forum_roles')) {
-    local_xpstore_cleanup_expired_forum_roles($courseid, $USER->id);
+$action = optional_param('action', '', PARAM_ALPHA);
+
+// CRÍTICO: Si solo estamos mostrando el widget (no comprando), liberamos el lock de sesión
+// inmediatamente para que múltiples iframes en el curso carguen en paralelo sin bloquearse.
+if ($action !== 'comprar') {
+    \core\session\manager::write_close();
 }
 
 $urlparams = [
@@ -58,7 +62,8 @@ $catalog = local_xpstore_parse_catalog($courseid);
 $catkey = $tiporeq . $cmidreq;
 $producto = null;
 
-$modinfo = get_fast_modinfo($courseid);
+// Pasar el objeto $course (ya cargado en RAM) en lugar de $courseid evita 1 query extra a {course}.
+$modinfo = get_fast_modinfo($course);
 $cms = $modinfo->get_cms();
 
 if (isset($catalog[$catkey])) {
@@ -133,8 +138,6 @@ if (!$producto) {
     die();
 }
 
-$action = optional_param('action', '', PARAM_ALPHA);
-
 if ($action === 'comprar' && confirm_sesskey()) {
     $result = local_xpstore_process_redemption($course, $USER->id, $tiporeq, $cmidreq);
 
@@ -154,39 +157,44 @@ $comprasactuales = (int)$DB->count_records_select(
 );
 $limitealcanzado = ($producto['limite'] > 0 && $comprasactuales >= $producto['limite']);
 
-$requisitocumplido = true;
-$reqname = '';
-if ($producto['requisito'] > 0) {
-    if (isset($cms[$producto['requisito']]) && empty($cms[$producto['requisito']]->deletioninprogress)) {
-        require_once($CFG->libdir . '/completionlib.php');
-        $completion = new completion_info($course);
-        $reqcminfo = $cms[$producto['requisito']];
-        $reqname = format_string($reqcminfo->name);
-        $completiondata = $completion->get_data($reqcminfo, false, $USER->id);
-        $requisitocumplido = (
-            $completiondata->completionstate == COMPLETION_COMPLETE ||
-            $completiondata->completionstate == COMPLETION_COMPLETE_PASS
-        );
-    } else {
-        $requisitocumplido = false;
-        $reqname = get_string('activitydeleted', 'local_xpstore');
-    }
-}
+$storeaccess = local_xpstore_get_store_access_state($courseid);
+$storeclosed = !empty($storeaccess['closed']);
 
 $userlevel = local_xpstore_get_user_level($USER->id, $courseid);
 $nivelcumplido = ($producto['minlevel'] <= 0 || $userlevel >= $producto['minlevel']);
 $hiddenbylevel = (!$nivelcumplido && $producto['hidebylevel'] === 1);
 
-$storeaccess = local_xpstore_get_store_access_state($courseid);
-$storeclosed = !empty($storeaccess['closed']);
-
+$requisitocumplido = true;
+$reqname = '';
 $stateallowed = true;
 $statebtnlabel = '';
-if (in_array($producto['tipo'], ['A', 'F', 'R'], true) && isset($cm)) {
-    $statecheck = local_xpstore_check_activity_redemption_state($courseid, $USER->id, $producto['tipo'], $cm);
-    if (!$statecheck['allowed']) {
-        $stateallowed = false;
-        $statebtnlabel = $statecheck['message'];
+
+// CORTOCIRCUITO CRÍTICO: Si el producto NO está oculto por nivel, ni agotado (Sold out), ni la tienda está cerrada,
+// recién ahí consultamos completion y estado de entregas/foros/calificaciones.
+if (!$hiddenbylevel && !$limitealcanzado && !$storeclosed) {
+    if ($producto['requisito'] > 0) {
+        if (isset($cms[$producto['requisito']]) && empty($cms[$producto['requisito']]->deletioninprogress)) {
+            require_once($CFG->libdir . '/completionlib.php');
+            $completion = new completion_info($course);
+            $reqcminfo = $cms[$producto['requisito']];
+            $reqname = format_string($reqcminfo->name);
+            $completiondata = $completion->get_data($reqcminfo, false, $USER->id);
+            $requisitocumplido = (
+                $completiondata->completionstate == COMPLETION_COMPLETE ||
+                $completiondata->completionstate == COMPLETION_COMPLETE_PASS
+            );
+        } else {
+            $requisitocumplido = false;
+            $reqname = get_string('activitydeleted', 'local_xpstore');
+        }
+    }
+
+    if ($requisitocumplido && $nivelcumplido && in_array($producto['tipo'], ['A', 'F', 'R'], true) && isset($cm)) {
+        $statecheck = local_xpstore_check_activity_redemption_state($courseid, $USER->id, $producto['tipo'], $cm);
+        if (!$statecheck['allowed']) {
+            $stateallowed = false;
+            $statebtnlabel = $statecheck['message'];
+        }
     }
 }
 

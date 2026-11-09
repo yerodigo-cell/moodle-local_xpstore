@@ -37,6 +37,7 @@ $openuser = optional_param('openuser', 0, PARAM_INT);
 
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
+
 require_login($course);
 
 if (!local_xpstore_can_manage($context)) {
@@ -73,8 +74,14 @@ if ($action === 'deletelog' && confirm_sesskey()) {
     redirect(new moodle_url('/local/xpstore/report.php', $redirectparams), get_string('purchasedeleted', 'local_xpstore'));
 }
 
-// Ensure any orphaned grade bonuses from previous resets and expired forum roles are cleaned up.
-local_xpstore_cleanup_orphan_grade_bonuses($courseid);
+// Throttle heavy orphan grade cleanup on page views to at most once every 10 minutes per course.
+$now = time();
+$orphanthrottlekey = 'last_orphan_cleanup_course_' . $courseid;
+if (($now - (int)get_config('local_xpstore', $orphanthrottlekey)) >= 600) {
+    set_config($orphanthrottlekey, $now, 'local_xpstore');
+    local_xpstore_cleanup_orphan_grade_bonuses($courseid);
+}
+
 if (function_exists('local_xpstore_cleanup_expired_forum_roles')) {
     local_xpstore_cleanup_expired_forum_roles($courseid);
 }
@@ -82,8 +89,8 @@ if (function_exists('local_xpstore_cleanup_expired_forum_roles')) {
 // Pre-load parsed store catalog to resolve categories, labels, and fallback bonus values.
 $catalogmap = local_xpstore_parse_catalog($courseid, true);
 
-// Load course module info for links.
-$modinfo = get_fast_modinfo($courseid);
+// Load course module info for links and fast activity names in RAM.
+$modinfo = get_fast_modinfo($course);
 
 echo $OUTPUT->header();
 
@@ -130,8 +137,7 @@ $templatedata = array_merge([
     'users' => [],
 ], $navdata);
 
-$sql = "SELECT g.*, u.firstname, u.lastname, u.picture, u.imagealt, u.email,
-               cm.module, cm.instance, gi.itemname AS gi_itemname
+$sql = "SELECT g.*, cm.module, cm.instance, gi.id AS gi_id, gi.itemname AS gi_itemname
           FROM {local_xpstore_gastos} g
           JOIN {user} u ON g.userid = u.id
      LEFT JOIN {course_modules} cm ON cm.id = g.itemid AND g.itemtype NOT IN ('M', 'C')
@@ -142,20 +148,26 @@ $sql = "SELECT g.*, u.firstname, u.lastname, u.picture, u.imagealt, u.email,
 $logs = $DB->get_records_sql($sql, [$courseid, $courseid, $courseid]);
 
 $grouped = [];
+$usersbyid = [];
+
 if ($logs) {
     $templatedata['has_users'] = true;
 
     foreach ($logs as $log) {
-        $grouped[$log->userid][] = $log;
+        $uid = (int)$log->userid;
+        $grouped[$uid][] = $log;
     }
 
+    // Preload all unique users in a single query instead of calling core_user::get_user() per student.
+    $usersbyid = $DB->get_records_list('user', 'id', array_keys($grouped));
+
     foreach ($grouped as $userid => $userlogs) {
-        $realuser = core_user::get_user($userid);
+        $realuser = $usersbyid[$userid] ?? null;
         if (!$realuser) {
             continue;
         }
-        $userfullname = fullname($realuser);
 
+        $userfullname = fullname($realuser);
         if (
             $searchuser !== '' &&
             core_text::strpos(core_text::strtolower($userfullname), core_text::strtolower($searchuser)) === false
@@ -171,8 +183,8 @@ if ($logs) {
         foreach ($userlogs as $log) {
             $totalgastado += max(0, (int)$log->amount);
         }
-        $saldodisponible = local_xpstore_get_balance($userid, $courseid);
 
+        $saldodisponible = local_xpstore_get_balance($userid, $courseid);
         $reseturl = new moodle_url($url, ['action' => 'resetuser', 'userid' => $userid, 'sesskey' => sesskey()]);
 
         $userdata = [
@@ -191,6 +203,7 @@ if ($logs) {
 
         foreach ($userlogs as $log) {
             $isdeletedactivity = false;
+            $itemid = (int)$log->itemid;
 
             if ($log->itemtype === 'M') {
                 if (!empty($log->gi_itemname)) {
@@ -200,24 +213,19 @@ if ($logs) {
                     $isdeletedactivity = true;
                 }
             } else if ($log->itemtype === 'C') {
-                if ($DB->record_exists('grade_items', ['id' => $log->itemid])) {
-                    $activityname = local_xpstore_get_course_grade_item_name($log->itemid);
+                if (!empty($log->gi_id)) {
+                    $activityname = trim((string)$log->gi_itemname) !== ''
+                        ? format_string($log->gi_itemname)
+                        : get_string('coursetotal', 'grades');
                 } else {
                     $activityname = get_string('activitydeleted', 'local_xpstore');
                     $isdeletedactivity = true;
                 }
             } else {
-                $activityname = '';
-                if (!empty($log->module)) {
-                    $modname = $DB->get_field('modules', 'name', ['id' => $log->module]);
-                    if (!empty($modname) && $DB->get_manager()->table_exists($modname)) {
-                        $instname = $DB->get_field($modname, 'name', ['id' => $log->instance]);
-                        if ($instname !== false && $instname !== '') {
-                            $activityname = $instname;
-                        }
-                    }
-                }
-                if ($activityname === '') {
+                // Resolve activity name directly from $modinfo in RAM (0 DB queries).
+                if (isset($modinfo->cms[$itemid]) && empty($modinfo->cms[$itemid]->deletioninprogress)) {
+                    $activityname = $modinfo->cms[$itemid]->name;
+                } else {
                     $activityname = get_string('activitydeleted', 'local_xpstore');
                     $isdeletedactivity = true;
                 }
@@ -225,7 +233,7 @@ if ($logs) {
 
             $tipostr = strtolower($log->itemtype);
             $tipocharupper = strtoupper($tipostr);
-            $itemkey = $tipocharupper . (int)$log->itemid;
+            $itemkey = $tipocharupper . $itemid;
             $catentry = $catalogmap[$itemkey] ?? null;
 
             $labeltipo = get_string_manager()->string_exists('type_' . $tipostr, 'local_xpstore')
@@ -265,7 +273,6 @@ if ($logs) {
             ) {
                 continue;
             }
-
             if (
                 $searchlabel !== '' &&
                 core_text::strpos(core_text::strtolower($labeltipo), core_text::strtolower($searchlabel)) === false
@@ -279,8 +286,8 @@ if ($logs) {
                     '/grade/report/user/index.php',
                     ['id' => $courseid, 'userid' => $log->userid]
                 ))->out(false);
-            } else if (!$isdeletedactivity && isset($modinfo->cms[$log->itemid])) {
-                $cmurl = $modinfo->cms[$log->itemid]->url ? $modinfo->cms[$log->itemid]->url->out(false) : '';
+            } else if (!$isdeletedactivity && isset($modinfo->cms[$itemid])) {
+                $cmurl = $modinfo->cms[$itemid]->url ? $modinfo->cms[$itemid]->url->out(false) : '';
             }
 
             $activityhtml = format_string($activityname, true, ['context' => $context]);
