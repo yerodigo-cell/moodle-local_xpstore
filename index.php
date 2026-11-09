@@ -166,7 +166,7 @@ $ccstore = local_xpstore_clean_hex_color(
 $caticons = json_decode(get_config('local_xpstore', 'cat_icons_course_' . $courseid) ?: '', true) ?: [];
 $completion = null;
 
-// 2. PRECARGA EN LOTE ANTES DEL FOREACH (Elimina el N+1):
+// 2. Precarga en lote antes del foreach para evitar N+1.
 $hasforumitems = false;
 $needgradeitems = false;
 foreach ($catalog as $citem) {
@@ -177,12 +177,12 @@ foreach ($catalog as $citem) {
     }
 }
 
-// Solo limpia roles de foro si la tienda realmente ofrece productos F o R:
+// Solo limpia roles de foro si la tienda realmente ofrece productos F o R.
 if ($hasforumitems && function_exists('local_xpstore_cleanup_expired_forum_roles')) {
     local_xpstore_cleanup_expired_forum_roles($courseid, $USER->id);
 }
 
-// Precarga TODOS los conteos de compras del usuario en este curso en 1 sola query:
+// Precarga todos los conteos de compras del usuario en este curso en una sola consulta.
 $userpurchasecounts = [];
 $concatkey = $DB->sql_concat('itemtype', "'_'", 'itemid');
 $sqlcounts = "SELECT {$concatkey} AS prodkey, COUNT(1) AS cnt
@@ -193,7 +193,7 @@ foreach ($DB->get_records_sql($sqlcounts, [$USER->id, $courseid]) as $row) {
     $userpurchasecounts[$row->prodkey] = (int)$row->cnt;
 }
 
-// Precarga TODOS los grade_items del curso en 1 sola query (si hay productos M o C):
+// Precarga todos los grade_items del curso en una sola consulta si hay productos M o C.
 $coursegradeitems = $needgradeitems
     ? $DB->get_records('grade_items', ['courseid' => $courseid])
     : [];
